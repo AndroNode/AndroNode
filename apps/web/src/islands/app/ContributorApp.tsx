@@ -107,7 +107,7 @@ function BrowserNode({ cfg, account, onChange }: { cfg: ApiConfig; account: Acco
       ) : (
         <>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Companion size={36} color={status.tone === "busy" ? "#F07843" : "#27282D"} />
+            <Companion size={36} color={status.tone === "busy" ? "#F07843" : "#ECEEF3"} />
             <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
             <span className="font-mono text-xs text-charcoal-60">{node.deviceId} · {count} submitted</span>
           </div>
@@ -191,7 +191,7 @@ function Devices({ tick }: { tick: number }) {
         </li>
       ))}</ul>
       <details className="mt-4 text-sm"><summary className="cursor-pointer font-bold">Run the command-line test node</summary>
-        <pre className="mt-2 overflow-x-auto rounded-lg bg-charcoal p-3 font-mono text-xs text-paper">{`git clone <repo> && cd andronode && pnpm install
+        <pre className="mt-2 overflow-x-auto zone-dark rounded-lg bg-charcoal p-3 font-mono text-xs text-paper ring-1 ring-white/5">{`git clone <repo> && cd andronode && pnpm install
 API_URL=${typeof location !== "undefined" ? location.origin : ""} WALLET_PRIVATE_KEY=<testnet-only key> \\
   pnpm --filter @andronode/test-node start node --minutes 30`}</pre>
       </details>

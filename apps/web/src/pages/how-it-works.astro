@@ -22,7 +22,7 @@ const trust = [
   <section class="mx-auto max-w-7xl px-4 sm:px-6" aria-label="Steps">
     <ol class="grid gap-4 md:grid-cols-5" data-stagger>
       {steps.map((s, i) => (
-        <li data-spotlight data-tilt="5" class="relative flex flex-col rounded-[var(--radius-card)] border border-line bg-white/60 p-5 transition-shadow hover:shadow-[0_20px_50px_-24px_rgba(39,40,45,0.35)]">
+        <li data-spotlight data-tilt="5" class="relative flex flex-col rounded-[var(--radius-card)] border border-line bg-white/60 p-5 transition-shadow hover:shadow-[0_20px_60px_-28px_rgba(255,122,69,0.45)]">
           <span class="grid size-9 place-items-center rounded-full bg-charcoal font-mono text-sm text-paper shadow-[0_0_0_4px_rgba(240,120,67,0.18)]">{i + 1}</span>
           <h2 class="mt-4 font-bold">{s.t}</h2>
           <p class="mt-2 flex-1 text-sm text-charcoal-80">{s.b}</p>
@@ -45,7 +45,7 @@ const trust = [
   </section>
 
   <section class="mx-auto mt-16 grid max-w-7xl gap-6 px-4 sm:px-6 md:grid-cols-3" data-stagger>
-    <div class="grain relative overflow-hidden rounded-[var(--radius-card)] bg-charcoal p-6 text-paper">
+    <div class="zone-dark grain relative overflow-hidden rounded-[var(--radius-card)] border border-orange/30 bg-charcoal p-6 text-paper">
       <h2 class="text-xl font-bold">What earns</h2>
       <p class="mt-2 text-paper/80">Accepted records from paid orders. Same work, same quote, same pay. No token, membership or multiplier changes it.</p>
     </div>

@@ -127,7 +127,7 @@ function NewOrder({ cfg, onCreated }: { cfg: ApiConfig; onCreated: () => void })
           <Field label="Execution deadline" htmlFor="co-dl">
             <Select id="co-dl" value={deadline} onChange={setDeadline} options={[{ value: "24", label: "24 hours" }, { value: "72", label: "3 days" }, { value: "168", label: "7 days (maximum)" }]} />
           </Field>
-          <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1 accent-[#27282D]" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1 accent-orange" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
             <span>These records are public, synthetic or cleared non-sensitive data, and I have the right to send them to third-party devices. Device owners can read what they process.</span></label>
           <Button variant="primary" disabled={!!step} onClick={getQuote}>Get quote</Button>
         </div>

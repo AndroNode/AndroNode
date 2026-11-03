@@ -17,18 +17,23 @@
 
 /* Brand tokens from AndroNode_Brand_Tokens.json (v1.0). */
 @theme {
-  --color-charcoal: #27282d;
-  --color-charcoal-80: #3a3b41;
-  --color-charcoal-60: #5d5e64;
-  --color-orange: #f07843;
-  --color-orange-deep: #c9561f; /* text-safe orange on paper, 4.6:1 */
-  --color-peach: #fbe0cf;
-  --color-peach-soft: #fdeee4;
-  --color-paper: #fcf7f2;
-  --color-line: #e7ddd3;
-  --color-ok: #2f7d4f;
-  --color-warn: #a35a00;
-  --color-bad: #b3261e;
+  /* Midnight theme. Token names are kept from the brand file so every component follows:
+     "charcoal" is the main ink (now light), "paper" the page (now near-black). */
+  --color-charcoal: #eceef3;
+  --color-charcoal-80: #c3c8d4;
+  --color-charcoal-60: #8d94a5;
+  --color-orange: #ff7a45;
+  --color-orange-deep: #ff9466; /* text-safe orange on the dark page */
+  --color-peach: #2a1d18;
+  --color-peach-soft: #141821;
+  --color-paper: #0b0d12;
+  --color-line: #222837;
+  --color-white: #11151d; /* card surfaces (bg-white/60) */
+  --color-snow: #eceef3;
+  --color-ink: #0b0d12;
+  --color-ok: #4cc38a;
+  --color-warn: #f2a65a;
+  --color-bad: #f26d63;
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius-card: 14px;
@@ -36,11 +41,19 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --andronode-charcoal: #27282d;
   --andronode-orange: #f07843;
   --andronode-peach: #fbe0cf;
   --andronode-paper: #fcf7f2;
+}
+
+/* Blocks that were designed dark-on-light (footer, hero stage, session, CTA): keep them a
+   lifted dark surface with light text, instead of letting the swapped tokens flip them. */
+.zone-dark {
+  --color-charcoal: #121722;
+  --color-charcoal-80: #1a2030;
+  --color-paper: #eceef3;
 }
 
 html {
@@ -161,7 +174,7 @@ html.fx-ready [data-draw].in path, html.fx-ready [data-draw].in line { stroke-da
 [data-spotlight]:hover::before { opacity: 1; }
 
 /* Scroll progress. */
-#fx-progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 70; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, var(--color-orange), #ffb38a); pointer-events: none; }
+#fx-progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 70; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, var(--color-orange), #ffb38a); box-shadow: 0 0 12px rgb(255 122 69 / 0.6); pointer-events: none; }
 
 /* Premium surfaces. */
 .grain::after {

@@ -196,7 +196,7 @@ export default function DeviceLab() {
             <div className="grid gap-2">
               {DEVICE_PRESETS.map((p) => (
                 <label key={p.id} className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm ${presetId === p.id && !corrupt ? "border-charcoal bg-peach-soft" : "border-line hover:border-charcoal/40"}`}>
-                  <input type="radio" name="preset" className="mt-1 accent-[#27282D]" checked={presetId === p.id && !corrupt} onChange={() => choosePreset(p.id)} />
+                  <input type="radio" name="preset" className="mt-1 accent-orange" checked={presetId === p.id && !corrupt} onChange={() => choosePreset(p.id)} />
                   <span>
                     <span className="font-bold">{p.name}</span>
                     <span className="block font-mono text-[11px] text-charcoal-60">Android {p.androidVersion} · {p.abi} · {p.installedRamGb} GB · {p.hasBattery ? "battery" : "no battery"}</span>
@@ -271,7 +271,7 @@ export default function DeviceLab() {
             <>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Companion size={40} color={status.tone === "busy" ? "#F07843" : "#27282D"} blinkKey={blink} />
+                  <Companion size={40} color={status.tone === "busy" ? "#F07843" : "#ECEEF3"} blinkKey={blink} />
                   <div aria-live="polite">
                     <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
                     {sim.pauseReason && sim.phase === "paused" && sim.pauseReason !== status.label && <p className="mt-1 text-sm">{sim.pauseReason}</p>}

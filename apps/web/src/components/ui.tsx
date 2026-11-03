@@ -15,7 +15,7 @@ export function Panel({ title, chip, children, className = "", actions }: { titl
 export function Button({ children, onClick, variant = "primary", disabled, type = "button", className = "", ariaLabel }: { children: ReactNode; onClick?: () => void; variant?: "primary" | "accent" | "ghost" | "danger"; disabled?: boolean; type?: "button" | "submit"; className?: string; ariaLabel?: string }) {
   const v = {
     primary: "bg-charcoal text-paper hover:bg-charcoal-80",
-    accent: "bg-orange text-charcoal hover:brightness-105",
+    accent: "bg-orange text-ink hover:brightness-105",
     ghost: "border border-charcoal/30 hover:bg-peach",
     danger: "border border-bad/40 text-bad hover:bg-bad/5",
   }[variant];
@@ -58,7 +58,7 @@ export function Toggle({ id, checked, onChange, label }: { id: string; checked: 
 export function Range({ id, value, min, max, step = 1, onChange, suffix }: { id: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void; suffix?: string }) {
   return (
     <div className="flex items-center gap-3">
-      <input id={id} type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-11 flex-1 accent-[#27282D]" />
+      <input id={id} type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-11 flex-1 accent-orange" />
       <output htmlFor={id} className="w-20 text-right font-mono text-sm tabular">{value}{suffix}</output>
     </div>
   );

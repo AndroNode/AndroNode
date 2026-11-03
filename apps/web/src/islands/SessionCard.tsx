@@ -44,7 +44,7 @@ export default function SessionCard() {
   const progress = s.id === "working" ? 0.6 : s.id === "verifying" || s.id === "accepted" ? 1 : s.id === "leased" ? 0.1 : 0;
 
   return (
-    <div className="slope-card relative bg-charcoal p-6 pt-8 text-paper shadow-2xl sm:p-8 sm:pt-10" aria-label="Simulated device session" role="group">
+    <div className="zone-dark slope-card relative bg-charcoal p-6 pt-8 text-paper shadow-2xl sm:p-8 sm:pt-10" aria-label="Simulated device session" role="group">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <Companion size={44} color="#F07843" blinkKey={s.id === "accepted" ? step : undefined} />
@@ -89,7 +89,7 @@ export default function SessionCard() {
             Start session
           </button>
         ) : (
-          <button type="button" className="min-h-11 rounded-full bg-orange px-5 text-sm font-bold text-charcoal hover:brightness-105" onClick={() => setStopped(true)}>
+          <button type="button" className="min-h-11 rounded-full bg-orange px-5 text-sm font-bold text-ink hover:brightness-105" onClick={() => setStopped(true)}>
             Stop
           </button>
         )}
