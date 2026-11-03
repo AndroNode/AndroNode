@@ -543,7 +543,14 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       const x = (wp.x * 0.5 + 0.5) * canvas.clientWidth;
       const y = (-wp.y * 0.5 + 0.5) * canvas.clientHeight;
       label.textContent = `Device ${String(hovered + 1).padStart(2, "0")} · ${flash[hovered]! > 0.2 ? "computing 64 records" : "idle"} · click to dispatch`;
-      label.style.transform = `translate(${(x + 18).toFixed(0)}px, ${(y - 40).toFixed(0)}px)`;
+      // Keep the label inside the hero: flip to the left of the device near the right edge.
+      const lw = label.offsetWidth, lh = label.offsetHeight;
+      const vw = Math.min(canvas.clientWidth, window.innerWidth - canvas.getBoundingClientRect().left);
+      let lx = x + 18;
+      if (lx + lw > vw - 12) lx = x - 18 - lw;
+      lx = Math.max(8, Math.min(lx, vw - lw - 12));
+      const ly = Math.max(8, Math.min(y - 40, canvas.clientHeight - lh - 8));
+      label.style.transform = `translate(${lx.toFixed(0)}px, ${ly.toFixed(0)}px)`;
       label.style.opacity = "1";
     } else {
       beamMat.opacity *= 0.85;
