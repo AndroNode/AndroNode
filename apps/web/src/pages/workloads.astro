@@ -1,13 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import PageHero from "../components/PageHero.astro";
 import WorkloadLab from "../islands/WorkloadLab";
 ---
 <Layout title="Workload Lab" description="Validate records, get an illustrative quote, fund demo escrow and watch tasks move through leasing, verification and settlement. Nothing leaves your browser.">
-  <section class="mx-auto max-w-7xl px-4 pb-6 pt-12 sm:px-6">
-    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Workload Lab · Simulation</p>
-    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">Pay only for accepted records</h1>
-    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">Validate records, get an illustrative quote, fund demo escrow and watch tasks move through leasing, verification and settlement. Nothing leaves your browser.</p>
-  </section>
+  <PageHero eyebrow="Workload Lab · Simulation" title="Pay only for accepted records" lead="Validate records, get an illustrative quote, fund demo escrow and watch tasks move through leasing, verification and settlement. Nothing leaves your browser." />
   <section class="mx-auto max-w-7xl px-4 sm:px-6">
     <WorkloadLab client:load />
   </section>

@@ -1,13 +1,12 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import PageHero from "../../components/PageHero.astro";
 import DeployEscrow from "../../islands/app/DeployEscrow";
 ---
 <Layout title="Deploy escrow" description="Deploy the AndroNode test USDC token and escrow contract to Robinhood Chain Testnet from your own wallet. Testnet only." noindex>
-  <section class="mx-auto max-w-7xl px-4 pb-4 pt-10 sm:px-6">
-    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60"><a href="/app" class="hover:underline">Testnet app</a> · Operator setup</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Deploy the escrow contract</h1>
-    <p class="mt-3 max-w-2xl text-charcoal-80">Your wallet signs the deploy, so no private key is shared with anyone. This page only works on Robinhood Chain Testnet.</p>
-  </section>
+  <PageHero title="Deploy the escrow contract" lead="Your wallet signs the deploy, so no private key is shared with anyone. This page only works on Robinhood Chain Testnet." compact>
+    <Fragment slot="eyebrow"><a href="/app" class="hover:underline">Testnet app</a> · Operator setup</Fragment>
+  </PageHero>
   <section class="mx-auto max-w-7xl px-4 sm:px-6">
     <DeployEscrow client:only="react" />
   </section>

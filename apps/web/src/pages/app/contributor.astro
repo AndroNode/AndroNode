@@ -1,12 +1,12 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import PageHero from "../../components/PageHero.astro";
 import ContributorApp from "../../islands/app/ContributorApp";
 ---
 <Layout title="Contributor dashboard" description="Run a test node and track rewards on the AndroNode testnet. Test funds only." noindex>
-  <section class="mx-auto max-w-7xl px-4 pb-4 pt-10 sm:px-6">
-    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60"><a href="/app" class="hover:underline">Testnet app</a> · Contributor dashboard</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Run a test node and track rewards</h1>
-  </section>
+  <PageHero title="Run a test node and track rewards" compact>
+    <Fragment slot="eyebrow"><a href="/app" class="hover:underline">Testnet app</a> · Contributor dashboard</Fragment>
+  </PageHero>
   <section class="mx-auto max-w-7xl px-4 sm:px-6">
     <ContributorApp client:only="react" />
   </section>

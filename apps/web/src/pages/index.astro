@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import SessionCard from "../islands/SessionCard";
+import HeroScene from "../islands/HeroScene";
 import site from "../site.config";
 
 const story = [
@@ -40,84 +41,222 @@ const story = [
     cta: "Follow the payment states",
   },
 ];
+
+const facts = ["64 records per task", "384-number vectors", "256 tokens per record", "Every result recomputed", "75% to contributors", "Stop any time, never penalised", "Leases expire in 120 s", "External power and Wi-Fi only", "Paid only for accepted work"];
+const flow = [
+  { t: "Device", d: "Plugged in, on Wi-Fi, owner-set limits." },
+  { t: "Lease", d: "A complete small task, 120 s to finish." },
+  { t: "Compute", d: "Embeddings run on the phone's CPU." },
+  { t: "Verify", d: "A trusted verifier recomputes every vector." },
+  { t: "Paid", d: "Accepted records split 75 / 25." },
+];
 ---
 <Layout title={site.displayName} description="AndroNode is a proposed protocol for paid AI inference on everyday Android devices. Explore it through labelled simulations — no wallet, app or account needed." intro>
-  <section class="relative overflow-hidden">
-    <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-12 sm:px-6 md:pt-20 lg:grid-cols-[1.05fr_1fr]">
-      <div class="rise">
-        <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Proposed AI compute protocol · Whitepaper v{site.docs.whitepaperVersion}</p>
-        <h1 class="mt-4 text-[2.6rem] font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-7xl">
-          Everyday devices.<br /><span class="text-charcoal-60">Shared intelligence.</span>
-        </h1>
-        <p class="mt-6 max-w-xl text-lg leading-relaxed text-charcoal-80">
-          {site.displayName} proposes a network where approved Android devices run short AI tasks under limits their owners set, and earn only for results that pass verification.
-        </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a href="/contribute" class="inline-flex min-h-12 items-center rounded-full bg-orange px-6 font-bold text-charcoal hover:brightness-105">Try the demo</a>
-          <a href="/workloads" class="inline-flex min-h-12 items-center rounded-full border border-charcoal px-6 font-bold hover:bg-peach">Try a sample workload</a>
+  <!-- HERO: dark stage with the 3D device constellation -->
+  <section class="px-2 pt-2 sm:px-4 sm:pt-3">
+    <div class="grain relative isolate overflow-hidden rounded-[28px] bg-[#1d1e22] text-paper sm:rounded-[36px]">
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_70%_at_75%_45%,rgba(240,120,67,0.28),transparent_65%),radial-gradient(40%_50%_at_10%_100%,rgba(251,224,207,0.10),transparent_70%)]"></div>
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 opacity-[0.07] [background-image:linear-gradient(rgba(252,247,242,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(252,247,242,.6)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(70%_60%_at_60%_40%,black,transparent)]"></div>
+      <div class="absolute inset-0 -z-10 opacity-60 sm:opacity-80 lg:left-[30%] lg:opacity-100">
+        <HeroScene client:only="react" />
+      </div>
+
+      <div class="relative mx-auto grid min-h-[min(88vh,860px)] max-w-7xl items-center px-5 pb-24 pt-16 sm:px-8 lg:grid-cols-[1.1fr_1fr]">
+        <div>
+          <div class="rise flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-2 rounded-full border border-paper/15 bg-paper/5 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-paper/80 backdrop-blur">
+              <span class="relative flex size-2"><span class="ping absolute inline-flex size-full rounded-full bg-orange"></span><span class="relative inline-flex size-2 rounded-full bg-orange"></span></span>
+              Testnet app live
+            </span>
+            <span class="rounded-full border border-paper/15 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-paper/60">Whitepaper v{site.docs.whitepaperVersion}</span>
+          </div>
+          <h1 data-split class="mt-6 text-[2.75rem] font-bold leading-[0.98] tracking-[-0.045em] sm:text-7xl lg:text-[5.6rem]">
+            Everyday devices.<br /><span class="text-shine">Shared intelligence.</span>
+          </h1>
+          <p data-reveal class="mt-7 max-w-xl text-lg leading-relaxed text-paper/70 [--fx-delay:500ms]">
+            {site.displayName} proposes a network where approved Android devices run short AI tasks under limits their owners set, and earn only for results that pass verification.
+          </p>
+          <div data-reveal class="mt-9 flex flex-wrap gap-3 [--fx-delay:650ms]">
+            <a href="/contribute" data-magnetic class="group relative inline-flex min-h-13 items-center gap-2 overflow-hidden rounded-full bg-orange px-7 py-3.5 font-bold text-charcoal shadow-[0_10px_40px_-10px_rgba(240,120,67,0.8)]">
+              <span class="relative z-10">Try the demo</span>
+              <span aria-hidden="true" class="relative z-10 transition-transform duration-300 group-hover:translate-x-1">→</span>
+              <span aria-hidden="true" class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full"></span>
+            </a>
+            <a href="/workloads" data-magnetic class="inline-flex min-h-13 items-center rounded-full border border-paper/25 bg-paper/5 px-7 py-3.5 font-bold text-paper backdrop-blur hover:bg-paper/10">Try a sample workload</a>
+          </div>
+          <p data-reveal class="mt-6 max-w-lg text-sm text-paper/50 [--fx-delay:800ms]">
+            Not live on mainnet. No app download or payment needed. Panels marked <span class="rounded-full bg-paper/10 px-1.5 font-mono text-[11px] text-paper/80">◇ SIMULATION</span> use bundled examples.
+          </p>
         </div>
-        <p class="mt-5 max-w-lg text-sm text-charcoal-60">
-          Not live. No app download, wallet or payment. Every panel marked <span class="rounded-full bg-peach px-1.5 font-mono text-[11px]">◇ SIMULATION</span> uses bundled examples.
-        </p>
+
+        <!-- Floating glass readouts (illustrative) -->
+        <div aria-hidden="true" class="pointer-events-none relative hidden h-full lg:block">
+          <div class="float absolute left-[6%] top-[18%] rounded-2xl border border-paper/15 bg-paper/[0.06] px-4 py-3 shadow-2xl backdrop-blur-md [animation-delay:-1s]">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/50">Task leased</p>
+            <p class="mt-1 text-sm font-bold">64 records · 120 s</p>
+          </div>
+          <div class="float absolute right-[2%] top-[44%] rounded-2xl border border-paper/15 bg-paper/[0.06] px-4 py-3 shadow-2xl backdrop-blur-md [animation-delay:-3s]">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/50">Verifier</p>
+            <p class="mt-1 flex items-center gap-2 text-sm font-bold"><span class="grid size-4 place-items-center rounded-full bg-[#2f7d4f] text-[10px]">✓</span> 64 / 64 within tolerance</p>
+          </div>
+          <div class="float absolute bottom-[16%] left-[18%] rounded-2xl border border-orange/40 bg-orange/10 px-4 py-3 shadow-2xl backdrop-blur-md [animation-delay:-4.5s]">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/50">Provisional reward</p>
+            <p class="mt-1 text-sm font-bold text-[#ffc9a8]">+0.0096 test USDC</p>
+          </div>
+        </div>
       </div>
-      <div class="rise [animation-delay:120ms]">
-        <SessionCard client:visible />
-      </div>
+
+      <a href="#facts" class="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-paper/50 hover:text-paper sm:flex">
+        Scroll
+        <span class="relative h-9 w-5 rounded-full border border-paper/30"><span class="absolute left-1/2 top-1.5 h-2 w-0.5 -translate-x-1/2 rounded bg-orange [animation:an-scrollcue_1.8s_ease-in-out_infinite]"></span></span>
+      </a>
     </div>
   </section>
 
-  <section class="border-y border-line bg-peach-soft" aria-labelledby="story-h">
-    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-      <h2 id="story-h" class="max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">How a phone could do useful AI work.</h2>
-      <p class="mt-3 max-w-2xl text-charcoal-80">Five connected ideas. Each one opens a page where you can try it.</p>
-      <ol class="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+  <!-- FACTS TICKER -->
+  <section id="facts" class="relative overflow-hidden border-b border-line py-6" aria-label="Design parameters">
+    <div class="marquee gap-10 pr-10">
+      {[...facts, ...facts].map((f, i) => (
+        <span class="flex items-center gap-10 whitespace-nowrap text-lg font-bold tracking-tight text-charcoal/80 sm:text-xl" aria-hidden={i >= facts.length ? "true" : undefined}>
+          {f}<span class="inline-block size-2 rotate-45 bg-orange"></span>
+        </span>
+      ))}
+    </div>
+    <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-paper to-transparent"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-paper to-transparent"></div>
+  </section>
+
+  <!-- NUMBERS -->
+  <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6" aria-label="Key numbers from the whitepaper">
+    <dl data-stagger class="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line lg:grid-cols-4">
+      {[
+        { n: 64, s: "", l: "records in one task", sub: "complete, small, self-contained" },
+        { n: 384, s: "", l: "numbers per vector", sub: "MiniLM-class embeddings" },
+        { n: 75, s: "%", l: "of each charge to contributors", sub: "25% to the service pool" },
+        { n: 100, s: "%", l: "of outputs recomputed", sub: "by a trusted verifier in v1" },
+      ].map((x) => (
+        <div data-spotlight class="bg-paper p-6 sm:p-8">
+          <dt class="sr-only">{x.l}</dt>
+          <dd>
+            <span data-count={x.n} data-suffix={x.s} class="tabular block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">{x.n}{x.s}</span>
+            <span class="mt-3 block font-bold">{x.l}</span>
+            <span class="mt-1 block text-sm text-charcoal-60">{x.sub}</span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <!-- STORY -->
+  <section class="relative border-y border-line bg-peach-soft" aria-labelledby="story-h">
+    <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+      <div class="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
+        <h2 id="story-h" data-split class="max-w-2xl text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">How a phone could do useful AI work.</h2>
+        <p data-reveal class="max-w-md text-lg text-charcoal-80 lg:justify-self-end">Five connected ideas. Each one opens a page where you can try it.</p>
+      </div>
+      <ol data-stagger class="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {story.map((s) => (
-          <li class="flex flex-col rounded-[var(--radius-card)] border border-line bg-paper p-5">
-            <span class="font-mono text-xs text-charcoal-60">{s.k}</span>
-            <h3 class="mt-3 text-lg font-bold leading-snug">{s.title}</h3>
+          <li data-spotlight data-tilt="5" class="group flex flex-col rounded-[22px] border border-line bg-paper p-6 shadow-[0_1px_0_rgba(39,40,45,0.04)] transition-shadow duration-500 hover:shadow-[0_30px_60px_-30px_rgba(39,40,45,0.35)]">
+            <span class="font-mono text-5xl font-bold tracking-tighter text-transparent [-webkit-text-stroke:1.2px_#c9561f] transition-colors duration-500 group-hover:text-orange">{s.k}</span>
+            <h3 class="mt-5 text-lg font-bold leading-snug">{s.title}</h3>
             <p class="mt-2 flex-1 text-sm leading-relaxed text-charcoal-80">{s.body}</p>
-            <a href={s.href} class="mt-4 inline-flex min-h-11 items-center text-sm font-bold underline decoration-orange decoration-2 underline-offset-4 hover:decoration-charcoal">{s.cta} →</a>
+            <a href={s.href} class="mt-5 inline-flex min-h-11 items-center gap-1 text-sm font-bold">
+              <span class="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_2px] bg-left-bottom bg-no-repeat pb-0.5 transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">{s.cta}</span>
+              <span aria-hidden="true" class="text-orange-deep transition-transform duration-300 group-hover:translate-x-1">→</span>
+            </a>
           </li>
         ))}
       </ol>
     </div>
   </section>
 
-  <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6" aria-labelledby="status-h">
-    <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
+  <!-- FLOW -->
+  <section class="mx-auto max-w-7xl px-4 py-24 sm:px-6" aria-labelledby="flow-h">
+    <p data-reveal class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">One task, end to end</p>
+    <h2 id="flow-h" data-split class="mt-3 max-w-3xl text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">From an idle phone to a checked, paid result.</h2>
+    <div class="relative mt-16">
+      <svg data-draw aria-hidden="true" class="absolute left-0 right-0 top-7 hidden h-4 w-full lg:block" viewBox="0 0 1000 16" preserveAspectRatio="none">
+        <line x1="40" y1="8" x2="960" y2="8" stroke="#e7ddd3" stroke-width="2" pathLength="1" />
+      </svg>
+      <svg aria-hidden="true" class="absolute left-0 right-0 top-7 hidden h-4 w-full lg:block" viewBox="0 0 1000 16" preserveAspectRatio="none">
+        <line class="flow-dash" x1="40" y1="8" x2="960" y2="8" stroke="#f07843" stroke-width="2" stroke-linecap="round" />
+      </svg>
+      <ol data-stagger class="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        {flow.map((f, i) => (
+          <li class="relative">
+            <span class={`relative grid size-14 place-items-center rounded-2xl border font-mono text-sm font-bold ${i === flow.length - 1 ? "border-orange bg-orange text-charcoal" : "border-charcoal/15 bg-paper"}`}>
+              {i === 3 && <span class="ping absolute inset-0 rounded-2xl bg-orange/30"></span>}
+              <span class="relative">0{i + 1}</span>
+            </span>
+            <h3 class="mt-5 text-xl font-bold">{f.t}</h3>
+            <p class="mt-1 text-sm leading-relaxed text-charcoal-80">{f.d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- SESSION -->
+  <section class="relative overflow-hidden bg-[#1d1e22] text-paper" aria-labelledby="session-h">
+    <div aria-hidden="true" class="pointer-events-none absolute -right-40 top-1/2 size-[640px] -translate-y-1/2 rounded-full bg-orange/25 blur-[120px]"></div>
+    <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1fr_1.05fr]">
       <div>
-        <h2 id="status-h" class="text-3xl font-bold tracking-tight sm:text-4xl">Where it stands today.</h2>
-        <p class="mt-4 text-charcoal-80">The whitepaper describes a design baseline, not an operating service. Releases advance only when evidence gates pass, never by calendar date.</p>
-        <a href="/docs#status" class="mt-6 inline-flex min-h-11 items-center font-bold underline decoration-orange decoration-2 underline-offset-4">Read the release status →</a>
+        <p data-reveal class="font-mono text-xs uppercase tracking-[0.18em] text-paper/50">Watch one session</p>
+        <h2 id="session-h" data-split class="mt-3 text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Visible, limited, and yours to stop.</h2>
+        <p data-reveal class="mt-6 max-w-lg text-lg text-paper/70">A hypothetical phone walks through a session: ready, leased, working, verifying, accepted. Press stop at any point. Stopping is never penalised.</p>
+        <ul data-stagger class="mt-8 grid max-w-md gap-3 text-sm text-paper/80">
+          <li class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-orange/20 text-orange">●</span> External power and unmetered Wi-Fi only</li>
+          <li class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-orange/20 text-orange">●</span> Battery and heat limits pause work automatically</li>
+          <li class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-orange/20 text-orange">●</span> Earn only for verified results, never for idle time</li>
+        </ul>
       </div>
-      <ol class="grid gap-3" aria-label="Roadmap stages">
+      <div data-reveal="scale" class="glow-border rounded-[26px] text-charcoal">
+        <div class="rounded-[26px] bg-paper p-2 shadow-[0_40px_120px_-30px_rgba(240,120,67,0.55)]">
+          <SessionCard client:visible />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section class="mx-auto max-w-7xl px-4 py-24 sm:px-6" aria-labelledby="status-h">
+    <div class="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
+      <div class="lg:sticky lg:top-28 lg:self-start">
+        <h2 id="status-h" data-split class="text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Where it stands today.</h2>
+        <p data-reveal class="mt-5 text-lg text-charcoal-80">The whitepaper describes a design baseline, not an operating service. Releases advance only when evidence gates pass, never by calendar date.</p>
+        <a href="/docs#status" data-reveal class="mt-7 inline-flex min-h-11 items-center font-bold underline decoration-orange decoration-2 underline-offset-4">Read the release status →</a>
+      </div>
+      <ol data-stagger class="relative grid gap-4 border-l border-line pl-8" aria-label="Roadmap stages">
         {[
-          ["Engineering prototype", "Android client, one embedding profile, coordinator, reference verifier, testnet settlement. 20 supervised devices.", "Not started publicly"],
+          ["Engineering prototype", "Android client, one embedding profile, coordinator, reference verifier, testnet settlement. 20 supervised devices.", "In progress on testnet"],
           ["Closed network pilot", "About 100 approved devices, one million reference-checked records over seven days.", "Gated"],
           ["Limited paid beta", "Audited escrow, published parameters, at least three independent paying customers, low exposure caps.", "Gated"],
           ["Expansion cohorts", "Android TV boxes, more profiles and accelerators, each tested separately.", "Gated"],
-        ].map(([t, d, s], i) => (
-          <li class="flex gap-4 rounded-[var(--radius-card)] border border-line p-4">
-            <span class="grid size-9 shrink-0 place-items-center rounded-full border border-charcoal/30 font-mono text-sm">{i + 1}</span>
-            <div>
-              <p class="font-bold">{t} <span class="ml-2 rounded-full bg-peach px-2 py-0.5 font-mono text-[11px] font-normal">{s}</span></p>
-              <p class="mt-1 text-sm text-charcoal-80">{d}</p>
-            </div>
+        ].map(([t, d, st], i) => (
+          <li data-spotlight class="relative rounded-[20px] border border-line bg-paper p-5">
+            <span class={`absolute -left-[42px] top-6 grid size-5 place-items-center rounded-full border-2 ${i === 0 ? "border-orange bg-orange" : "border-line bg-paper"}`}>{i === 0 && <span class="ping absolute inset-0 rounded-full bg-orange/40"></span>}</span>
+            <p class="font-mono text-xs text-charcoal-60">Stage {i + 1}</p>
+            <p class="mt-1 text-lg font-bold">{t} <span class={`ml-2 rounded-full px-2 py-0.5 align-middle font-mono text-[11px] font-normal ${i === 0 ? "bg-orange/15 text-orange-deep" : "bg-peach"}`}>{st}</span></p>
+            <p class="mt-1 text-sm text-charcoal-80">{d}</p>
           </li>
         ))}
       </ol>
     </div>
   </section>
 
-  <section class="mx-auto max-w-7xl px-4 sm:px-6" aria-labelledby="try-h">
-    <div class="notch-card grid gap-8 bg-charcoal p-8 text-paper sm:p-12 lg:grid-cols-[1.4fr_1fr] lg:items-center">
-      <div>
-        <h2 id="try-h" class="text-3xl font-bold tracking-tight sm:text-4xl">Try it, then read the details.</h2>
-        <p class="mt-3 max-w-xl text-paper/80">Run a device session, send a sample batch, inspect why a result is accepted, and see what an accepted record would pay. No wallet needed.</p>
-      </div>
-      <div class="flex flex-wrap gap-3 lg:justify-end">
-        <a href="/contribute" class="inline-flex min-h-12 items-center rounded-full bg-orange px-6 font-bold text-charcoal">Try a device session</a>
-        <a href="/docs" class="inline-flex min-h-12 items-center rounded-full border border-paper/40 px-6 font-bold hover:bg-paper/10">Read the docs</a>
+  <!-- CTA -->
+  <section class="px-2 pb-6 sm:px-4" aria-labelledby="try-h">
+    <div data-reveal="scale" class="grain relative isolate overflow-hidden rounded-[28px] bg-charcoal px-6 py-16 text-paper sm:rounded-[36px] sm:px-12 sm:py-24">
+      <div aria-hidden="true" class="float pointer-events-none absolute -left-24 -top-24 size-80 rounded-full bg-orange/40 blur-[90px]"></div>
+      <div aria-hidden="true" class="float pointer-events-none absolute -bottom-32 right-0 size-96 rounded-full bg-[#ffc9a8]/20 blur-[100px] [animation-delay:-3s]"></div>
+      <div class="relative mx-auto max-w-4xl text-center">
+        <h2 id="try-h" data-split class="text-4xl font-bold leading-[1.02] tracking-[-0.04em] sm:text-7xl">Try it, then read the details.</h2>
+        <p data-reveal class="mx-auto mt-5 max-w-xl text-lg text-paper/70">Run a device session, send a sample batch, inspect why a result is accepted, and see what an accepted record would pay. No wallet needed.</p>
+        <div data-reveal class="mt-10 flex flex-wrap justify-center gap-3">
+          <a href="/contribute" data-magnetic class="inline-flex min-h-13 items-center rounded-full bg-orange px-7 py-3.5 font-bold text-charcoal shadow-[0_10px_40px_-10px_rgba(240,120,67,0.8)]">Try a device session</a>
+          <a href="/app" data-magnetic class="inline-flex min-h-13 items-center rounded-full border border-paper/25 bg-paper/5 px-7 py-3.5 font-bold backdrop-blur hover:bg-paper/10">Open the testnet app</a>
+          <a href="/docs" data-magnetic class="inline-flex min-h-13 items-center rounded-full px-5 py-3.5 font-bold text-paper/80 underline decoration-orange decoration-2 underline-offset-4 hover:text-paper">Read the docs</a>
+        </div>
       </div>
     </div>
   </section>

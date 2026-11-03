@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import PageHero from "../../components/PageHero.astro";
 const cards = [
   { href: "/app/customer", t: "Customer", b: "Quote a batch of records, fund escrow with test USDC (or simulated funding), track progress, download verified vectors and claim refunds." },
   { href: "/app/contributor", t: "Contributor", b: "Register a test node (this browser or the command-line tool), run sessions, and watch rewards move from provisional to claimable." },
@@ -8,17 +9,13 @@ const cards = [
 ];
 ---
 <Layout title="Testnet app" description="Use the AndroNode coordinator on Robinhood Chain Testnet with test funds: customer, contributor and admin dashboards.">
-  <section class="mx-auto max-w-7xl px-4 pb-8 pt-12 sm:px-6">
-    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Testnet app · Robinhood Chain Testnet</p>
-    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">The real pipeline, with test money.</h1>
-    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">Unlike the simulations, these dashboards talk to the live coordinator: wallet sign-in, signed device leases, server-side verification and escrow settlement. Only testnet tokens are used. Never send real funds.</p>
-  </section>
-  <section class="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 md:grid-cols-3">
+  <PageHero eyebrow="Testnet app · Robinhood Chain Testnet" title="The real pipeline, with test money." lead="Unlike the simulations, these dashboards talk to the live coordinator: wallet sign-in, signed device leases, server-side verification and escrow settlement. Only testnet tokens are used. Never send real funds." />
+  <section class="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 md:grid-cols-2 lg:grid-cols-4" data-stagger>
     {cards.map((c) => (
-      <a href={c.href} class="group flex flex-col rounded-[var(--radius-card)] border border-line bg-white/60 p-6 hover:border-charcoal">
+      <a href={c.href} data-spotlight data-tilt="5" class="group flex flex-col rounded-[var(--radius-card)] border border-line bg-white/60 p-6 transition-[border-color,box-shadow] hover:border-charcoal hover:shadow-[0_20px_50px_-24px_rgba(39,40,45,0.35)]">
         <h2 class="text-xl font-bold">{c.t}</h2>
         <p class="mt-2 flex-1 text-sm text-charcoal-80">{c.b}</p>
-        <span class="mt-4 font-bold underline decoration-orange decoration-2 underline-offset-4">Open →</span>
+        <span class="mt-4 font-bold underline decoration-orange decoration-2 underline-offset-4">Open <span class="inline-block transition-transform group-hover:translate-x-1">→</span></span>
       </a>
     ))}
   </section>

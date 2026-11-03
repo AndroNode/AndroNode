@@ -1,27 +1,98 @@
 ---
 /**
- * First-visit device-to-task intro (PRD FR-03).
- * Shows once per browser, can be skipped at once, and releases the page within 10 seconds.
- * Progress counts real asset readiness (fonts, logo, page load), never a timed fake percentage.
+ * First-visit intro (PRD FR-03): a short cinematic of devices joining a network around a checked result.
+ * Shows once per browser, can be skipped at once (button or Esc), and always releases the page within 10 seconds.
+ * The progress line counts real asset readiness (fonts, logo, page load), never a timed fake percentage.
+ * With motion off it is a still card that fades away.
  */
 ---
-<div id="an-intro" hidden class="fixed inset-0 z-[60] grid place-items-center bg-paper px-6" role="dialog" aria-modal="true" aria-labelledby="an-intro-title">
-  <div class="w-full max-w-md text-center">
-    <svg viewBox="0 0 1000 800" width="96" height="77" class="mx-auto" aria-hidden="true">
-      <defs><mask id="an-intro-mask"><rect width="1000" height="800" fill="white"/><rect class="blink-eye" x="194" y="292" width="230" height="110" fill="black"/><rect class="blink-eye" x="574" y="430" width="232" height="110" fill="black"/></mask></defs>
-      <path d="M0 240 124 108 848 0 1000 136 1000 628 806 628 806 800 0 800Z" fill="#27282D" mask="url(#an-intro-mask)"/>
-    </svg>
-    <h1 id="an-intro-title" class="mt-6 text-2xl font-bold tracking-tight">A device. A small task. A checked result.</h1>
-    <p class="mt-2 text-charcoal-60">Everyday Android devices could take short AI tasks, under limits their owners set. Everything on this site is a labelled simulation.</p>
-    <div class="mt-8">
-      <div class="h-1.5 w-full overflow-hidden rounded-full bg-peach" role="progressbar" aria-label="Loading page assets" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="an-intro-bar">
-        <div id="an-intro-fill" class="h-full w-0 bg-charcoal transition-[width] duration-300"></div>
-      </div>
-      <p id="an-intro-status" class="mt-2 font-mono text-xs text-charcoal-60" aria-live="polite">Loading fonts and page assets</p>
+<div id="an-intro" hidden role="dialog" aria-modal="true" aria-labelledby="an-intro-title">
+  <canvas id="an-intro-canvas" aria-hidden="true"></canvas>
+  <div class="an-intro-vignette" aria-hidden="true"></div>
+  <div class="an-curtain an-curtain-top" aria-hidden="true"></div>
+  <div class="an-curtain an-curtain-bottom" aria-hidden="true"></div>
+
+  <button id="an-intro-skip" type="button">Skip intro <kbd>Esc</kbd></button>
+
+  <div class="an-intro-center">
+    <div class="an-intro-mark">
+      <svg viewBox="0 0 1000 800" width="112" height="90" aria-hidden="true">
+        <defs>
+          <linearGradient id="an-intro-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FCF7F2" />
+            <stop offset="1" stop-color="#FBE0CF" />
+          </linearGradient>
+          <mask id="an-intro-mask"><rect width="1000" height="800" fill="white"/><rect class="blink-eye" x="194" y="292" width="230" height="110" fill="black"/><rect class="blink-eye" x="574" y="430" width="232" height="110" fill="black"/></mask>
+        </defs>
+        <path d="M0 240 124 108 848 0 1000 136 1000 628 806 628 806 800 0 800Z" fill="url(#an-intro-grad)" mask="url(#an-intro-mask)"/>
+      </svg>
+      <span class="an-intro-halo" aria-hidden="true"></span>
     </div>
-    <button id="an-intro-skip" type="button" class="mt-6 min-h-11 rounded-full border border-charcoal/30 px-5 text-sm font-bold hover:bg-peach">Skip intro</button>
+    <p class="an-intro-word" aria-hidden="true">
+      {"AndroNode".split("").map((ch, i) => <span style={`--i:${i}`}>{ch}</span>)}
+    </p>
+    <h1 id="an-intro-title" class="an-intro-lines">
+      <span class="an-line" style="--d:0"><span>A device.</span></span>
+      <span class="an-line" style="--d:1"><span>A small task.</span></span>
+      <span class="an-line" style="--d:2"><span class="an-accent">A checked result.</span></span>
+    </h1>
+    <p class="an-intro-sub">Everyday Android devices could take short AI tasks, under limits their owners set. Everything on this site is a labelled simulation.</p>
+  </div>
+
+  <div class="an-intro-foot">
+    <div id="an-intro-bar" role="progressbar" aria-label="Loading page assets" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="an-intro-fill"></div></div>
+    <div class="an-intro-meta">
+      <span id="an-intro-status" aria-live="polite">Loading fonts and page assets</span>
+      <span id="an-intro-pct">0%</span>
+    </div>
   </div>
 </div>
+
+<style>
+  #an-intro { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: transparent; color: #fcf7f2; overflow: hidden; }
+  #an-intro[hidden] { display: none; }
+  #an-intro-canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+  .an-intro-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(60% 55% at 50% 45%, rgb(240 120 67 / 0.16), transparent 70%), radial-gradient(120% 90% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.55)); }
+  .an-curtain { position: absolute; left: 0; right: 0; height: 50.5%; background: #1d1e22; z-index: 0; pointer-events: none; transition: transform 1100ms cubic-bezier(0.76, 0, 0.24, 1); }
+  .an-curtain-top { top: 0; }
+  .an-curtain-bottom { bottom: 0; }
+  #an-intro.leaving #an-intro-canvas, #an-intro.leaving .an-intro-vignette { opacity: 0; transition: opacity 500ms ease; }
+  #an-intro.leaving .an-curtain-top { transform: translateY(-101%); }
+  #an-intro.leaving .an-curtain-bottom { transform: translateY(101%); }
+  #an-intro.leaving .an-intro-center, #an-intro.leaving .an-intro-foot, #an-intro.leaving #an-intro-skip { opacity: 0; transform: scale(1.06); filter: blur(8px); transition: all 600ms cubic-bezier(0.7, 0, 0.84, 0); }
+
+  #an-intro-skip { position: absolute; top: max(1rem, env(safe-area-inset-top)); right: 1rem; z-index: 4; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid rgb(252 247 242 / 0.25); color: #fcf7f2; font-size: 0.875rem; font-weight: 700; background: rgb(252 247 242 / 0.04); backdrop-filter: blur(6px); }
+  #an-intro-skip:hover { background: rgb(252 247 242 / 0.12); }
+  #an-intro-skip kbd { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 0.7rem; opacity: 0.6; }
+
+  .an-intro-center { position: relative; z-index: 2; width: min(92vw, 40rem); text-align: center; }
+  .an-intro-mark { position: relative; display: inline-grid; place-items: center; opacity: 0; transform: scale(0.6); filter: blur(12px); animation: an-mark-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 150ms forwards; }
+  .an-intro-halo { position: absolute; inset: -40%; border-radius: 50%; background: radial-gradient(circle, rgb(240 120 67 / 0.5), transparent 65%); filter: blur(10px); animation: an-halo 3.2s ease-in-out infinite; z-index: -1; }
+  .an-intro-word { margin-top: 1.1rem; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; }
+  .an-intro-word span { display: inline-block; opacity: 0; transform: translateY(0.6em); animation: an-char 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: calc(650ms + var(--i) * 45ms); }
+  .an-intro-lines { margin-top: 1.6rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 0.5em; font-size: clamp(1.35rem, 3.4vw, 2.1rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
+  .an-line { display: inline-block; overflow: hidden; padding-bottom: 0.1em; }
+  .an-line > span { display: inline-block; transform: translateY(110%); animation: an-line 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: calc(1250ms + var(--d) * 380ms); }
+  .an-accent { background: linear-gradient(100deg, #f07843, #ffc9a8 45%, #f07843); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: an-line 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards, an-shine 3s linear 2.4s infinite !important; animation-delay: calc(1250ms + var(--d) * 380ms), 2.4s; }
+  .an-intro-sub { margin: 1.1rem auto 0; max-width: 30rem; color: rgb(252 247 242 / 0.62); font-size: 0.95rem; line-height: 1.55; opacity: 0; animation: an-fade 900ms ease forwards 2.4s; }
+
+  .an-intro-foot { position: absolute; z-index: 2; left: 50%; bottom: max(2rem, env(safe-area-inset-bottom)); width: min(86vw, 24rem); transform: translateX(-50%); }
+  #an-intro-bar { height: 2px; background: rgb(252 247 242 / 0.12); border-radius: 2px; overflow: hidden; }
+  #an-intro-fill { height: 100%; width: 0; background: linear-gradient(90deg, #f07843, #ffd2b8); box-shadow: 0 0 12px #f07843; transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .an-intro-meta { margin-top: 0.6rem; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(252 247 242 / 0.5); }
+
+  @keyframes an-mark-in { to { opacity: 1; transform: none; filter: none; } }
+  @keyframes an-halo { 0%, 100% { opacity: 0.55; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.08); } }
+  @keyframes an-char { to { opacity: 1; transform: none; } }
+  @keyframes an-line { to { transform: none; } }
+  @keyframes an-fade { to { opacity: 1; } }
+  @keyframes an-shine { to { background-position: -200% 0; } }
+
+  /* Motion off: everything is simply shown. */
+  #an-intro.still .an-intro-mark, #an-intro.still .an-intro-word span, #an-intro.still .an-line > span, #an-intro.still .an-intro-sub { animation: none; opacity: 1; transform: none; filter: none; }
+  #an-intro.still .an-intro-halo { animation: none; }
+</style>
+
 <script is:inline>
 (function () {
   var KEY = "an-intro-seen";
@@ -30,23 +101,123 @@
   if (seen || window.__anIntroSeen) return;
   var el = document.getElementById("an-intro");
   if (!el) return;
+  var motion = true;
+  try {
+    var pref = localStorage.getItem("an-motion");
+    motion = pref === "on" || (pref !== "off" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  } catch (e) {}
   el.hidden = false;
+  if (!motion) el.classList.add("still");
   document.documentElement.style.overflow = "hidden";
   var fill = document.getElementById("an-intro-fill");
   var bar = document.getElementById("an-intro-bar");
   var status = document.getElementById("an-intro-status");
+  var pctEl = document.getElementById("an-intro-pct");
+  var started = performance.now();
   var done = false;
+  var raf = 0;
+
+  // Particle network: devices drift in from the edges and settle into a constellation around the mark.
+  var canvas = document.getElementById("an-intro-canvas");
+  var ctx = canvas && canvas.getContext("2d");
+  var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var pts = [];
+  var mouse = { x: -9999, y: -9999 };
+  function size() {
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function seed() {
+    var n = W < 700 ? 60 : 110;
+    pts = [];
+    for (var i = 0; i < n; i++) {
+      var ang = Math.random() * Math.PI * 2;
+      var ring = 0.28 + Math.random() * 0.55;
+      var R = Math.min(W, H) * ring;
+      var far = Math.max(W, H) * (0.7 + Math.random() * 0.4);
+      pts.push({
+        x: W / 2 + Math.cos(ang) * far, y: H / 2 + Math.sin(ang) * far,
+        hx: W / 2 + Math.cos(ang) * R * (W > H ? 1.35 : 0.9), hy: H * 0.45 + Math.sin(ang) * R * 0.75,
+        r: Math.random() < 0.18 ? 2.2 : 1.2, ph: Math.random() * 6.28, hot: Math.random() < 0.22,
+      });
+    }
+  }
+  function draw(now) {
+    var t = (now - started) / 1000;
+    ctx.clearRect(0, 0, W, H);
+    var settle = Math.min(1, t / 2.2);
+    var e = 1 - Math.pow(1 - settle, 3);
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      var tx = p.hx + Math.cos(t * 0.5 + p.ph) * 10;
+      var ty = p.hy + Math.sin(t * 0.6 + p.ph) * 10;
+      p.x += (tx - p.x) * (0.02 + e * 0.05);
+      p.y += (ty - p.y) * (0.02 + e * 0.05);
+      var dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
+      if (d2 < 14000) { p.x += dx * 0.02; p.y += dy * 0.02; }
+    }
+    ctx.lineWidth = 1;
+    for (var a = 0; a < pts.length; a++) {
+      for (var b = a + 1; b < pts.length; b++) {
+        var ddx = pts[a].x - pts[b].x, ddy = pts[a].y - pts[b].y, dd = ddx * ddx + ddy * ddy;
+        if (dd < 12000) {
+          ctx.strokeStyle = "rgba(251,224,207," + (0.16 * (1 - dd / 12000) * e).toFixed(3) + ")";
+          ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke();
+        }
+      }
+    }
+    // Spokes from hot devices to the centre: tasks out, results back.
+    for (var k = 0; k < pts.length; k++) {
+      var q = pts[k];
+      if (!q.hot) continue;
+      ctx.strokeStyle = "rgba(240,120,67," + (0.12 * e).toFixed(3) + ")";
+      ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(W / 2, H * 0.36); ctx.stroke();
+      var f = ((t * 0.45 + q.ph) % 1);
+      var px = q.x + (W / 2 - q.x) * f, py = q.y + (H * 0.36 - q.y) * f;
+      var g = ctx.createRadialGradient(px, py, 0, px, py, 7);
+      g.addColorStop(0, "rgba(255,190,150," + (0.9 * e).toFixed(3) + ")"); g.addColorStop(1, "rgba(240,120,67,0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, 7, 0, 6.283); ctx.fill();
+    }
+    for (var j = 0; j < pts.length; j++) {
+      var s = pts[j];
+      var tw = 0.55 + Math.sin(t * 2 + s.ph) * 0.35;
+      ctx.fillStyle = s.hot ? "rgba(240,120,67," + tw.toFixed(3) + ")" : "rgba(252,247,242," + (tw * 0.75).toFixed(3) + ")";
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+  if (motion && ctx) {
+    size(); seed(); raf = requestAnimationFrame(draw);
+    window.addEventListener("resize", function () { size(); seed(); });
+    el.addEventListener("pointermove", function (ev) { mouse.x = ev.clientX; mouse.y = ev.clientY; });
+  }
+
+  // Blink twice once the mark has landed.
+  var mark = el.querySelector(".an-intro-mark svg");
+  function blink() { if (!mark) return; mark.classList.remove("is-blinking"); void mark.getBBox(); mark.classList.add("is-blinking"); }
+  if (motion) { setTimeout(blink, 1300); setTimeout(blink, 1600); }
+
+  function finish() {
+    cancelAnimationFrame(raf);
+    el.hidden = true;
+    el.classList.remove("leaving");
+    document.documentElement.style.overflow = "";
+  }
   function release(reason) {
     if (done) return;
     done = true;
     window.__anIntroSeen = true;
     try { localStorage.setItem(KEY, "1"); } catch (e) {}
-    el.hidden = true;
-    document.documentElement.style.overflow = "";
     if (reason === "timeout" && status) status.textContent = "Some assets are still loading";
+    window.dispatchEvent(new Event("an-intro-done"));
+    if (!motion || reason === "skip") { finish(); return; }
+    el.classList.add("leaving");
+    setTimeout(finish, 1150);
   }
   document.getElementById("an-intro-skip").addEventListener("click", function () { release("skip"); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") release("skip"); });
+
   var tasks = [
     { label: "Fonts", p: (document.fonts && document.fonts.ready) || Promise.resolve() },
     { label: "Logo", p: new Promise(function (r) { var i = new Image(); i.onload = i.onerror = r; i.src = "/brand/AndroNode_Horizontal_charcoal.svg"; }) },
@@ -58,9 +229,14 @@
       finished++;
       var pct = Math.round((finished / tasks.length) * 100);
       fill.style.width = pct + "%";
+      pctEl.textContent = pct + "%";
       bar.setAttribute("aria-valuenow", String(pct));
       status.textContent = finished === tasks.length ? "Ready" : t.label + " ready";
-      if (finished === tasks.length) setTimeout(function () { release("ready"); }, 1400);
+      if (finished === tasks.length) {
+        // Let the title sequence finish (about 3.4 s from start) before the curtain opens.
+        var wait = motion ? Math.max(600, 3400 - (performance.now() - started)) : 1200;
+        setTimeout(function () { release("ready"); }, wait);
+      }
     });
   });
   setTimeout(function () { release("timeout"); }, 10000);

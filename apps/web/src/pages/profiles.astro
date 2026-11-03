@@ -1,13 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import PageHero from "../components/PageHero.astro";
 import ProfilesLab from "../islands/ProfilesLab";
 ---
 <Layout title="Model Profiles" description="The first release supports one embedding profile. Every device runs the same model, tokenizer, runtime and precision, so results can be checked against a reference.">
-  <section class="mx-auto max-w-7xl px-4 pb-6 pt-12 sm:px-6">
-    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Model Profiles · Simulation</p>
-    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">One exact model setup per task type</h1>
-    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">The first release supports one embedding profile. Every device runs the same model, tokenizer, runtime and precision, so results can be checked against a reference.</p>
-  </section>
+  <PageHero eyebrow="Model Profiles · Simulation" title="One exact model setup per task type" lead="The first release supports one embedding profile. Every device runs the same model, tokenizer, runtime and precision, so results can be checked against a reference." />
   <section class="mx-auto max-w-7xl px-4 sm:px-6">
     <ProfilesLab client:load />
   </section>

@@ -123,3 +123,80 @@ html[data-motion="off"] *::after {
 .prose-an th, .prose-an td { border-bottom: 1px solid var(--color-line); padding: 0.5rem 0.5rem; text-align: left; vertical-align: top; }
 .prose-an th { font-weight: 700; }
 .prose-an code { font-family: var(--font-mono); font-size: 0.85em; background: var(--color-peach-soft); padding: 0.1em 0.3em; border-radius: 4px; }
+
+/* ───────── Motion layer (see src/lib/fx.ts) ───────── */
+html.fx-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  filter: blur(6px);
+  transition: opacity 900ms var(--ease-settle), transform 1000ms var(--ease-settle), filter 900ms var(--ease-settle);
+  transition-delay: var(--fx-delay, 0ms);
+}
+html.fx-ready [data-reveal="left"] { transform: translate3d(-40px, 0, 0); }
+html.fx-ready [data-reveal="right"] { transform: translate3d(40px, 0, 0); }
+html.fx-ready [data-reveal="scale"] { transform: scale(0.94); }
+html.fx-ready [data-reveal].in { opacity: 1; transform: none; filter: none; }
+
+.fx-word { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.fx-word-in { display: inline-block; }
+html.fx-ready [data-split] .fx-word-in {
+  transform: translate3d(0, 105%, 0) rotate(4deg);
+  transition: transform 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+html.fx-ready [data-split].in .fx-word-in { transform: none; }
+
+/* Line drawing for SVG paths marked data-draw. */
+html.fx-ready [data-draw] path, html.fx-ready [data-draw] line { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1800ms cubic-bezier(0.65, 0, 0.35, 1); }
+html.fx-ready [data-draw].in path, html.fx-ready [data-draw].in line { stroke-dashoffset: 0; }
+
+[data-tilt], [data-magnetic] { transition: transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1); will-change: transform; }
+
+/* Cursor spotlight on cards. */
+[data-spotlight] { position: relative; isolation: isolate; }
+[data-spotlight]::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(240 120 67 / 0.16), transparent 60%);
+  opacity: 0; transition: opacity 400ms ease;
+}
+[data-spotlight]:hover::before { opacity: 1; }
+
+/* Scroll progress. */
+#fx-progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 70; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, var(--color-orange), #ffb38a); pointer-events: none; }
+
+/* Premium surfaces. */
+.grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay; border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.text-shine {
+  background: linear-gradient(100deg, #f07843 0%, #ffc9a8 30%, #f07843 55%, #c9561f 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: an-shine 6s linear infinite;
+}
+@keyframes an-shine { to { background-position: -220% 0; } }
+
+.glow-border { position: relative; isolation: isolate; }
+.glow-border::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; z-index: -1; padding: 1px;
+  background: conic-gradient(from var(--fx-angle, 0deg), transparent 0 60%, #f07843 75%, #ffd2b8 82%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: an-spin 6s linear infinite;
+}
+@property --fx-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes an-spin { to { --fx-angle: 360deg; } }
+
+.marquee { display: flex; width: max-content; animation: an-marquee 38s linear infinite; }
+.marquee:hover { animation-play-state: paused; }
+@keyframes an-marquee { to { transform: translateX(-50%); } }
+
+@keyframes an-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.float { animation: an-float 6s ease-in-out infinite; }
+
+@keyframes an-flow { to { stroke-dashoffset: -40; } }
+.flow-dash { stroke-dasharray: 6 14; animation: an-flow 1.6s linear infinite; }
+
+@keyframes an-ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(2.6); opacity: 0; } }
+.ping { animation: an-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+@keyframes an-scrollcue { 0% { transform: translate(-50%, 0); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(-50%, 14px); opacity: 0; } }
+.min-h-13 { min-height: 3.25rem; }

@@ -1,13 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import PageHero from "../components/PageHero.astro";
 import RewardsLab from "../islands/RewardsLab";
 ---
 <Layout title="Rewards & Settlement" description="See how 75% of each accepted charge becomes a provisional reward, then claimable on-chain, then withdrawn by you. Refunds go back to the customer.">
-  <section class="mx-auto max-w-7xl px-4 pb-6 pt-12 sm:px-6">
-    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Rewards &amp; Settlement · Simulation</p>
-    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">From accepted work to your wallet</h1>
-    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">See how 75% of each accepted charge becomes a provisional reward, then claimable on-chain, then withdrawn by you. Refunds go back to the customer.</p>
-  </section>
+  <PageHero eyebrow="Rewards & Settlement · Simulation" title="From accepted work to your wallet" lead="See how 75% of each accepted charge becomes a provisional reward, then claimable on-chain, then withdrawn by you. Refunds go back to the customer." />
   <section class="mx-auto max-w-7xl px-4 sm:px-6">
     <RewardsLab client:load />
   </section>

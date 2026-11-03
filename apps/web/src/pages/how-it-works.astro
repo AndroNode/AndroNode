@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import PageHero from "../components/PageHero.astro";
 const steps = [
   { t: "Customer funds an order", b: "Picks the embedding profile, uploads approved non-sensitive text and funds the maximum charge in USDC escrow.", where: "On-chain deposit", href: "/workloads" },
   { t: "Coordinator leases tasks", b: "Records are grouped into tasks of up to 64. Each attempt gets a lease of at most 120 seconds and a fixed reward.", where: "Off-chain", href: "/workloads" },
@@ -16,17 +17,13 @@ const trust = [
 ];
 ---
 <Layout title="How it works" description="Five steps from a funded order to a withdrawn reward, and exactly where trust in the operator remains.">
-  <section class="mx-auto max-w-7xl px-4 pb-10 pt-12 sm:px-6">
-    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">How it works</p>
-    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">Useful work in. Verified results out.</h1>
-    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">AndroNode is a proposed network where Android devices run small, checkable AI tasks for paying customers. AI work stays off-chain; only money moves on-chain.</p>
-  </section>
+  <PageHero eyebrow="How it works" title="Useful work in. Verified results out." lead="AndroNode is a proposed network where Android devices run small, checkable AI tasks for paying customers. AI work stays off-chain; only money moves on-chain." />
 
   <section class="mx-auto max-w-7xl px-4 sm:px-6" aria-label="Steps">
-    <ol class="grid gap-4 md:grid-cols-5">
+    <ol class="grid gap-4 md:grid-cols-5" data-stagger>
       {steps.map((s, i) => (
-        <li class="relative flex flex-col rounded-[var(--radius-card)] border border-line bg-white/60 p-5">
-          <span class="grid size-9 place-items-center rounded-full bg-charcoal font-mono text-sm text-paper">{i + 1}</span>
+        <li data-spotlight data-tilt="5" class="relative flex flex-col rounded-[var(--radius-card)] border border-line bg-white/60 p-5 transition-shadow hover:shadow-[0_20px_50px_-24px_rgba(39,40,45,0.35)]">
+          <span class="grid size-9 place-items-center rounded-full bg-charcoal font-mono text-sm text-paper shadow-[0_0_0_4px_rgba(240,120,67,0.18)]">{i + 1}</span>
           <h2 class="mt-4 font-bold">{s.t}</h2>
           <p class="mt-2 flex-1 text-sm text-charcoal-80">{s.b}</p>
           <p class="mt-3 font-mono text-[11px] uppercase tracking-wide text-orange-deep">{s.where}</p>
@@ -47,8 +44,8 @@ const trust = [
     </div>
   </section>
 
-  <section class="mx-auto mt-16 grid max-w-7xl gap-6 px-4 sm:px-6 md:grid-cols-3">
-    <div class="rounded-[var(--radius-card)] bg-charcoal p-6 text-paper">
+  <section class="mx-auto mt-16 grid max-w-7xl gap-6 px-4 sm:px-6 md:grid-cols-3" data-stagger>
+    <div class="grain relative overflow-hidden rounded-[var(--radius-card)] bg-charcoal p-6 text-paper">
       <h2 class="text-xl font-bold">What earns</h2>
       <p class="mt-2 text-paper/80">Accepted records from paid orders. Same work, same quote, same pay. No token, membership or multiplier changes it.</p>
     </div>

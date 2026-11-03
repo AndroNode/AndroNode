@@ -43,11 +43,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <ClientRouter fallback="swap" />
   </head>
   <body class="flex min-h-screen flex-col">
+    <div id="fx-progress" aria-hidden="true" transition:persist></div>
     {intro && <FirstVisitIntro />}
     <Header />
     <main id="main" class="flex-1" transition:animate="fade">
       <slot />
     </main>
     <Footer />
+    <script>
+      import { initFx } from "../lib/fx";
+      document.addEventListener("astro:page-load", initFx);
+      window.addEventListener("an-motion", () => initFx());
+    </script>
   </body>
 </html>
