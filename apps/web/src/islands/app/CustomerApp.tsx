@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Hex } from "viem";
 import { escrowAbi, erc20Abi, testUsdcAbi } from "@andronode/protocol/abi";
 import { api, type ApiConfig } from "../../lib/api";
@@ -164,6 +164,13 @@ function NewOrder({ cfg, onCreated }: { cfg: ApiConfig; onCreated: () => void })
 function OrderDetail({ cfg, id, onChange }: { cfg: ApiConfig; id: string; onChange: () => void }) {
   const d = useAsync(() => api<any>(`/v1/orders/${id}`), [id]);
   const [msg, setMsg] = useState<string | null>(null);
+  // Keep the list row in step with the detail: refresh the list whenever this order's state or progress changes.
+  const sig = d.data ? `${d.data.order.state}:${d.data.order.accepted_records}:${d.data.order.charged_units}` : null;
+  const lastSig = useRef<string | null>(null);
+  useEffect(() => {
+    if (sig && lastSig.current && sig !== lastSig.current) onChange();
+    lastSig.current = sig;
+  }, [sig]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!d.data || !["FUNDED", "RUNNING"].includes(d.data.order.state)) return;
     const t = setTimeout(d.reload, 4000);
