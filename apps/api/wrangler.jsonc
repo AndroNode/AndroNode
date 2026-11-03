@@ -1,0 +1,44 @@
+{
+  // AndroNode testnet coordinator + website. One Worker serves the static site and the /v1 API.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "andronode",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/v1/*"]
+  },
+  "observability": { "enabled": true },
+  "vars": {
+    "NETWORK": "base-sepolia",
+    "CHAIN_ID": "84532",
+    "USDC_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "ESCROW_ADDRESS": "",
+    "ADMIN_ADDRESSES": "",
+    "SITE_ORIGIN": "https://andronode.workers.dev",
+    "VERIFIER_MODE": "fixture",
+    "ALLOW_MOCK_FUNDING": "true",
+    "REVIEW_WINDOW_SECONDS": "172800",
+    "CONFIRMATIONS": "3"
+  },
+  // Secrets (wrangler secret put): SESSION_SECRET, COORDINATOR_KEY_JWK, BASE_RPC_URL, VERIFIER_URL, VERIFIER_TOKEN
+  "d1_databases": [
+    { "binding": "DB", "database_name": "andronode", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "BLOBS", "bucket_name": "andronode-blobs" }],
+  "kv_namespaces": [{ "binding": "KV", "id": "00000000000000000000000000000000" }],
+  "queues": {
+    "producers": [
+      { "binding": "VERIFY_QUEUE", "queue": "andronode-verify" },
+      { "binding": "WEBHOOK_QUEUE", "queue": "andronode-webhooks" }
+    ],
+    "consumers": [
+      { "queue": "andronode-verify", "max_batch_size": 10, "max_retries": 5, "dead_letter_queue": "andronode-verify-dlq" },
+      { "queue": "andronode-webhooks", "max_batch_size": 10, "max_retries": 8 }
+    ]
+  },
+  "triggers": { "crons": ["*/2 * * * *"] }
+}

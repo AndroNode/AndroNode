@@ -8,3 +8,5 @@ export * from "./hash.js";
 export * from "./schemas.js";
 export * from "./config.js";
 export * from "./ca.js";
+export * from "./fixture-embed.js";
+export * from "./abi.js";

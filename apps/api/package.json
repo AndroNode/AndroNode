@@ -1,0 +1,26 @@
+{
+  "name": "@andronode/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:migrate:local": "wrangler d1 migrations apply andronode --local",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@andronode/protocol": "workspace:*",
+    "hono": "^4.13.16",
+    "viem": "^2.57.15",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.5.0",
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.156.2"
+  }
+}
