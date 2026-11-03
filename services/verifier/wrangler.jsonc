@@ -1,0 +1,11 @@
+{
+  // Reference verifier: a small Worker in front of the Python ONNX container. Secret: VERIFIER_TOKEN.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "andronode-verifier",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+  "containers": [{ "class_name": "VerifierContainer", "image": "./Dockerfile", "instance_type": "standard-1", "max_instances": 4 }],
+  "durable_objects": { "bindings": [{ "name": "VERIFIER", "class_name": "VerifierContainer" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["VerifierContainer"] }],
+  "observability": { "enabled": true }
+}
