@@ -1,16 +1,24 @@
 @import "tailwindcss";
 
+/* Type: Space Grotesk for display, Manrope for reading, JetBrains Mono for data and labels (all OFL). */
 @font-face {
-  font-family: "DM Sans";
-  src: url("/fonts/DMSans-Variable.woff2") format("woff2");
-  font-weight: 100 1000;
+  font-family: "Space Grotesk";
+  src: url("/fonts/SpaceGrotesk-Variable.woff2") format("woff2");
+  font-weight: 300 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "DM Mono";
-  src: url("/fonts/DMMono-Regular.woff2") format("woff2");
-  font-weight: 400;
+  font-family: "Manrope";
+  src: url("/fonts/Manrope-Variable.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-Variable.woff2") format("woff2");
+  font-weight: 100 800;
   font-style: normal;
   font-display: swap;
 }
@@ -34,8 +42,9 @@
   --color-ok: #4cc38a;
   --color-warn: #f2a65a;
   --color-bad: #f26d63;
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius-card: 14px;
   --container-7xl: 86rem; /* a little wider than Tailwind's 80rem so wide screens feel fuller */
   --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -69,6 +78,11 @@ html {
    instead of leaving wide empty margins. 1680px stays at 16px; it also follows the height so the hero still fits one screen. Capped at 40px. */
 @media (min-width: 1680px) {
   html { font-size: max(16px, min(calc(100vw / 105), calc(100vh / 59), 40px)); }
+}
+
+/* Headings and big figures use the display face; body copy stays on Manrope. */
+@layer base {
+  h1, h2, h3 { font-family: var(--font-display); }
 }
 
 body {

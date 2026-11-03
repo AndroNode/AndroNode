@@ -164,7 +164,7 @@ const contours = (() => {
         <dt class="sr-only">Records in one task</dt>
         <dd>
           <div class="viz-dots" aria-hidden="true">{Array.from({ length: 64 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
-          <span data-count="64" class="tabular mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">64</span>
+          <span data-count="64" class="tabular font-display mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">64</span>
           <span class="mt-2 block font-bold">records in one task</span>
           <span class="mt-1 block text-sm text-charcoal-60">complete, small, self-contained</span>
         </dd>
@@ -173,7 +173,7 @@ const contours = (() => {
         <dt class="sr-only">Numbers per vector</dt>
         <dd>
           <div class="viz-bars" aria-hidden="true">{bars.map((h, i) => <i style={`--i:${i};--h:${h}%`}></i>)}</div>
-          <span data-count="384" class="tabular mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">384</span>
+          <span data-count="384" class="tabular font-display mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">384</span>
           <span class="mt-2 block font-bold">numbers per vector</span>
           <span class="mt-1 block text-sm text-charcoal-60">MiniLM-class embeddings</span>
         </dd>
@@ -189,7 +189,7 @@ const contours = (() => {
               <circle cx="20" cy="20" r="15.9" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4" />
               <circle class="val" cx="20" cy="20" r="15.9" fill="none" stroke="#ff7a45" stroke-width="4" stroke-linecap="round" pathLength="100" />
             </svg>
-            <span data-count={x.n} data-suffix="%" class="tabular mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">{x.n}%</span>
+            <span data-count={x.n} data-suffix="%" class="tabular font-display mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">{x.n}%</span>
             <span class="mt-2 block font-bold">{x.l}</span>
             <span class="mt-1 block text-sm text-charcoal-60">{x.sub}</span>
           </dd>
@@ -257,7 +257,7 @@ const contours = (() => {
                   <p class="mt-2 text-xl font-bold">Recomputed and compared</p>
                   <div class="relative mx-auto mt-6 size-32">
                     <svg class="absolute inset-0 size-full -rotate-90" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15.9" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3" /><circle cx="20" cy="20" r="15.9" fill="none" stroke="#4cc38a" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" style="animation:story-ring 1.6s ease-out both" /></svg>
-                    <p class="absolute inset-0 grid place-items-center text-2xl font-bold tabular-nums tracking-tight">64/64</p>
+                    <p class="font-display absolute inset-0 grid place-items-center text-2xl font-bold tabular-nums tracking-tight">64/64</p>
                   </div>
                   <ul class="mt-8 grid gap-1.5 font-mono text-[10px]">
                     <li class="flex justify-between rounded-md bg-white/5 px-2.5 py-1.5"><span>cosine ≥ 0.9999</span><span class="text-ok">✓</span></li>
@@ -269,7 +269,7 @@ const contours = (() => {
                 <div class="story-screen" data-s="4">
                   <p class="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-snow/50">Accepted</p>
                   <p class="mt-2 text-xl font-bold">Provisional reward</p>
-                  <p class="mt-8 text-center text-4xl font-bold tracking-tight text-orange">+0.0096</p>
+                  <p class="font-display mt-8 text-center text-4xl font-bold tracking-tight text-orange">+0.0096</p>
                   <p class="text-center text-xs text-snow/60">test USDC</p>
                   <div class="mt-8 flex h-3 overflow-hidden rounded-full"><div class="bg-orange" style="width:75%;animation:story-fill 1.4s ease-out"></div><div class="flex-1 bg-white/20"></div></div>
                   <div class="mt-2 flex justify-between text-[10px] text-snow/60"><span>75% contributors</span><span>25% pool</span></div>
@@ -283,7 +283,7 @@ const contours = (() => {
           {story.map((s, i) => (
             <li data-story-step={i} class:list={["story-step lg:flex lg:min-h-[62vh] lg:items-center", i === 0 && "active"]}>
               <div data-spotlight class="group relative w-full rounded-[24px] border border-line bg-white/60 p-7 sm:p-9">
-                <span class="font-mono text-6xl font-bold tracking-tighter text-transparent [-webkit-text-stroke:1.2px_#ff9466] transition-colors duration-500 group-hover:text-orange">{s.k}</span>
+                <span class="font-display text-6xl font-bold tracking-tighter text-transparent [-webkit-text-stroke:1.2px_#ff9466] transition-colors duration-500 group-hover:text-orange">{s.k}</span>
                 <h3 class="mt-5 text-2xl font-bold leading-snug sm:text-3xl">{s.title}</h3>
                 <p class="mt-3 text-base leading-relaxed text-charcoal-80">{s.body}</p>
                 <a href={s.href} class="mt-6 inline-flex min-h-11 items-center gap-2 font-bold">
@@ -318,7 +318,7 @@ const contours = (() => {
               </span>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-3">
-                  <p class="text-[0.95rem] font-bold leading-snug text-paper">{g.t}</p>
+                  <p class="font-display text-[1rem] font-semibold leading-snug text-paper">{g.t}</p>
                   <span aria-hidden="true" class={`sg-meter sg-${g.k} ml-auto shrink-0`} set:html={g.meter} />
                 </div>
                 <div class="sg-more grid"><p class="min-h-0 overflow-hidden text-sm leading-relaxed text-paper/60">{g.d}</p></div>

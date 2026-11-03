@@ -30,7 +30,7 @@ const active = (href: string) => path === href || (href === "/app" && path.start
       <ul class="flex items-center gap-0.5">
         {nav.map((n) => (
           <li>
-            <a href={n.href} aria-current={active(n.href) ? "page" : undefined} class:list={["whitespace-nowrap rounded-full px-3 py-2 text-sm hover:bg-peach", active(n.href) && "bg-peach font-bold"]}>{n.label}</a>
+            <a href={n.href} aria-current={active(n.href) ? "page" : undefined} class:list={["font-display whitespace-nowrap rounded-full px-3 py-2 text-[0.92rem] font-medium hover:bg-peach", active(n.href) && "bg-peach font-bold"]}>{n.label}</a>
           </li>
         ))}
       </ul>

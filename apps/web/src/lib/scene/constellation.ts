@@ -313,7 +313,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   // Hover label, drawn as HTML next to the canvas.
   const label = document.createElement("div");
   label.setAttribute("aria-hidden", "true");
-  label.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;opacity:0;transition:opacity 200ms ease;z-index:5;padding:8px 12px;border-radius:12px;border:1px solid rgba(255,122,69,0.45);background:rgba(15,19,27,0.78);backdrop-filter:blur(8px);color:#eceef3;font:600 12px/1.3 'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 10px 30px -10px rgba(255,122,69,0.5)";
+  label.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;opacity:0;transition:opacity 200ms ease;z-index:5;padding:8px 12px;border-radius:12px;border:1px solid rgba(255,122,69,0.45);background:rgba(15,19,27,0.78);backdrop-filter:blur(8px);color:#eceef3;font:600 12px/1.3 'Manrope',sans-serif;white-space:nowrap;box-shadow:0 10px 30px -10px rgba(255,122,69,0.5)";
   canvas.parentElement?.appendChild(label);
 
   // ── Interaction state.
