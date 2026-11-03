@@ -1,0 +1,16 @@
+{
+  "network": "robinhoodTestnet",
+  "chainId": 46630,
+  "escrow": "0xb4bbE822211b0c43985EF89f76cEd2308d3255f5",
+  "asset": "0x5a083eAf2Dd92A338fDE7e67fC86B5E1894E62b7",
+  "assetSymbol": "tUSDC",
+  "assetDecimals": 6,
+  "admin": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
+  "operatorTreasury": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
+  "maxOutstandingEscrowUnits": "500000000",
+  "maxHardCloseWindowSeconds": 1209600,
+  "deployedAtBlock": null,
+  "deployedAt": "2026-11-03",
+  "deployer": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
+  "txHash": "0x542354a468b90faf4aa9048416c7aac3940263a63bf39468dce89f604b50d644"
+}
