@@ -8,5 +8,19 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "pnpm -r --if-present lint"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "workerd",
+      "@tailwindcss/oxide",
+      "keccak",
+      "secp256k1",
+      "bufferutil",
+      "utf-8-validate"
+    ]
+  }
 }

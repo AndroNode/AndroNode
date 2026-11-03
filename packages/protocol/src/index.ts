@@ -7,3 +7,4 @@ export * from "./tasks.js";
 export * from "./hash.js";
 export * from "./schemas.js";
 export * from "./config.js";
+export * from "./ca.js";

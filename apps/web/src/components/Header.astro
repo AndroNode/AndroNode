@@ -1,0 +1,53 @@
+---
+import HeaderControls from "../islands/HeaderControls";
+import site from "../site.config";
+const nav = [
+  { href: "/contribute", label: "Contribute" },
+  { href: "/profiles", label: "Profiles" },
+  { href: "/workloads", label: "Workloads" },
+  { href: "/verify", label: "Verify" },
+  { href: "/rewards", label: "Rewards" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/docs", label: "Docs" },
+];
+const path = Astro.url.pathname.replace(/\/$/, "").replace(/\.html$/, "") || "/";
+---
+<header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur" transition:persist="site-header">
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-charcoal focus:px-3 focus:py-2 focus:text-paper">Skip to content</a>
+  <div class="border-b border-line/70 bg-peach-soft">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-1.5 sm:px-6">
+      <p class="hidden font-mono text-[11px] text-charcoal-60 md:block"><a href="/docs#status" class="hover:underline">Simulation website · proposed protocol · not live</a></p>
+      <HeaderControls client:load site={site} part="utility" />
+    </div>
+  </div>
+  <div class="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
+    <a href="/" class="shrink-0" aria-label={`${site.displayName} home`}>
+      <img src="/brand/AndroNode_Horizontal_charcoal.svg" alt={site.displayName} width="168" height="44" class="h-8 w-auto sm:h-11" />
+    </a>
+    <nav aria-label="Main" class="hidden flex-1 justify-center lg:flex">
+      <ul class="flex items-center gap-0.5">
+        {nav.map((n) => (
+          <li>
+            <a href={n.href} aria-current={path === n.href ? "page" : undefined} class:list={["whitespace-nowrap rounded-full px-3 py-2 text-sm hover:bg-peach", path === n.href && "bg-peach font-bold"]}>{n.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="ml-auto lg:ml-0">
+      <HeaderControls client:load site={site} part="wallet" />
+    </div>
+    <details class="group relative lg:hidden">
+      <summary class="grid size-11 cursor-pointer list-none place-items-center rounded-full border border-charcoal/20 [&::-webkit-details-marker]:hidden" aria-label="Menu">
+        <span aria-hidden="true" class="text-lg group-open:hidden">☰</span>
+        <span aria-hidden="true" class="hidden text-xl group-open:inline">×</span>
+      </summary>
+      <div class="absolute right-0 top-14 w-[min(92vw,22rem)] rounded-[var(--radius-card)] border border-line bg-paper p-3 shadow-xl">
+        <ul class="grid gap-1">
+          {nav.map((n) => (
+            <li><a href={n.href} aria-current={path === n.href ? "page" : undefined} class:list={["block rounded-lg px-3 py-3 hover:bg-peach", path === n.href && "bg-peach font-bold"]}>{n.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  </div>
+</header>

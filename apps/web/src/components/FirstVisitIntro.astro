@@ -1,0 +1,68 @@
+---
+/**
+ * First-visit device-to-task intro (PRD FR-03).
+ * Shows once per browser, can be skipped at once, and releases the page within 10 seconds.
+ * Progress counts real asset readiness (fonts, logo, page load), never a timed fake percentage.
+ */
+---
+<div id="an-intro" hidden class="fixed inset-0 z-[60] grid place-items-center bg-paper px-6" role="dialog" aria-modal="true" aria-labelledby="an-intro-title">
+  <div class="w-full max-w-md text-center">
+    <svg viewBox="0 0 1000 800" width="96" height="77" class="mx-auto" aria-hidden="true">
+      <defs><mask id="an-intro-mask"><rect width="1000" height="800" fill="white"/><rect class="blink-eye" x="194" y="292" width="230" height="110" fill="black"/><rect class="blink-eye" x="574" y="430" width="232" height="110" fill="black"/></mask></defs>
+      <path d="M0 240 124 108 848 0 1000 136 1000 628 806 628 806 800 0 800Z" fill="#27282D" mask="url(#an-intro-mask)"/>
+    </svg>
+    <h1 id="an-intro-title" class="mt-6 text-2xl font-bold tracking-tight">A device. A small task. A checked result.</h1>
+    <p class="mt-2 text-charcoal-60">Everyday Android devices could take short AI tasks, under limits their owners set. Everything on this site is a labelled simulation.</p>
+    <div class="mt-8">
+      <div class="h-1.5 w-full overflow-hidden rounded-full bg-peach" role="progressbar" aria-label="Loading page assets" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="an-intro-bar">
+        <div id="an-intro-fill" class="h-full w-0 bg-charcoal transition-[width] duration-300"></div>
+      </div>
+      <p id="an-intro-status" class="mt-2 font-mono text-xs text-charcoal-60" aria-live="polite">Loading fonts and page assets</p>
+    </div>
+    <button id="an-intro-skip" type="button" class="mt-6 min-h-11 rounded-full border border-charcoal/30 px-5 text-sm font-bold hover:bg-peach">Skip intro</button>
+  </div>
+</div>
+<script is:inline>
+(function () {
+  var KEY = "an-intro-seen";
+  var seen = false;
+  try { seen = localStorage.getItem(KEY) === "1"; } catch (e) { seen = !!window.__anIntroSeen; }
+  if (seen || window.__anIntroSeen) return;
+  var el = document.getElementById("an-intro");
+  if (!el) return;
+  el.hidden = false;
+  document.documentElement.style.overflow = "hidden";
+  var fill = document.getElementById("an-intro-fill");
+  var bar = document.getElementById("an-intro-bar");
+  var status = document.getElementById("an-intro-status");
+  var done = false;
+  function release(reason) {
+    if (done) return;
+    done = true;
+    window.__anIntroSeen = true;
+    try { localStorage.setItem(KEY, "1"); } catch (e) {}
+    el.hidden = true;
+    document.documentElement.style.overflow = "";
+    if (reason === "timeout" && status) status.textContent = "Some assets are still loading";
+  }
+  document.getElementById("an-intro-skip").addEventListener("click", function () { release("skip"); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") release("skip"); });
+  var tasks = [
+    { label: "Fonts", p: (document.fonts && document.fonts.ready) || Promise.resolve() },
+    { label: "Logo", p: new Promise(function (r) { var i = new Image(); i.onload = i.onerror = r; i.src = "/brand/AndroNode_Horizontal_charcoal.svg"; }) },
+    { label: "Page", p: document.readyState === "complete" ? Promise.resolve() : new Promise(function (r) { window.addEventListener("load", r, { once: true }); }) },
+  ];
+  var finished = 0;
+  tasks.forEach(function (t) {
+    t.p.then(function () {
+      finished++;
+      var pct = Math.round((finished / tasks.length) * 100);
+      fill.style.width = pct + "%";
+      bar.setAttribute("aria-valuenow", String(pct));
+      status.textContent = finished === tasks.length ? "Ready" : t.label + " ready";
+      if (finished === tasks.length) setTimeout(function () { release("ready"); }, 1400);
+    });
+  });
+  setTimeout(function () { release("timeout"); }, 10000);
+})();
+</script>

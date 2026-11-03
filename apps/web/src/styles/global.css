@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("/fonts/DMSans-Variable.woff2") format("woff2");
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Mono";
+  src: url("/fonts/DMMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Brand tokens from AndroNode_Brand_Tokens.json (v1.0). */
+@theme {
+  --color-charcoal: #27282d;
+  --color-charcoal-80: #3a3b41;
+  --color-charcoal-60: #5d5e64;
+  --color-orange: #f07843;
+  --color-orange-deep: #c9561f; /* text-safe orange on paper, 4.6:1 */
+  --color-peach: #fbe0cf;
+  --color-peach-soft: #fdeee4;
+  --color-paper: #fcf7f2;
+  --color-line: #e7ddd3;
+  --color-ok: #2f7d4f;
+  --color-warn: #a35a00;
+  --color-bad: #b3261e;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-card: 14px;
+  --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root {
+  color-scheme: light;
+  --andronode-charcoal: #27282d;
+  --andronode-orange: #f07843;
+  --andronode-peach: #fbe0cf;
+  --andronode-paper: #fcf7f2;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-paper);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Brand graphic language: cropped top slope + square notch. */
+.slope-card {
+  clip-path: polygon(0 18px, 18px 0, calc(100% - 26px) 0, 100% 22px, 100% 100%, 0 100%);
+}
+.notch-card {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
+}
+
+/* Motion off: visitor toggle or OS preference (PRD FR-05). */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="on"]) *,
+  html:not([data-motion="on"]) *::before,
+  html:not([data-motion="on"]) *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+.blink-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.is-blinking .blink-eye {
+  animation: an-blink 140ms ease-in-out 1;
+}
+@keyframes an-blink {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.12); }
+}
+
+@keyframes an-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.rise {
+  animation: an-rise 420ms var(--ease-settle) both;
+}
+
+.prose-an p { margin: 0.75rem 0; line-height: 1.65; }
+.prose-an h2 { font-weight: 700; font-size: 1.5rem; margin: 2rem 0 0.5rem; letter-spacing: -0.01em; }
+.prose-an h3 { font-weight: 700; font-size: 1.125rem; margin: 1.5rem 0 0.25rem; }
+.prose-an ul { list-style: disc; padding-left: 1.25rem; margin: 0.75rem 0; }
+.prose-an li { margin: 0.25rem 0; line-height: 1.6; }
+.prose-an table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+.prose-an th, .prose-an td { border-bottom: 1px solid var(--color-line); padding: 0.5rem 0.5rem; text-align: left; vertical-align: top; }
+.prose-an th { font-weight: 700; }
+.prose-an code { font-family: var(--font-mono); font-size: 0.85em; background: var(--color-peach-soft); padding: 0.1em 0.3em; border-radius: 4px; }

@@ -1,0 +1,124 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SessionCard from "../islands/SessionCard";
+import site from "../site.config";
+
+const story = [
+  {
+    k: "01",
+    title: "Everyday hardware",
+    body: "Phones, tablets and later Android TV boxes that already sit plugged in could contribute. Each device works alone on a complete small task; the network never pools memory or splits a big model across devices.",
+    href: "/contribute",
+    cta: "Check a hypothetical device",
+  },
+  {
+    k: "02",
+    title: "Small, suitable tasks",
+    body: "The first workload is batch text embeddings for approved, non-sensitive English text: up to 64 records per task, 256 tokens per record, a 384-number vector out.",
+    href: "/profiles",
+    cta: "See the candidate profile",
+  },
+  {
+    k: "03",
+    title: "You stay in control",
+    body: "Sessions are started on purpose and stay visible. External power, unmetered network, battery and heat limits apply. Stop works at any time and is never penalised.",
+    href: "/contribute",
+    cta: "Try the session controls",
+  },
+  {
+    k: "04",
+    title: "Every result is checked",
+    body: "In the first paid design a trusted verifier recomputes every output and compares it within published tolerances. Hashes and blockchains record results; they do not prove correctness.",
+    href: "/verify",
+    cta: "Inspect a receipt",
+  },
+  {
+    k: "05",
+    title: "Paid for accepted work",
+    body: "Customers fund orders. Only accepted records are charged: 75% goes to contributors, 25% to the service pool. Idle time, uptime or holding a token earns nothing.",
+    href: "/rewards",
+    cta: "Follow the payment states",
+  },
+];
+---
+<Layout title={site.displayName} description="AndroNode is a proposed protocol for paid AI inference on everyday Android devices. Explore it through labelled simulations — no wallet, app or account needed." intro>
+  <section class="relative overflow-hidden">
+    <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-12 sm:px-6 md:pt-20 lg:grid-cols-[1.05fr_1fr]">
+      <div class="rise">
+        <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Proposed AI compute protocol · Whitepaper v{site.docs.whitepaperVersion}</p>
+        <h1 class="mt-4 text-[2.6rem] font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-7xl">
+          Everyday devices.<br /><span class="text-charcoal-60">Shared intelligence.</span>
+        </h1>
+        <p class="mt-6 max-w-xl text-lg leading-relaxed text-charcoal-80">
+          {site.displayName} proposes a network where approved Android devices run short AI tasks under limits their owners set, and earn only for results that pass verification.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/contribute" class="inline-flex min-h-12 items-center rounded-full bg-orange px-6 font-bold text-charcoal hover:brightness-105">Try the demo</a>
+          <a href="/workloads" class="inline-flex min-h-12 items-center rounded-full border border-charcoal px-6 font-bold hover:bg-peach">Try a sample workload</a>
+        </div>
+        <p class="mt-5 max-w-lg text-sm text-charcoal-60">
+          Not live. No app download, wallet or payment. Every panel marked <span class="rounded-full bg-peach px-1.5 font-mono text-[11px]">◇ SIMULATION</span> uses bundled examples.
+        </p>
+      </div>
+      <div class="rise [animation-delay:120ms]">
+        <SessionCard client:visible />
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-line bg-peach-soft" aria-labelledby="story-h">
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 id="story-h" class="max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">How a phone could do useful AI work.</h2>
+      <p class="mt-3 max-w-2xl text-charcoal-80">Five connected ideas. Each one opens a page where you can try it.</p>
+      <ol class="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {story.map((s) => (
+          <li class="flex flex-col rounded-[var(--radius-card)] border border-line bg-paper p-5">
+            <span class="font-mono text-xs text-charcoal-60">{s.k}</span>
+            <h3 class="mt-3 text-lg font-bold leading-snug">{s.title}</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-charcoal-80">{s.body}</p>
+            <a href={s.href} class="mt-4 inline-flex min-h-11 items-center text-sm font-bold underline decoration-orange decoration-2 underline-offset-4 hover:decoration-charcoal">{s.cta} →</a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6" aria-labelledby="status-h">
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
+      <div>
+        <h2 id="status-h" class="text-3xl font-bold tracking-tight sm:text-4xl">Where it stands today.</h2>
+        <p class="mt-4 text-charcoal-80">The whitepaper describes a design baseline, not an operating service. Releases advance only when evidence gates pass, never by calendar date.</p>
+        <a href="/docs#status" class="mt-6 inline-flex min-h-11 items-center font-bold underline decoration-orange decoration-2 underline-offset-4">Read the release status →</a>
+      </div>
+      <ol class="grid gap-3" aria-label="Roadmap stages">
+        {[
+          ["Engineering prototype", "Android client, one embedding profile, coordinator, reference verifier, testnet settlement. 20 supervised devices.", "Not started publicly"],
+          ["Closed network pilot", "About 100 approved devices, one million reference-checked records over seven days.", "Gated"],
+          ["Limited paid beta", "Audited escrow, published parameters, at least three independent paying customers, low exposure caps.", "Gated"],
+          ["Expansion cohorts", "Android TV boxes, more profiles and accelerators, each tested separately.", "Gated"],
+        ].map(([t, d, s], i) => (
+          <li class="flex gap-4 rounded-[var(--radius-card)] border border-line p-4">
+            <span class="grid size-9 shrink-0 place-items-center rounded-full border border-charcoal/30 font-mono text-sm">{i + 1}</span>
+            <div>
+              <p class="font-bold">{t} <span class="ml-2 rounded-full bg-peach px-2 py-0.5 font-mono text-[11px] font-normal">{s}</span></p>
+              <p class="mt-1 text-sm text-charcoal-80">{d}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-7xl px-4 sm:px-6" aria-labelledby="try-h">
+    <div class="notch-card grid gap-8 bg-charcoal p-8 text-paper sm:p-12 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+      <div>
+        <h2 id="try-h" class="text-3xl font-bold tracking-tight sm:text-4xl">Try it, then read the details.</h2>
+        <p class="mt-3 max-w-xl text-paper/80">Run a device session, send a sample batch, inspect why a result is accepted, and see what an accepted record would pay. No wallet needed.</p>
+      </div>
+      <div class="flex flex-wrap gap-3 lg:justify-end">
+        <a href="/contribute" class="inline-flex min-h-12 items-center rounded-full bg-orange px-6 font-bold text-charcoal">Try a device session</a>
+        <a href="/docs" class="inline-flex min-h-12 items-center rounded-full border border-paper/40 px-6 font-bold hover:bg-paper/10">Read the docs</a>
+      </div>
+    </div>
+  </section>
+</Layout>

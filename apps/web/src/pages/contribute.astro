@@ -1,0 +1,20 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DeviceLab from "../islands/DeviceLab";
+---
+<Layout title="Device & Session Lab" description="Pick a hypothetical Android device, set owner limits and run a simulated visible session. Nothing runs on your real device.">
+  <section class="mx-auto max-w-7xl px-4 pb-6 pt-12 sm:px-6">
+    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Device &amp; Session Lab · Simulation</p>
+    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">Your device. Your limits.</h1>
+    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">See whether a hypothetical device may meet the proposed baseline, then start a visible session and watch how power, network, heat and data limits stop new work. Idle time alone never earns anything.</p>
+  </section>
+  <section class="mx-auto max-w-7xl px-4 sm:px-6">
+    <DeviceLab client:load />
+  </section>
+  <section class="mx-auto mt-12 max-w-7xl px-4 sm:px-6">
+    <div class="rounded-[var(--radius-card)] border border-line p-6 text-sm leading-relaxed text-charcoal-80">
+      <h2 class="text-base font-bold text-charcoal">About overnight charging</h2>
+      <p class="mt-2">The first release uses explicitly started, visible, bounded sessions (§5.1). Automatic charging sessions, idle schedules and background operation are later features that need separate policy approval and testing. This page does not promise overnight income.</p>
+    </div>
+  </section>
+</Layout>

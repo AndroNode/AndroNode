@@ -1,0 +1,51 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import FirstVisitIntro from "../components/FirstVisitIntro.astro";
+import site from "../site.config";
+
+interface Props {
+  title: string;
+  description: string;
+  intro?: boolean;
+}
+const { title, description, intro = false } = Astro.props;
+const fullTitle = title === site.displayName ? `${site.displayName} — ${site.tagline}` : `${title} · ${site.displayName}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#FCF7F2" />
+    <link rel="preload" href="/fonts/DMSans-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.displayName} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL("/og.png", Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      try { var m = localStorage.getItem("an-motion"); if (m === "on" || m === "off") document.documentElement.setAttribute("data-motion", m); } catch (e) {}
+    </script>
+    <ClientRouter fallback="swap" />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    {intro && <FirstVisitIntro />}
+    <Header />
+    <main id="main" class="flex-1" transition:animate="fade">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

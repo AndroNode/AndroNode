@@ -1,0 +1,45 @@
+---
+import site from "../site.config";
+const year = 2026;
+---
+<footer class="mt-24 bg-charcoal text-paper">
+  <div aria-hidden="true" class="mx-auto flex max-w-7xl justify-end gap-6 px-4 pt-8 sm:px-6"><span class="h-3 w-16 bg-orange"></span><span class="mt-4 h-3 w-16 bg-orange"></span></div>
+  <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
+    <div>
+      <img src="/brand/AndroNode_Horizontal_paper_tagline.svg" alt={`${site.displayName} — Your device. Your choice.`} width="240" height="80" class="h-16 w-auto" loading="lazy" />
+      <p id="risks" class="mt-6 max-w-prose text-sm leading-relaxed text-paper/85">
+        {site.displayName} is a proposed compute protocol. This website uses simulations; no live compute or payments are offered here. Future participation may involve energy costs, device wear, data exposure and payment risks. Work availability and earnings are not guaranteed.
+      </p>
+      <p id="non-affiliation" class="mt-4 max-w-prose text-sm leading-relaxed text-paper/70">
+        {site.displayName} is independent and is not affiliated with or endorsed by Google, Android device manufacturers, or MLX. Product names identify compatibility or references only.
+      </p>
+    </div>
+    <nav aria-label="Explore">
+      <h2 class="font-mono text-xs uppercase tracking-wider text-paper/60">Try it</h2>
+      <ul class="mt-3 grid gap-2 text-sm">
+        <li><a class="hover:text-orange" href="/contribute">Device &amp; Session Lab</a></li>
+        <li><a class="hover:text-orange" href="/profiles">Model Profiles</a></li>
+        <li><a class="hover:text-orange" href="/workloads">Workload Lab</a></li>
+        <li><a class="hover:text-orange" href="/verify">Verification &amp; Receipts</a></li>
+        <li><a class="hover:text-orange" href="/rewards">Rewards &amp; Settlement</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Learn">
+      <h2 class="font-mono text-xs uppercase tracking-wider text-paper/60">Learn</h2>
+      <ul class="mt-3 grid gap-2 text-sm">
+        <li><a class="hover:text-orange" href="/how-it-works">How it works</a></li>
+        <li><a class="hover:text-orange" href="/docs">Docs and FAQ</a></li>
+        <li><a class="hover:text-orange" href="/docs#risks">Risks and limits</a></li>
+        <li><a class="hover:text-orange" href="/docs#privacy">Privacy boundary</a></li>
+        <li><a class="hover:text-orange" href="/docs#status">Release status</a></li>
+        <li><a class="hover:text-orange" href={site.docs.whitepaperPdf}>Whitepaper v{site.docs.whitepaperVersion} (PDF)</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="border-t border-paper/15">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs text-paper/60 sm:px-6">
+      <span>© {year} {site.displayName}. Simulation website. Status: <span class="font-mono">{site.release.status}</span>.</span>
+      <span>Fonts: DM Sans and DM Mono (<a class="underline" href="/licenses/DMSans-OFL.txt">OFL</a>)</span>
+    </div>
+  </div>
+</footer>
