@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export function Panel({ title, chip, children, className = "", actions }: { title: string; chip?: ReactNode; children: ReactNode; className?: string; actions?: ReactNode }) {
   return (
-    <section className={`min-w-0 rounded-[var(--radius-card)] border border-line bg-white/60 p-5 sm:p-6 ${className}`} aria-label={title}>
+    <section data-spotlight className={`min-w-0 rounded-[var(--radius-card)] border border-line bg-white/60 p-5 sm:p-6 ${className}`} aria-label={title}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold">{title}</h2>
         <div className="flex items-center gap-2">{actions}{chip}</div>

@@ -134,15 +134,28 @@ export function initFx() {
 
   if (!motion || !fine) return;
 
-  document.querySelectorAll<HTMLElement>("[data-spotlight]").forEach((el) => {
-    const move = (e: PointerEvent) => {
+  // Spotlight and cursor glow use one delegated listener, so React islands that render later get it too.
+  const glow = document.getElementById("fx-cursor");
+  let gx = innerWidth / 2, gy = innerHeight / 2, tx = gx, ty = gy, glowRaf = 0;
+  const glowTick = () => {
+    gx += (tx - gx) * 0.12; gy += (ty - gy) * 0.12;
+    if (glow) glow.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
+    glowRaf = Math.abs(tx - gx) + Math.abs(ty - gy) > 0.5 ? requestAnimationFrame(glowTick) : 0;
+  };
+  const onMove = (e: PointerEvent) => {
+    tx = e.clientX; ty = e.clientY;
+    if (glow) { glow.classList.add("on"); if (!glowRaf) glowRaf = requestAnimationFrame(glowTick); }
+    const el = (e.target as Element | null)?.closest?.("[data-spotlight]") as HTMLElement | null;
+    if (el) {
       const r = el.getBoundingClientRect();
       el.style.setProperty("--mx", `${e.clientX - r.left}px`);
       el.style.setProperty("--my", `${e.clientY - r.top}px`);
-    };
-    el.addEventListener("pointermove", move);
-    cleanups.push(() => el.removeEventListener("pointermove", move));
-  });
+    }
+  };
+  on(window, "pointermove", onMove, { passive: true });
+  const leaveDoc = () => glow?.classList.remove("on");
+  document.documentElement.addEventListener("pointerleave", leaveDoc);
+  cleanups.push(() => { document.documentElement.removeEventListener("pointerleave", leaveDoc); cancelAnimationFrame(glowRaf); glow?.classList.remove("on"); });
 
   document.querySelectorAll<HTMLElement>("[data-tilt]").forEach((el) => {
     const max = Number(el.dataset.tilt || 6);

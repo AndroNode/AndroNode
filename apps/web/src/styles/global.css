@@ -238,3 +238,75 @@ html.fx-ready [data-draw].in path, html.fx-ready [data-draw].in line { stroke-da
 .hero-ring-pulse { transform-origin: 400px 110px; animation: hero-ring 3.6s ease-in-out infinite; }
 @keyframes hero-ring { 0%, 100% { opacity: 0.4; transform: scale(0.96); } 50% { opacity: 1; transform: scale(1.04); } }
 @media (max-width: 1023px) { .hero-floor { left: -20%; right: -20%; height: 30%; opacity: 0.6; } }
+
+/* ───────── Interaction layer v2 ───────── */
+/* Soft light that follows the cursor across the dark page (desktop, motion on). */
+#fx-cursor { position: fixed; left: -300px; top: -300px; width: 600px; height: 600px; border-radius: 9999px; pointer-events: none; z-index: 1; opacity: 0; transition: opacity 600ms ease; background: radial-gradient(circle, rgb(255 122 69 / 0.09), transparent 62%); mix-blend-mode: screen; }
+#fx-cursor.on { opacity: 1; }
+@media (pointer: coarse) { #fx-cursor { display: none; } }
+
+/* Spotlight cards also get a lit border that tracks the cursor. */
+[data-spotlight]::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; z-index: 0;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgb(255 140 90 / 0.9), rgb(255 122 69 / 0.25) 40%, transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity 400ms ease;
+}
+[data-spotlight]:hover::after { opacity: 1; }
+
+/* Buttons: a light sweep on hover. */
+.btn-shine { position: relative; overflow: hidden; isolation: isolate; }
+.btn-shine::before { content: ""; position: absolute; inset: 0; z-index: -1; transform: translateX(-120%) skewX(-20deg); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent); transition: transform 700ms ease; }
+.btn-shine:hover::before { transform: translateX(120%) skewX(-20deg); }
+
+/* Numbers: each card carries a small live visual that fills when the card is revealed. */
+.viz-dots { display: grid; grid-template-columns: repeat(16, 1fr); gap: 4px; }
+.viz-dots i { aspect-ratio: 1; border-radius: 2px; background: rgb(255 255 255 / 0.08); transition: background 300ms ease, box-shadow 300ms ease; transition-delay: calc(var(--i) * 18ms); }
+.in .viz-dots i, html:not(.fx-ready) .viz-dots i { background: var(--color-orange); box-shadow: 0 0 6px rgb(255 122 69 / 0.6); }
+.viz-bars { display: flex; align-items: flex-end; gap: 3px; height: 40px; }
+.viz-bars i { flex: 1; border-radius: 2px; background: linear-gradient(to top, rgb(255 122 69 / 0.35), #ff9466); height: 6%; transition: height 900ms cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--i) * 35ms); }
+.in .viz-bars i, html:not(.fx-ready) .viz-bars i { height: var(--h); animation: viz-wave 3.2s ease-in-out infinite; animation-delay: calc(900ms + var(--i) * 90ms); }
+@keyframes viz-wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.55); } }
+.viz-bars i { transform-origin: bottom; }
+.viz-ring circle.val { stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1600ms cubic-bezier(0.16, 1, 0.3, 1) 200ms; }
+.in .viz-ring circle.val, html:not(.fx-ready) .viz-ring circle.val { stroke-dashoffset: calc(100 - var(--p)); }
+
+/* Story: sticky phone whose screen follows the active step. */
+.story-step { opacity: 0.32; transition: opacity 500ms ease, transform 500ms ease; }
+.story-step.active { opacity: 1; }
+@media (max-width: 1023px) { .story-step { opacity: 1; } }
+.story-screen { position: absolute; inset: 0; opacity: 0; transform: translateY(14px) scale(0.98); transition: opacity 500ms ease, transform 600ms cubic-bezier(0.16, 1, 0.3, 1); padding: 22px 18px; }
+[data-active="0"] .story-screen[data-s="0"], [data-active="1"] .story-screen[data-s="1"], [data-active="2"] .story-screen[data-s="2"], [data-active="3"] .story-screen[data-s="3"], [data-active="4"] .story-screen[data-s="4"] { opacity: 1; transform: none; }
+[data-active="0"] .story-dot[data-s="0"], [data-active="1"] .story-dot[data-s="1"], [data-active="2"] .story-dot[data-s="2"], [data-active="3"] .story-dot[data-s="3"], [data-active="4"] .story-dot[data-s="4"] { background: var(--color-orange); height: 28px; }
+.story-dot { width: 4px; height: 10px; border-radius: 4px; background: rgb(255 255 255 / 0.15); transition: height 400ms ease, background 400ms ease; }
+@keyframes story-bolt { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes story-fill { from { width: 0; } }
+@keyframes story-row { from { opacity: 0; transform: translateX(-8px); } }
+.story-row { animation: story-row 500ms ease both; }
+@keyframes story-pulse { 0% { box-shadow: 0 0 0 0 rgb(255 122 69 / 0.5); } 100% { box-shadow: 0 0 0 22px rgb(255 122 69 / 0); } }
+
+/* Flow: a light pulse runs along the pipeline and lights each node as it passes. */
+.flow-runner { position: absolute; top: 50%; left: 4%; width: 90px; height: 3px; margin-top: -1.5px; border-radius: 3px; background: linear-gradient(90deg, transparent, #ff9466, #fff); filter: drop-shadow(0 0 8px #ff7a45); animation: flow-run 5s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+@keyframes flow-run { 0% { left: 0%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { left: calc(100% - 90px); opacity: 0; } }
+.flow-node { animation: flow-node 5s ease-in-out infinite; animation-delay: calc(var(--i) * 0.95s + 0.2s); }
+@keyframes flow-node { 0%, 14%, 100% { box-shadow: 0 0 0 0 rgb(255 122 69 / 0); border-color: rgb(236 238 243 / 0.15); } 5% { box-shadow: 0 0 30px 2px rgb(255 122 69 / 0.55); border-color: #ff7a45; } }
+
+/* Timeline: the rail fills as you scroll, stages light up once reached. */
+.tl-rail { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--color-line); }
+.tl-rail::after { content: ""; position: absolute; inset: 0; transform-origin: top; transform: scaleY(var(--p, 0)); background: linear-gradient(#ff9466, #ff7a45); box-shadow: 0 0 12px #ff7a45; }
+.tl-item .tl-dot { transition: background 400ms ease, border-color 400ms ease, box-shadow 400ms ease; }
+.tl-item.lit .tl-dot { background: var(--color-orange); border-color: var(--color-orange); box-shadow: 0 0 14px rgb(255 122 69 / 0.8); }
+.tl-item { transition: border-color 400ms ease, transform 400ms ease; }
+.tl-item.lit { border-color: rgb(255 122 69 / 0.35); }
+
+/* CTA aurora. */
+.aurora { position: absolute; inset: -20%; z-index: -1; filter: blur(70px); opacity: 0.85; pointer-events: none; }
+.aurora i { position: absolute; border-radius: 9999px; mix-blend-mode: screen; }
+.aurora i:nth-child(1) { width: 45%; height: 60%; left: 5%; top: 10%; background: #ff7a45; animation: aur-a 14s ease-in-out infinite alternate; opacity: 0.55; }
+.aurora i:nth-child(2) { width: 40%; height: 55%; right: 5%; top: 25%; background: #6078ff; animation: aur-b 18s ease-in-out infinite alternate; opacity: 0.28; }
+.aurora i:nth-child(3) { width: 35%; height: 50%; left: 35%; bottom: 0; background: #ffb38a; animation: aur-c 16s ease-in-out infinite alternate; opacity: 0.3; }
+@keyframes aur-a { to { transform: translate(30%, 20%) scale(1.2); } }
+@keyframes aur-b { to { transform: translate(-35%, -15%) scale(0.85); } }
+@keyframes aur-c { to { transform: translate(-20%, -30%) scale(1.15); } }
+@keyframes story-ring { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.session-beams { background: conic-gradient(from var(--fx-angle, 0deg) at 75% 50%, transparent 0 20%, rgb(255 122 69 / 0.10) 25%, transparent 32%, transparent 60%, rgb(96 120 255 / 0.07) 66%, transparent 74%); animation: an-spin 18s linear infinite; }

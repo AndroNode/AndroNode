@@ -44,6 +44,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body class="flex min-h-screen flex-col">
     <div id="fx-progress" aria-hidden="true" transition:persist></div>
+    <div id="fx-cursor" aria-hidden="true" transition:persist></div>
     {intro && <FirstVisitIntro />}
     <Header />
     <main id="main" class="flex-1" transition:animate="fade">

@@ -43,6 +43,7 @@ const story = [
 ];
 
 const facts = ["64 records per task", "384-number vectors", "256 tokens per record", "Every result recomputed", "75% to contributors", "Stop any time, never penalised", "Leases expire in 120 s", "External power and Wi-Fi only", "Paid only for accepted work"];
+const bars = [38, 62, 45, 80, 55, 92, 40, 70, 58, 86, 48, 74, 66, 95, 52, 78, 44, 68];
 const flow = [
   { t: "Device", d: "Plugged in, on Wi-Fi, owner-set limits." },
   { t: "Lease", d: "A complete small task, 120 s to finish." },
@@ -150,19 +151,39 @@ const contours = (() => {
   </section>
 
   <!-- NUMBERS -->
-  <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6" aria-label="Key numbers from the protocol design">
-    <dl data-stagger class="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line lg:grid-cols-4">
+  <section class="mx-auto max-w-7xl px-4 py-24 sm:px-6" aria-label="Key numbers from the protocol design">
+    <dl data-stagger class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-spotlight data-tilt="6" class="relative overflow-hidden rounded-[22px] border border-line bg-white/60 p-6">
+        <dt class="sr-only">Records in one task</dt>
+        <dd>
+          <div class="viz-dots" aria-hidden="true">{Array.from({ length: 64 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
+          <span data-count="64" class="tabular mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">64</span>
+          <span class="mt-2 block font-bold">records in one task</span>
+          <span class="mt-1 block text-sm text-charcoal-60">complete, small, self-contained</span>
+        </dd>
+      </div>
+      <div data-spotlight data-tilt="6" class="relative overflow-hidden rounded-[22px] border border-line bg-white/60 p-6">
+        <dt class="sr-only">Numbers per vector</dt>
+        <dd>
+          <div class="viz-bars" aria-hidden="true">{bars.map((h, i) => <i style={`--i:${i};--h:${h}%`}></i>)}</div>
+          <span data-count="384" class="tabular mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">384</span>
+          <span class="mt-2 block font-bold">numbers per vector</span>
+          <span class="mt-1 block text-sm text-charcoal-60">MiniLM-class embeddings</span>
+        </dd>
+      </div>
       {[
-        { n: 64, s: "", l: "records in one task", sub: "complete, small, self-contained" },
-        { n: 384, s: "", l: "numbers per vector", sub: "MiniLM-class embeddings" },
-        { n: 75, s: "%", l: "of each charge to contributors", sub: "25% to the service pool" },
-        { n: 100, s: "%", l: "of outputs recomputed", sub: "by a trusted verifier in v1" },
+        { n: 75, l: "of each charge to contributors", sub: "25% to the service pool", p: 75 },
+        { n: 100, l: "of outputs recomputed", sub: "by a trusted verifier in v1", p: 100 },
       ].map((x) => (
-        <div data-spotlight class="bg-paper p-6 sm:p-8">
+        <div data-spotlight data-tilt="6" class="relative overflow-hidden rounded-[22px] border border-line bg-white/60 p-6">
           <dt class="sr-only">{x.l}</dt>
           <dd>
-            <span data-count={x.n} data-suffix={x.s} class="tabular block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">{x.n}{x.s}</span>
-            <span class="mt-3 block font-bold">{x.l}</span>
+            <svg class="viz-ring h-12 w-12 -rotate-90" viewBox="0 0 40 40" aria-hidden="true" style={`--p:${x.p}`}>
+              <circle cx="20" cy="20" r="15.9" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4" />
+              <circle class="val" cx="20" cy="20" r="15.9" fill="none" stroke="#ff7a45" stroke-width="4" stroke-linecap="round" pathLength="100" />
+            </svg>
+            <span data-count={x.n} data-suffix="%" class="tabular mt-6 block text-5xl font-bold tracking-[-0.04em] sm:text-6xl">{x.n}%</span>
+            <span class="mt-2 block font-bold">{x.l}</span>
             <span class="mt-1 block text-sm text-charcoal-60">{x.sub}</span>
           </dd>
         </div>
@@ -170,26 +191,103 @@ const contours = (() => {
     </dl>
   </section>
 
-  <!-- STORY -->
-  <section class="relative border-y border-line bg-peach-soft" aria-labelledby="story-h">
-    <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+  <!-- STORY: sticky phone, screen follows the active step -->
+  <section id="story" data-active="0" class="relative border-y border-line bg-peach-soft" aria-labelledby="story-h">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(transparent,black_20%,black_80%,transparent)]"></div>
+    <div class="relative mx-auto max-w-7xl px-4 py-24 sm:px-6">
       <div class="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
         <h2 id="story-h" data-split class="max-w-2xl text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">How a phone could do useful AI work.</h2>
-        <p data-reveal class="max-w-md text-lg text-charcoal-80 lg:justify-self-end">Five connected ideas. Each one opens a page where you can try it.</p>
+        <p data-reveal class="max-w-md text-lg text-charcoal-80 lg:justify-self-end">Five connected ideas. Scroll through them, then open any one to try it.</p>
       </div>
-      <ol data-stagger class="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        {story.map((s) => (
-          <li data-spotlight data-tilt="5" class="group flex flex-col rounded-[22px] border border-line bg-paper p-6 shadow-[0_1px_0_rgba(255,255,255,0.03)] transition-shadow duration-500 hover:shadow-[0_30px_60px_-30px_rgba(39,40,45,0.35)]">
-            <span class="font-mono text-5xl font-bold tracking-tighter text-transparent [-webkit-text-stroke:1.2px_#ff9466] transition-colors duration-500 group-hover:text-orange">{s.k}</span>
-            <h3 class="mt-5 text-lg font-bold leading-snug">{s.title}</h3>
-            <p class="mt-2 flex-1 text-sm leading-relaxed text-charcoal-80">{s.body}</p>
-            <a href={s.href} class="mt-5 inline-flex min-h-11 items-center gap-1 text-sm font-bold">
-              <span class="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_2px] bg-left-bottom bg-no-repeat pb-0.5 transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">{s.cta}</span>
-              <span aria-hidden="true" class="text-orange-deep transition-transform duration-300 group-hover:translate-x-1">→</span>
-            </a>
-          </li>
-        ))}
-      </ol>
+      <div class="mt-16 grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
+        <div class="hidden lg:block">
+          <div class="sticky top-[18vh] flex items-center gap-8">
+            <div class="flex flex-col gap-2" aria-hidden="true">{story.map((_, i) => <span class="story-dot" data-s={i}></span>)}</div>
+            <div aria-hidden="true" class="relative mx-auto h-[min(64vh,36rem)] aspect-[9/18.5] rounded-[2.6rem] border border-white/10 bg-gradient-to-b from-[#1b2130] to-[#0e1118] p-2.5 shadow-[0_50px_120px_-40px_rgba(255,122,69,0.55),inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+              <div class="absolute left-1/2 top-4 z-10 h-5 w-20 -translate-x-1/2 rounded-full bg-black"></div>
+              <div class="relative h-full overflow-hidden rounded-[2.1rem] bg-[#0b0d12] text-snow">
+                <div class="absolute inset-0 bg-[radial-gradient(80%_50%_at_50%_0%,rgba(255,122,69,0.18),transparent_70%)]"></div>
+                <!-- 0 hardware -->
+                <div class="story-screen" data-s="0">
+                  <p class="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-snow/50">Device check</p>
+                  <p class="mt-2 text-xl font-bold">Ready to help</p>
+                  <div class="mt-8 grid place-items-center">
+                    <div class="relative grid size-32 place-items-center rounded-full border border-orange/40" style="animation:story-pulse 2s ease-out infinite">
+                      <span class="text-4xl" style="animation:story-bolt 1.6s ease-in-out infinite">⚡</span>
+                    </div>
+                  </div>
+                  <ul class="mt-8 grid gap-2 text-xs">
+                    <li class="flex justify-between rounded-lg bg-white/5 px-3 py-2"><span>External power</span><span class="text-ok">● on</span></li>
+                    <li class="flex justify-between rounded-lg bg-white/5 px-3 py-2"><span>Wi-Fi, unmetered</span><span class="text-ok">● on</span></li>
+                    <li class="flex justify-between rounded-lg bg-white/5 px-3 py-2"><span>Battery</span><span>92%</span></li>
+                  </ul>
+                </div>
+                <!-- 1 tasks -->
+                <div class="story-screen" data-s="1">
+                  <p class="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-snow/50">Task leased · 120 s</p>
+                  <p class="mt-2 text-xl font-bold">64 short records</p>
+                  <ul class="mt-6 grid gap-1.5 font-mono text-[10px]">
+                    {["rec-001 · 212 tokens", "rec-002 · 98 tokens", "rec-003 · 256 tokens", "rec-004 · 143 tokens", "rec-005 · 77 tokens", "rec-006 · 190 tokens", "rec-007 · 64 tokens"].map((r, i) => (
+                      <li class="story-row flex items-center justify-between rounded-md bg-white/5 px-2.5 py-1.5" style={`animation-delay:${i * 90}ms`}><span>{r}</span><span class="text-orange">→ 384</span></li>
+                    ))}
+                  </ul>
+                  <div class="mt-5 h-1.5 overflow-hidden rounded-full bg-white/10"><div class="h-full w-[62%] rounded-full bg-orange" style="animation:story-fill 2.4s ease-out"></div></div>
+                </div>
+                <!-- 2 control -->
+                <div class="story-screen" data-s="2">
+                  <p class="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-snow/50">Your limits</p>
+                  <p class="mt-2 text-xl font-bold">Session · 30 min</p>
+                  <ul class="mt-6 grid gap-2.5 text-xs">
+                    {["Pause above 40 °C", "Pause below 80% battery", "Wi-Fi only", "Visible while running"].map((t) => (
+                      <li class="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2.5"><span>{t}</span><span class="relative h-5 w-9 rounded-full bg-orange"><span class="absolute right-0.5 top-0.5 size-4 rounded-full bg-white"></span></span></li>
+                    ))}
+                  </ul>
+                  <div class="mt-8 grid place-items-center"><span class="grid size-20 place-items-center rounded-full bg-orange text-sm font-bold text-ink" style="animation:story-pulse 2s ease-out infinite">Stop</span></div>
+                </div>
+                <!-- 3 verify -->
+                <div class="story-screen" data-s="3">
+                  <p class="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-snow/50">Verifier</p>
+                  <p class="mt-2 text-xl font-bold">Recomputed and compared</p>
+                  <div class="mt-6 grid place-items-center">
+                    <svg class="size-28 -rotate-90" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15.9" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3" /><circle cx="20" cy="20" r="15.9" fill="none" stroke="#4cc38a" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" style="animation:story-ring 1.6s ease-out both" /></svg>
+                    <p class="-mt-[4.6rem] text-2xl font-bold">64/64</p>
+                  </div>
+                  <ul class="mt-14 grid gap-1.5 font-mono text-[10px]">
+                    <li class="flex justify-between rounded-md bg-white/5 px-2.5 py-1.5"><span>cosine ≥ 0.9999</span><span class="text-ok">✓</span></li>
+                    <li class="flex justify-between rounded-md bg-white/5 px-2.5 py-1.5"><span>max error ≤ 0.001</span><span class="text-ok">✓</span></li>
+                    <li class="flex justify-between rounded-md bg-white/5 px-2.5 py-1.5"><span>384 dimensions</span><span class="text-ok">✓</span></li>
+                  </ul>
+                </div>
+                <!-- 4 paid -->
+                <div class="story-screen" data-s="4">
+                  <p class="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-snow/50">Accepted</p>
+                  <p class="mt-2 text-xl font-bold">Provisional reward</p>
+                  <p class="mt-8 text-center text-4xl font-bold tracking-tight text-orange">+0.0096</p>
+                  <p class="text-center text-xs text-snow/60">test USDC</p>
+                  <div class="mt-8 flex h-3 overflow-hidden rounded-full"><div class="bg-orange" style="width:75%;animation:story-fill 1.4s ease-out"></div><div class="flex-1 bg-white/20"></div></div>
+                  <div class="mt-2 flex justify-between text-[10px] text-snow/60"><span>75% contributors</span><span>25% pool</span></div>
+                  <p class="mt-8 rounded-lg bg-white/5 px-3 py-2 text-center text-[11px] text-snow/70">Idle time never earns</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ol class="grid gap-6 lg:gap-0">
+          {story.map((s, i) => (
+            <li data-story-step={i} class:list={["story-step lg:flex lg:min-h-[62vh] lg:items-center", i === 0 && "active"]}>
+              <div data-spotlight class="group relative w-full rounded-[24px] border border-line bg-white/60 p-7 sm:p-9">
+                <span class="font-mono text-6xl font-bold tracking-tighter text-transparent [-webkit-text-stroke:1.2px_#ff9466] transition-colors duration-500 group-hover:text-orange">{s.k}</span>
+                <h3 class="mt-5 text-2xl font-bold leading-snug sm:text-3xl">{s.title}</h3>
+                <p class="mt-3 text-base leading-relaxed text-charcoal-80">{s.body}</p>
+                <a href={s.href} class="mt-6 inline-flex min-h-11 items-center gap-2 font-bold">
+                  <span class="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_2px] bg-left-bottom bg-no-repeat pb-0.5 transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">{s.cta}</span>
+                  <span aria-hidden="true" class="grid size-8 place-items-center rounded-full border border-orange/40 text-orange-deep transition-all duration-300 group-hover:translate-x-1 group-hover:bg-orange group-hover:text-ink">→</span>
+                </a>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -198,17 +296,13 @@ const contours = (() => {
     <p data-reveal class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">One task, end to end</p>
     <h2 id="flow-h" data-split class="mt-3 max-w-3xl text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">From an idle phone to a checked, paid result.</h2>
     <div class="relative mt-16">
-      <svg data-draw aria-hidden="true" class="absolute left-0 right-0 top-7 hidden h-4 w-full lg:block" viewBox="0 0 1000 16" preserveAspectRatio="none">
-        <line x1="40" y1="8" x2="960" y2="8" stroke="#222837" stroke-width="2" pathLength="1" />
-      </svg>
-      <svg aria-hidden="true" class="absolute left-0 right-0 top-7 hidden h-4 w-full lg:block" viewBox="0 0 1000 16" preserveAspectRatio="none">
-        <line class="flow-dash" x1="40" y1="8" x2="960" y2="8" stroke="#f07843" stroke-width="2" stroke-linecap="round" />
-      </svg>
-      <ol data-stagger class="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+      <div aria-hidden="true" class="absolute inset-x-[4%] top-7 hidden h-px bg-line lg:block">
+        <span class="flow-runner"></span>
+      </div>
+      <ol data-stagger class="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
         {flow.map((f, i) => (
-          <li class="relative">
-            <span class={`relative grid size-14 place-items-center rounded-2xl border font-mono text-sm font-bold ${i === flow.length - 1 ? "border-orange bg-orange text-ink" : "border-charcoal/15 bg-paper"}`}>
-              {i === 3 && <span class="ping absolute inset-0 rounded-2xl bg-orange/30"></span>}
+          <li data-spotlight class="group relative rounded-[20px] border border-transparent p-3 transition-colors hover:border-line hover:bg-white/60">
+            <span class="flow-node relative grid size-14 place-items-center rounded-2xl border bg-paper font-mono text-sm font-bold transition-transform duration-300 group-hover:-translate-y-1" style={`--i:${i}`}>
               <span class="relative">0{i + 1}</span>
             </span>
             <h3 class="mt-5 text-xl font-bold">{f.t}</h3>
@@ -222,6 +316,7 @@ const contours = (() => {
   <!-- SESSION -->
   <section class="zone-dark relative overflow-hidden border-y border-white/5 bg-charcoal text-paper" aria-labelledby="session-h">
     <div aria-hidden="true" class="pointer-events-none absolute -right-40 top-1/2 size-[640px] -translate-y-1/2 rounded-full bg-orange/25 blur-[120px]"></div>
+    <div aria-hidden="true" class="session-beams pointer-events-none absolute inset-0"></div>
     <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1fr_1.05fr]">
       <div>
         <p data-reveal class="font-mono text-xs uppercase tracking-[0.18em] text-paper/50">Watch one session</p>
@@ -249,15 +344,16 @@ const contours = (() => {
         <p data-reveal class="mt-5 text-lg text-charcoal-80">The protocol describes a design baseline, not an operating service. Releases advance only when evidence gates pass, never by calendar date.</p>
         <a href="/docs#status" data-reveal class="mt-7 inline-flex min-h-11 items-center font-bold underline decoration-orange decoration-2 underline-offset-4">Read the release status →</a>
       </div>
-      <ol data-stagger class="relative grid gap-4 border-l border-line pl-8" aria-label="Roadmap stages">
+      <ol id="timeline" data-stagger class="relative grid gap-4 pl-8" aria-label="Roadmap stages">
+        <span aria-hidden="true" class="tl-rail"></span>
         {[
           ["Engineering prototype", "Android client, one embedding profile, coordinator, reference verifier, testnet settlement. 20 supervised devices.", "In progress on testnet"],
           ["Closed network pilot", "About 100 approved devices, one million reference-checked records over seven days.", "Gated"],
           ["Limited paid beta", "Audited escrow, published parameters, at least three independent paying customers, low exposure caps.", "Gated"],
           ["Expansion cohorts", "Android TV boxes, more profiles and accelerators, each tested separately.", "Gated"],
         ].map(([t, d, st], i) => (
-          <li data-spotlight class="relative rounded-[20px] border border-line bg-paper p-5">
-            <span class={`absolute -left-[42px] top-6 grid size-5 place-items-center rounded-full border-2 ${i === 0 ? "border-orange bg-orange" : "border-line bg-paper"}`}>{i === 0 && <span class="ping absolute inset-0 rounded-full bg-orange/40"></span>}</span>
+          <li data-spotlight class:list={["tl-item relative rounded-[20px] border border-line bg-white/60 p-5", i === 0 && "lit"]}>
+            <span class="tl-dot absolute -left-[41px] top-6 grid size-5 place-items-center rounded-full border-2 border-line bg-paper">{i === 0 && <span class="ping absolute inset-0 rounded-full bg-orange/40"></span>}</span>
             <p class="font-mono text-xs text-charcoal-60">Stage {i + 1}</p>
             <p class="mt-1 text-lg font-bold">{t} <span class={`ml-2 rounded-full px-2 py-0.5 align-middle font-mono text-[11px] font-normal ${i === 0 ? "bg-orange/15 text-orange-deep" : "bg-peach"}`}>{st}</span></p>
             <p class="mt-1 text-sm text-charcoal-80">{d}</p>
@@ -269,18 +365,57 @@ const contours = (() => {
 
   <!-- CTA -->
   <section class="px-2 pb-6 sm:px-4" aria-labelledby="try-h">
-    <div data-reveal="scale" class="grain relative isolate overflow-hidden zone-dark rounded-[28px] bg-charcoal px-6 py-16 text-paper ring-1 ring-white/5 sm:rounded-[36px] sm:px-12 sm:py-24">
-      <div aria-hidden="true" class="float pointer-events-none absolute -left-24 -top-24 size-80 rounded-full bg-orange/40 blur-[90px]"></div>
-      <div aria-hidden="true" class="float pointer-events-none absolute -bottom-32 right-0 size-96 rounded-full bg-[#ffc9a8]/20 blur-[100px] [animation-delay:-3s]"></div>
+    <div data-reveal="scale" data-spotlight class="grain relative isolate overflow-hidden zone-dark rounded-[28px] bg-charcoal px-6 py-16 text-paper ring-1 ring-white/5 sm:rounded-[36px] sm:px-12 sm:py-24">
+      <div aria-hidden="true" class="aurora"><i></i><i></i><i></i></div>
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.6)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(60%_70%_at_50%_50%,black,transparent)]"></div>
       <div class="relative mx-auto max-w-4xl text-center">
         <h2 id="try-h" data-split class="text-4xl font-bold leading-[1.02] tracking-[-0.04em] sm:text-7xl">Try it, then read the details.</h2>
         <p data-reveal class="mx-auto mt-5 max-w-xl text-lg text-paper/70">Run a device session, send a sample batch, inspect why a result is accepted, and see what an accepted record would pay. No wallet needed.</p>
         <div data-reveal class="mt-10 flex flex-wrap justify-center gap-3">
-          <a href="/contribute" data-magnetic class="inline-flex min-h-13 items-center rounded-full bg-orange px-7 py-3.5 font-bold text-ink shadow-[0_10px_40px_-10px_rgba(240,120,67,0.8)]">Try a device session</a>
+          <a href="/contribute" data-magnetic class="btn-shine inline-flex min-h-13 items-center rounded-full bg-orange px-7 py-3.5 font-bold text-ink shadow-[0_10px_40px_-10px_rgba(240,120,67,0.8)]">Try a device session</a>
           <a href="/app" data-magnetic class="inline-flex min-h-13 items-center rounded-full border border-paper/25 bg-paper/5 px-7 py-3.5 font-bold backdrop-blur hover:bg-paper/10">Open the testnet app</a>
           <a href="/docs" data-magnetic class="inline-flex min-h-13 items-center rounded-full px-5 py-3.5 font-bold text-paper/80 underline decoration-orange decoration-2 underline-offset-4 hover:text-paper">Read the docs</a>
         </div>
       </div>
     </div>
   </section>
+<script>
+  // Story: the step nearest the middle of the screen drives the sticky phone.
+  // Timeline: the rail fills with scroll and lights each stage it reaches.
+  function initStory() {
+    const story = document.getElementById("story");
+    const steps = [...document.querySelectorAll<HTMLElement>("[data-story-step]")];
+    const tl = document.getElementById("timeline");
+    const items = [...document.querySelectorAll<HTMLElement>(".tl-item")];
+    if (!story || !tl) return;
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const i = (e.target as HTMLElement).dataset.storyStep!;
+        if (story.dataset.active === i) continue;
+        story.dataset.active = i;
+        steps.forEach((s) => s.classList.toggle("active", s.dataset.storyStep === i));
+        story.querySelector<HTMLElement>(`.story-screen[data-s="${i}"]`)?.getAnimations({ subtree: true }).forEach((a) => { a.cancel(); a.play(); });
+      }
+    }, { rootMargin: "-45% 0px -45% 0px" });
+    steps.forEach((s) => io.observe(s));
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        const r = tl.getBoundingClientRect();
+        const mid = innerHeight * 0.6;
+        const p = Math.max(0, Math.min(1, (mid - r.top) / r.height));
+        tl.style.setProperty("--p", p.toFixed(3));
+        items.forEach((it) => it.classList.toggle("lit", it.getBoundingClientRect().top + 30 < mid || it === items[0]));
+      });
+    };
+    addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    document.addEventListener("astro:before-swap", () => { io.disconnect(); removeEventListener("scroll", onScroll); }, { once: true });
+  }
+  document.addEventListener("astro:page-load", initStory);
+</script>
 </Layout>
