@@ -53,10 +53,10 @@ const { eyebrow, title, lead, compact = false } = Astro.props;
   @keyframes ph-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-40px, 30px); } }
 
   /* 3D object */
-  .ph-obj { position: absolute; z-index: -5; right: -3rem; top: 50%; width: 300px; height: 300px; transform: translateY(-50%); perspective: 900px; opacity: 0.45; pointer-events: none; }
+  .ph-obj { position: absolute; z-index: -5; right: -3rem; top: 50%; width: 18.75rem; height: 18.75rem; transform: translateY(-50%); perspective: 900px; opacity: 0.45; pointer-events: none; }
   @media (max-width: 767px) { .ph-obj { top: 4.5rem; right: -6rem; width: 220px; height: 220px; transform: none; opacity: 0.3; } }
   @media (min-width: 768px) { .ph-obj { right: 4%; opacity: 1; } }
-  @media (min-width: 1280px) { .ph-obj { right: 9%; width: 340px; height: 340px; } }
+  @media (min-width: 1280px) { .ph-obj { right: 9%; width: 21.25rem; height: 21.25rem; } }
   .ph-compact .ph-obj { width: 200px; height: 200px; }
   @media (max-width: 767px) { .ph-compact .ph-obj { display: none; } }
   .ph-scene { position: absolute; inset: 0; transform-style: preserve-3d; animation: ph-sway 12s ease-in-out infinite; }

@@ -64,6 +64,12 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* Wide screens (or a zoomed-out browser): scale the whole rem-based layout with the viewport
+   instead of leaving wide empty margins. 1680px stays at 16px; capped at 28px (about 2940px wide). */
+@media (min-width: 1680px) {
+  html { font-size: min(calc(100vw / 105), 28px); }
+}
+
 body {
   min-height: 100vh;
   background: var(--color-paper);

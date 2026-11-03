@@ -169,7 +169,13 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
     const h = canvas.clientHeight || 1;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    camera.position.z = w / h < 0.9 ? 11.5 : 9.2;
+    // Fit the device sphere (radius ~3.3) to the canvas: about 74% of the height on wide canvases,
+    // and slightly wider than the screen on tall phone canvases where it sits behind the text.
+    const tanHalf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const aspect = w / h;
+    camera.position.z = aspect < 0.9
+      ? 3.3 / (1.05 * tanHalf * aspect)
+      : Math.max(3.3 / (0.74 * tanHalf), 3.3 / (0.8 * tanHalf * aspect));
     camera.updateProjectionMatrix();
   };
   const ro = new ResizeObserver(resize);
