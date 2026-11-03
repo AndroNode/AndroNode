@@ -11,10 +11,9 @@ const status = [
   ["Paid service", "Not live", "No customer deposits or contributor payouts are accepted."],
 ];
 ---
-<Layout title="Docs and FAQ" description="A plain-language summary of the AndroNode whitepaper v1.0: scope, devices, sessions, verification, privacy, pricing, settlement, risks and FAQ.">
-  <PageHero eyebrow="Docs · Whitepaper v1.0 summary" title="How AndroNode is meant to work" lead="Short summaries of all 23 whitepaper sections. Where this page and the PDF differ, the PDF wins.">
+<Layout title="Docs and FAQ" description="A plain-language summary of the AndroNode protocol design: scope, devices, sessions, verification, privacy, pricing, settlement, risks and FAQ.">
+  <PageHero eyebrow="Docs · Protocol summary" title="How AndroNode is meant to work" lead="Short, plain-language summaries of all 23 sections of the protocol design.">
     <div class="flex flex-wrap items-center gap-3">
-      <a href="/docs/AndroNode_Whitepaper_v1.pdf" class="inline-flex min-h-11 items-center rounded-full bg-charcoal px-5 font-bold text-paper" download>Download whitepaper (PDF)</a>
       <label class="relative block w-full sm:w-80">
         <span class="sr-only">Search the docs</span>
         <input id="doc-search" type="search" placeholder="Search docs, e.g. battery, refund" class="min-h-11 w-full rounded-full border border-charcoal/30 bg-white px-4 text-sm" autocomplete="off" />
@@ -64,7 +63,7 @@ const status = [
           ))}
         </div>
       </section>
-      <p id="doc-empty" hidden class="mt-6 rounded-lg bg-peach-soft p-4 text-sm">No section matches. Try another word, or <a href="/docs/AndroNode_Whitepaper_v1.pdf" class="underline">open the PDF</a>.</p>
+      <p id="doc-empty" hidden class="mt-6 rounded-lg bg-peach-soft p-4 text-sm">No section matches. Try another word.</p>
     </div>
   </div>
 </Layout>

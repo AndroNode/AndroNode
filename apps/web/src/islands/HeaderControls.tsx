@@ -33,7 +33,7 @@ function CaChip({ site }: { site: SiteConfig }) {
         <Dialog open={open} onClose={() => setOpen(false)} title={s.kind === "unset" ? "Contract address" : "Configuration error"}>
           <p className="font-medium">{s.tooltip}</p>
           <p className="mt-3 text-sm text-charcoal-60">
-            No native token or token launch is confirmed. The whitepaper (§14) says the base protocol does not require one. Compute payments are designed in USDC. Copy is disabled until an owner-confirmed address is configured.
+            No native token or token launch is confirmed. The protocol design (§14) says the base protocol does not require one. Compute payments are designed in USDC. Copy is disabled until an owner-confirmed address is configured.
           </p>
         </Dialog>
       </>

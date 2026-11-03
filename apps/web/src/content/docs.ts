@@ -1,4 +1,4 @@
-/** Plain-language summary of AndroNode Whitepaper v1.0 (23 sections). The PDF is authoritative. */
+/** Plain-language summary of the AndroNode protocol design (23 sections). */
 export interface DocSection { n: number; id: string; title: string; summary: string; points: string[] }
 
 export const SECTIONS: DocSection[] = [

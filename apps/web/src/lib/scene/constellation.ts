@@ -13,15 +13,15 @@ export interface SceneHandle {
   dispose(): void;
 }
 
-const ORANGE = new THREE.Color("#f07843");
-const PEACH = new THREE.Color("#fbe0cf");
-const CHARCOAL = new THREE.Color("#2e2f35");
+const ORANGE = new THREE.Color("#ff7a45");
+const PEACH = new THREE.Color("#ffd9c4");
+const FRAME = new THREE.Color("#3a4152");
 
 function fibonacciSphere(n: number, r: number): THREE.Vector3[] {
   const pts: THREE.Vector3[] = [];
   const golden = Math.PI * (3 - Math.sqrt(5));
   for (let i = 0; i < n; i++) {
-    const y = 1 - (i / (n - 1)) * 2;
+    const y = 1 - ((i + 0.5) / n) * 2; // offset keeps devices off the exact poles
     const rad = Math.sqrt(1 - y * y);
     const t = golden * i;
     pts.push(new THREE.Vector3(Math.cos(t) * rad * r, y * r * 0.82, Math.sin(t) * rad * r));
@@ -44,9 +44,54 @@ function glowTexture(): THREE.Texture {
   return t;
 }
 
+/** A phone screen drawn once: rounded glass, status bar, a task card and a progress bar.
+ *  Greyscale so each instance can tint it (idle slate, orange while working). */
+function screenTexture(): THREE.Texture {
+  const W = 256, H = 512, r = 30;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d")!;
+  const rr = (x: number, y: number, w: number, h: number, rad: number) => {
+    g.beginPath();
+    g.moveTo(x + rad, y);
+    g.arcTo(x + w, y, x + w, y + h, rad);
+    g.arcTo(x + w, y + h, x, y + h, rad);
+    g.arcTo(x, y + h, x, y, rad);
+    g.arcTo(x, y, x + w, y, rad);
+    g.closePath();
+  };
+  const bg = g.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, "#6a6f7c");
+  bg.addColorStop(1, "#2c3039");
+  rr(0, 0, W, H, r); g.fillStyle = bg; g.fill();
+  g.fillStyle = "rgba(255,255,255,0.55)";
+  rr(W / 2 - 28, 14, 56, 12, 6); g.fill(); // camera notch
+  g.fillStyle = "rgba(255,255,255,0.85)";
+  rr(26, 70, 120, 16, 8); g.fill();
+  g.fillStyle = "rgba(255,255,255,0.35)";
+  rr(26, 98, 190, 10, 5); g.fill();
+  rr(26, 116, 150, 10, 5); g.fill();
+  g.fillStyle = "rgba(255,255,255,0.16)";
+  rr(22, 160, W - 44, 170, 20); g.fill();
+  g.strokeStyle = "rgba(255,255,255,0.9)"; g.lineWidth = 8;
+  g.beginPath(); g.arc(W / 2, 245, 46, -Math.PI / 2, Math.PI * 1.15); g.stroke();
+  g.fillStyle = "rgba(255,255,255,0.25)";
+  rr(26, 372, W - 52, 12, 6); g.fill();
+  g.fillStyle = "rgba(255,255,255,0.95)";
+  rr(26, 372, (W - 52) * 0.68, 12, 6); g.fill();
+  g.fillStyle = "rgba(255,255,255,0.3)";
+  rr(26, 404, 110, 10, 5); g.fill();
+  rr(W / 2 - 40, H - 24, 80, 8, 4); g.fill(); // home bar
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+
 export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: boolean; compact: boolean }): SceneHandle {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, opts.compact ? 1.5 : 1.75));
+  // Render at least at 1.5x so edges and 1px lines stay crisp on standard (1x) monitors.
+  renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -71,51 +116,58 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   world.add(rim);
 
   // Verifier core: faceted orange crystal inside a slowly turning wire shell.
-  const coreMat = new THREE.MeshPhysicalMaterial({ color: ORANGE, emissive: ORANGE, emissiveIntensity: 0.55, metalness: 0.2, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.1, flatShading: true });
-  const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.62, 0), coreMat);
+  // Verifier core: a polished faceted crystal, a fine geodesic cage and a tight halo.
+  const coreMat = new THREE.MeshPhysicalMaterial({ color: ORANGE, emissive: ORANGE, emissiveIntensity: 0.35, metalness: 0.1, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.05, flatShading: true });
+  const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 1), coreMat);
   world.add(core);
-  const shell = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.0, 1)), new THREE.LineBasicMaterial({ color: PEACH, transparent: true, opacity: 0.35 }));
+  const cageMat = new THREE.LineBasicMaterial({ color: PEACH, transparent: true, opacity: 0.32 });
+  const shell = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(0.95, 2), 1), cageMat);
   world.add(shell);
+  const shell2 = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.25, 0)), new THREE.LineBasicMaterial({ color: ORANGE, transparent: true, opacity: 0.45 }));
+  world.add(shell2);
   const glowTex = glowTexture();
-  const coreGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: ORANGE, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
-  coreGlow.scale.setScalar(3.6);
+  const coreGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: ORANGE, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  coreGlow.scale.setScalar(2.4);
   world.add(coreGlow);
 
   // Orbit rings.
-  const ringMat = new THREE.MeshBasicMaterial({ color: PEACH, transparent: true, opacity: 0.18 });
-  const rings: THREE.Mesh[] = [];
-  for (const [rx, rz, r] of [[1.25, 0.2, 3.3], [1.75, -0.5, 3.9]] as const) {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.006, 6, 180), ringMat);
+  // Thin 1px orbit lines (crisper than thin tori, which shimmer at a distance).
+  const ringMat = new THREE.LineBasicMaterial({ color: PEACH, transparent: true, opacity: 0.22 });
+  const rings: THREE.Object3D[] = [];
+  for (const [rx, rz, r] of [[1.35, 0.2, 3.55], [1.75, -0.5, 4.0]] as const) {
+    const pts = new THREE.EllipseCurve(0, 0, r, r, 0, Math.PI * 2).getPoints(256).map((v) => new THREE.Vector3(v.x, v.y, 0));
+    const ring = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), ringMat);
     ring.rotation.set(rx, 0, rz);
     world.add(ring);
     rings.push(ring);
   }
 
   // Phones: instanced bodies with instanced emissive screens.
-  const N = opts.compact ? 34 : 56;
+  // Phones: precise rounded metal frames, every one upright and facing outward like a tiled globe.
+  const N = opts.compact ? 30 : 44;
   const positions = fibonacciSphere(N, 3.1);
-  const bodyGeo = new RoundedBoxGeometry(0.34, 0.66, 0.06, 4, 0.06);
-  const bodyMat = new THREE.MeshPhysicalMaterial({ color: CHARCOAL, metalness: 0.7, roughness: 0.28, clearcoat: 0.8, clearcoatRoughness: 0.2 });
+  const bodyGeo = new RoundedBoxGeometry(0.4, 0.8, 0.05, 6, 0.06);
+  const bodyMat = new THREE.MeshPhysicalMaterial({ color: FRAME, metalness: 0.95, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 });
   const bodies = new THREE.InstancedMesh(bodyGeo, bodyMat, N);
-  const screenGeo = new THREE.PlaneGeometry(0.28, 0.58);
-  const screenMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+  const screenTex = screenTexture();
+  const screenGeo = new THREE.PlaneGeometry(0.36, 0.72);
+  const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, transparent: true, alphaTest: 0.5, toneMapped: false });
   const screens = new THREE.InstancedMesh(screenGeo, screenMat, N);
   const m = new THREE.Matrix4();
   const s = new THREE.Vector3(1, 1, 1);
   const tmp = new THREE.Object3D();
-  const SCREEN_OFFSET = new THREE.Matrix4().makeTranslation(0, 0, 0.032);
+  const SCREEN_OFFSET = new THREE.Matrix4().makeTranslation(0, 0, 0.027);
   const base: { pos: THREE.Vector3; quat: THREE.Quaternion; phase: number }[] = [];
   positions.forEach((p, i) => {
     tmp.position.copy(p);
-    tmp.lookAt(0, 0, 0);
-    tmp.rotateY(Math.PI); // screen faces outward
-    tmp.rotateZ((Math.random() - 0.5) * 0.5);
+    tmp.up.set(0, 1, 0);
+    tmp.lookAt(p.x * 2, p.y * 2, p.z * 2); // screen faces outward, kept upright
     tmp.updateMatrix();
     base.push({ pos: p.clone(), quat: tmp.quaternion.clone(), phase: Math.random() * Math.PI * 2 });
     bodies.setMatrixAt(i, tmp.matrix);
     m.compose(p, tmp.quaternion, s).multiply(SCREEN_OFFSET);
     screens.setMatrixAt(i, m);
-    screens.setColorAt(i, new THREE.Color("#3a3b41"));
+    screens.setColorAt(i, new THREE.Color("#9aa3b5"));
   });
   world.add(bodies, screens);
 
@@ -124,7 +176,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   positions.forEach((p, i) => linkPos.set([p.x * 0.97, p.y * 0.97, p.z * 0.97, p.x * 0.22, p.y * 0.22, p.z * 0.22], i * 6));
   const linkGeo = new THREE.BufferGeometry();
   linkGeo.setAttribute("position", new THREE.BufferAttribute(linkPos, 3));
-  const links = new THREE.LineSegments(linkGeo, new THREE.LineBasicMaterial({ color: PEACH, transparent: true, opacity: 0.13, blending: THREE.AdditiveBlending, depthWrite: false }));
+  const links = new THREE.LineSegments(linkGeo, new THREE.LineBasicMaterial({ color: PEACH, transparent: true, opacity: 0.07, blending: THREE.AdditiveBlending, depthWrite: false }));
   world.add(links);
 
   // Ambient dust.
@@ -136,7 +188,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   }
   const dustGeo = new THREE.BufferGeometry();
   dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
-  const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: PEACH, size: 0.025, transparent: true, opacity: 0.55, depthWrite: false }));
+  const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: PEACH, size: 0.018, transparent: true, opacity: 0.5, depthWrite: false }));
   world.add(dust);
 
   // Pulses travelling along links: out (task, peach) then back (result, orange).
@@ -145,12 +197,12 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   const P = opts.compact ? 10 : 18;
   for (let i = 0; i < P; i++) {
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: PEACH, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-    sprite.scale.setScalar(0.28);
+    sprite.scale.setScalar(0.22);
     world.add(sprite);
     pulses.push({ sprite, dev: Math.floor(Math.random() * N), t: Math.random(), speed: 0.35 + Math.random() * 0.35, back: Math.random() > 0.5 });
   }
   const flash = new Float32Array(N);
-  const idle = new THREE.Color("#3a3b41");
+  const idle = new THREE.Color("#9aa3b5");
   const col = new THREE.Color();
 
   // Interaction state.
@@ -210,7 +262,8 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
 
     core.rotation.set(t * 0.4, t * 0.55, 0);
     shell.rotation.set(-t * 0.15, t * 0.2, t * 0.05);
-    coreGlow.material.opacity = 0.7 + Math.sin(t * 2.2) * 0.12;
+    shell2.rotation.set(t * 0.1, -t * 0.12, 0);
+    coreGlow.material.opacity = 0.5 + Math.sin(t * 2.2) * 0.08;
     rings[0]!.rotation.z = 0.2 + t * 0.05;
     rings[1]!.rotation.z = -0.5 - t * 0.04;
     dust.rotation.y = -t * 0.02;
@@ -218,8 +271,8 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
     // Gentle bob on each phone.
     for (let i = 0; i < N; i++) {
       const bb = base[i]!;
-      const bob = Math.sin(t * 1.3 + bb.phase) * 0.05;
-      a.copy(bb.pos).multiplyScalar(1 + bob * 0.3);
+      const bob = Math.sin(t * 1.3 + bb.phase) * 0.012;
+      a.copy(bb.pos).multiplyScalar(1 + bob);
       m.compose(a, bb.quat, s);
       bodies.setMatrixAt(i, m);
       m.multiply(SCREEN_OFFSET);
@@ -247,7 +300,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       const e = p.t * p.t * (3 - 2 * p.t);
       if (p.back) p.sprite.position.lerpVectors(b, a, e);
       else p.sprite.position.lerpVectors(a, b, e);
-      p.sprite.scale.setScalar(0.18 + Math.sin(p.t * Math.PI) * 0.18);
+      p.sprite.scale.setScalar(0.12 + Math.sin(p.t * Math.PI) * 0.14);
     }
 
     renderer.render(scene, camera);
@@ -270,6 +323,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
         else mat?.dispose?.();
       });
       glowTex.dispose();
+      screenTex.dispose();
       envTex.dispose();
       pmrem.dispose();
       renderer.dispose();
