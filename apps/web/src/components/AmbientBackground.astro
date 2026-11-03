@@ -1,0 +1,166 @@
+---
+/**
+ * Site-wide animated backdrop, fixed behind every page and kept across page changes.
+ * Layers: slow orange/indigo aurora, a drifting dot grid, and a faint device network where
+ * small data packets travel between nodes. Nodes near the cursor light up and link to it,
+ * and the network shifts with scroll for depth. It runs at about 30 fps, pauses in hidden
+ * tabs, and draws one still frame when motion is off.
+ */
+---
+<div id="an-bg" aria-hidden="true" transition:persist>
+  <div class="anbg-aurora"><i></i><i></i><i></i></div>
+  <div class="anbg-grid"></div>
+  <canvas id="an-bg-canvas"></canvas>
+  <div class="anbg-vignette"></div>
+</div>
+
+<style is:global>
+  #an-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; contain: strict; }
+  .anbg-aurora { position: absolute; inset: -20%; opacity: 0.9; transform: translate3d(0, calc(var(--anbg-sy, 0) * -0.04px), 0); }
+  .anbg-aurora i { position: absolute; border-radius: 9999px; mix-blend-mode: screen; }
+  .anbg-aurora i:nth-child(1) { width: 46vmax; height: 46vmax; left: 52%; top: 8%; background: radial-gradient(circle, rgb(255 122 69 / 0.13), transparent 65%); animation: anbg-a 34s ease-in-out infinite alternate; }
+  .anbg-aurora i:nth-child(2) { width: 52vmax; height: 52vmax; left: -6%; top: 38%; background: radial-gradient(circle, rgb(96 120 255 / 0.09), transparent 65%); animation: anbg-b 42s ease-in-out infinite alternate; }
+  .anbg-aurora i:nth-child(3) { width: 36vmax; height: 36vmax; left: 30%; top: 70%; background: radial-gradient(circle, rgb(255 148 102 / 0.08), transparent 65%); animation: anbg-c 38s ease-in-out infinite alternate; }
+  @keyframes anbg-a { to { transform: translate(-22vw, 18vh) scale(1.15); } }
+  @keyframes anbg-b { to { transform: translate(28vw, -16vh) scale(0.9); } }
+  @keyframes anbg-c { to { transform: translate(-14vw, -30vh) scale(1.2); } }
+  .anbg-grid { position: absolute; inset: -40px; background-image: radial-gradient(rgb(236 238 243 / 0.07) 1px, transparent 1.2px); background-size: 32px 32px; -webkit-mask-image: radial-gradient(80% 70% at 50% 40%, #000, transparent 85%); mask-image: radial-gradient(80% 70% at 50% 40%, #000, transparent 85%); animation: anbg-grid 24s linear infinite; }
+  @keyframes anbg-grid { to { transform: translate3d(32px, 32px, 0); } }
+  #an-bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.2s ease; }
+  #an-bg-canvas.on { opacity: 1; }
+  .anbg-vignette { position: absolute; inset: 0; background: radial-gradient(130% 100% at 50% 30%, transparent 55%, rgb(5 6 9 / 0.55)); }
+</style>
+
+<script>
+  import { motionAllowed } from "../lib/motion";
+
+  type Node = { x: number; y: number; vx: number; vy: number; r: number; phone: boolean; ph: number; glow: number };
+  type Packet = { a: number; b: number; t: number; speed: number };
+
+  function start() {
+    const canvas = document.getElementById("an-bg-canvas") as HTMLCanvasElement | null;
+    const root = document.getElementById("an-bg");
+    if (!canvas || !root || canvas.dataset.ready) return;
+    canvas.dataset.ready = "1";
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const LINK = 150, LINK2 = LINK * LINK, DEPTH = 0.18, FRAME = 1000 / 30;
+    let W = 0, H = 0, dpr = 1, nodes: Node[] = [], packets: Packet[] = [];
+    let mx = -9999, my = -9999, sy = window.scrollY, raf = 0, last = 0, running = false;
+
+    const resize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const n = Math.round(Math.min(90, Math.max(28, (W * H) / 19000)));
+      nodes = Array.from({ length: n }, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
+        r: Math.random() < 0.2 ? 1.7 : 1.1, phone: Math.random() < 0.14, ph: Math.random() * 6.28, glow: 0,
+      }));
+      packets = [];
+    };
+
+    // Positions wrap around the screen, shifted by scroll for a slow parallax.
+    const px = (n: Node) => n.x;
+    const py = (n: Node) => (((n.y - sy * DEPTH) % H) + H) % H;
+
+    const frame = (now: number, still = false) => {
+      const t = now / 1000;
+      ctx.clearRect(0, 0, W, H);
+      for (const n of nodes) {
+        if (!still) { n.x += n.vx; n.y += n.vy; if (n.x < -20) n.x = W + 20; else if (n.x > W + 20) n.x = -20; }
+        n.glow *= 0.93;
+      }
+      // Links between nearby nodes; skip pairs split by the scroll wrap.
+      ctx.lineWidth = 1;
+      const P = nodes.map((n) => [px(n), py(n)] as const);
+      for (let i = 0; i < nodes.length; i++) {
+        const [ax, ay] = P[i]!;
+        for (let j = i + 1; j < nodes.length; j++) {
+          const [bx, by] = P[j]!;
+          const dx = ax - bx, dy = ay - by, d2 = dx * dx + dy * dy;
+          if (d2 > LINK2) continue;
+          const a = (1 - d2 / LINK2) * 0.11;
+          ctx.strokeStyle = `rgba(236,238,243,${a.toFixed(3)})`;
+          ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+          // Occasionally send a data packet along this link.
+          if (!still && packets.length < 14 && Math.random() < 0.0009) packets.push({ a: i, b: j, t: 0, speed: 0.008 + Math.random() * 0.012 });
+        }
+      }
+      // Cursor: nearby nodes light up and link to the pointer.
+      if (mx > -999) {
+        for (let i = 0; i < nodes.length; i++) {
+          const [ax, ay] = P[i]!;
+          const dx = ax - mx, dy = ay - my, d2 = dx * dx + dy * dy;
+          if (d2 > 200 * 200) continue;
+          const k = 1 - Math.sqrt(d2) / 200;
+          nodes[i]!.glow = Math.max(nodes[i]!.glow, k);
+          ctx.strokeStyle = `rgba(255,122,69,${(k * 0.35).toFixed(3)})`;
+          ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(mx, my); ctx.stroke();
+        }
+      }
+      // Packets: a small glowing dot runs along its link, then the far node flashes.
+      for (let k = packets.length - 1; k >= 0; k--) {
+        const pk = packets[k]!;
+        pk.t += pk.speed;
+        const A = P[pk.a]!, B = P[pk.b]!;
+        const dx = A[0] - B[0], dy = A[1] - B[1];
+        if (pk.t >= 1 || dx * dx + dy * dy > LINK2 * 1.4) { if (pk.t >= 1) nodes[pk.b]!.glow = 1; packets.splice(k, 1); continue; }
+        const x = A[0] + (B[0] - A[0]) * pk.t, y = A[1] + (B[1] - A[1]) * pk.t;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 9);
+        g.addColorStop(0, "rgba(255,180,140,0.95)"); g.addColorStop(1, "rgba(255,122,69,0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 9, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = "rgba(255,122,69,0.28)";
+        ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(x, y); ctx.stroke();
+      }
+      // Nodes: dots, with a few tiny phones; lit ones turn orange.
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i]!, [x, y] = P[i]!;
+        const tw = 0.55 + Math.sin(t * 1.4 + n.ph) * 0.25;
+        const gl = n.glow;
+        if (gl > 0.05) {
+          const g = ctx.createRadialGradient(x, y, 0, x, y, 14);
+          g.addColorStop(0, `rgba(255,122,69,${(0.5 * gl).toFixed(3)})`); g.addColorStop(1, "rgba(255,122,69,0)");
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 14, 0, 6.283); ctx.fill();
+        }
+        ctx.fillStyle = gl > 0.05
+          ? `rgba(255,${Math.round(238 - 100 * gl)},${Math.round(243 - 160 * gl)},${(0.35 + 0.6 * gl).toFixed(3)})`
+          : `rgba(236,238,243,${(tw * 0.38).toFixed(3)})`;
+        if (n.phone) { ctx.beginPath(); ctx.roundRect(x - 2.5, y - 4.5, 5, 9, 1.4); ctx.fill(); }
+        else { ctx.beginPath(); ctx.arc(x, y, n.r, 0, 6.283); ctx.fill(); }
+      }
+    };
+
+    const loop = (now: number) => {
+      raf = 0;
+      if (!running) return;
+      if (now - last >= FRAME) { last = now; frame(now); }
+      raf = requestAnimationFrame(loop);
+    };
+    const play = () => {
+      const want = motionAllowed() && !document.hidden;
+      if (want && !running) { running = true; raf = requestAnimationFrame(loop); }
+      else if (!want) { running = false; cancelAnimationFrame(raf); raf = 0; frame(performance.now(), true); }
+    };
+
+    resize();
+    frame(performance.now(), true);
+    canvas.classList.add("on");
+    play();
+
+    let rt = 0;
+    window.addEventListener("resize", () => { clearTimeout(rt); rt = window.setTimeout(() => { resize(); if (!running) frame(performance.now(), true); }, 150); });
+    window.addEventListener("scroll", () => { sy = window.scrollY; root.style.setProperty("--anbg-sy", String(Math.round(sy))); if (!running) frame(performance.now(), true); }, { passive: true });
+    window.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") { mx = e.clientX; my = e.clientY; } }, { passive: true });
+    document.documentElement.addEventListener("pointerleave", () => { mx = my = -9999; });
+    document.addEventListener("visibilitychange", play);
+    window.addEventListener("an-motion", play);
+  }
+
+  // The backdrop persists across page changes, so it only needs to start once.
+  start();
+  document.addEventListener("astro:page-load", start);
+</script>

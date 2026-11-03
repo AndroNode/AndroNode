@@ -15,6 +15,7 @@ interface Props {
 const { title, description, intro = false, noindex = false } = Astro.props;
 const fullTitle = title === site.displayName ? `${site.displayName} — ${site.tagline}` : `${title} · ${site.displayName}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+import AmbientBackground from "../components/AmbientBackground.astro";
 ---
 <!doctype html>
 <html lang="en">
@@ -45,6 +46,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <body class="flex min-h-screen flex-col">
     <div id="fx-progress" aria-hidden="true" transition:persist></div>
     <div id="fx-cursor" aria-hidden="true" transition:persist></div>
+    <AmbientBackground />
     {intro && <FirstVisitIntro />}
     <Header />
     <main id="main" class="flex-1" transition:animate="fade">
