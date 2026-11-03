@@ -26,11 +26,6 @@ const raw: SiteConfig = {
     adminSafe: null,
   },
   social: { x: null, support: null },
-  docs: {
-    whitepaperPdf: "/docs/AndroNode_Whitepaper_v1.pdf",
-    whitepaperVersion: "1.0",
-    whitepaperDate: "2 November 2026",
-  },
   release: { status: "simulation", evidenceDate: null },
 };
 

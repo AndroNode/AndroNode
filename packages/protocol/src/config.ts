@@ -27,7 +27,6 @@ export const siteConfigSchema = z.object({
     adminSafe: evmAddress.nullable(),
   }),
   social: z.object({ x: z.string().url().nullable(), support: z.string().nullable() }),
-  docs: z.object({ whitepaperPdf: z.string(), whitepaperVersion: z.string(), whitepaperDate: z.string() }),
   release: z.object({
     status: z.enum(["simulation", "testnet", "mainnet"]),
     evidenceDate: z.string().nullable(),
