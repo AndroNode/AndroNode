@@ -17,7 +17,7 @@
     "CHAIN_ID": "84532",
     "USDC_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     "ESCROW_ADDRESS": "",
-    "ADMIN_ADDRESSES": "",
+    "ADMIN_ADDRESSES": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
     "SITE_ORIGIN": "https://andronode.workers.dev",
     "VERIFIER_MODE": "fixture",
     "ALLOW_MOCK_FUNDING": "true",

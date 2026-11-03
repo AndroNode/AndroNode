@@ -75,6 +75,23 @@ Order of operations:
 3. Set `ESCROW_ADDRESS` and `BASE_SEPOLIA_RPC_URL`, then re-run **Deploy to Cloudflare**. Set `ALLOW_MOCK_FUNDING=false` once real test USDC funding is working.
 4. Optional: run **Deploy verifier container**, then set `VERIFIER_MODE=container` and `VERIFIER_URL`.
 
+## Deploying without GitHub
+
+From a machine that can reach `api.cloudflare.com`:
+
+```bash
+export CLOUDFLARE_API_TOKEN=...   # from the environment or a secret store, never committed
+export CLOUDFLARE_ACCOUNT_ID=...
+export ADMIN_ADDRESSES=0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E
+./scripts/deploy-direct.sh
+```
+
+It builds, tests, provisions D1/R2/KV/Queues, migrates, deploys, creates the Worker secrets on first run and smoke-tests the URL.
+The script sets `SITE_ORIGIN` from the account's workers.dev subdomain, or from `SITE_ORIGIN` if you export one.
+
+The escrow contract is deployed from the browser at `/app/deploy` with the operator's own wallet, so no private key is handed to anyone.
+After that, rerun the script with `ESCROW_ADDRESS=0x...` so the API reads and settles against it.
+
 ## Mainnet readiness (not done, by design)
 
 - Independent audit of `AndroNodeEscrow.sol`; `deploy/base-mainnet.json` refuses to deploy without `AUDIT_COMMIT`.

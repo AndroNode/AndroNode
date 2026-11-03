@@ -8,8 +8,9 @@
     "address": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     "source": "Circle testnet USDC on Base Sepolia. Re-check against https://developers.circle.com/stablecoins/usdc-contract-addresses before deploying."
   },
-  "admin": null,
-  "operatorTreasury": null,
+  "admin": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
+  "operatorTreasury": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
   "maxOutstandingEscrowUnits": "500000000",
-  "maxHardCloseWindowSeconds": 1209600
+  "maxHardCloseWindowSeconds": 1209600,
+  "note": "Testnet uses a single EOA admin. Mainnet must use a 2-of-3 Safe."
 }
