@@ -56,6 +56,8 @@ import AmbientBackground from "../components/AmbientBackground.astro";
     <Footer />
     <script>
       import { initFx } from "../lib/fx";
+      import { initSmoothScroll } from "../lib/smooth";
+      initSmoothScroll();
       document.addEventListener("astro:page-load", initFx);
       window.addEventListener("an-motion", () => initFx());
     </script>

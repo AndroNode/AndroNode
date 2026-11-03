@@ -17,7 +17,7 @@
 <style is:global>
   #an-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; contain: strict; }
   .anbg-aurora { position: absolute; inset: -20%; opacity: 0.9; transform: translate3d(0, calc(var(--anbg-sy, 0) * -0.04px), 0); }
-  .anbg-aurora i { position: absolute; border-radius: 9999px; mix-blend-mode: screen; }
+  .anbg-aurora i { position: absolute; border-radius: 9999px; will-change: transform; }
   .anbg-aurora i:nth-child(1) { width: 46vmax; height: 46vmax; left: 52%; top: 8%; background: radial-gradient(circle, rgb(255 122 69 / 0.13), transparent 65%); animation: anbg-a 34s ease-in-out infinite alternate; }
   .anbg-aurora i:nth-child(2) { width: 52vmax; height: 52vmax; left: -6%; top: 38%; background: radial-gradient(circle, rgb(96 120 255 / 0.09), transparent 65%); animation: anbg-b 42s ease-in-out infinite alternate; }
   .anbg-aurora i:nth-child(3) { width: 36vmax; height: 36vmax; left: 30%; top: 70%; background: radial-gradient(circle, rgb(255 148 102 / 0.08), transparent 65%); animation: anbg-c 38s ease-in-out infinite alternate; }

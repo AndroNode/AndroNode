@@ -163,14 +163,13 @@ html[data-motion="off"] *::after {
 html.fx-ready [data-reveal] {
   opacity: 0;
   transform: translate3d(0, 28px, 0);
-  filter: blur(6px);
-  transition: opacity 900ms var(--ease-settle), transform 1000ms var(--ease-settle), filter 900ms var(--ease-settle), translate 400ms var(--ease-settle), box-shadow 400ms ease, border-color 400ms ease, background-color 300ms ease;
+  transition: opacity 900ms var(--ease-settle), transform 1000ms var(--ease-settle), translate 400ms var(--ease-settle), box-shadow 400ms ease, border-color 400ms ease, background-color 300ms ease;
   transition-delay: var(--fx-delay, 0ms);
 }
 html.fx-ready [data-reveal="left"] { transform: translate3d(-40px, 0, 0); }
 html.fx-ready [data-reveal="right"] { transform: translate3d(40px, 0, 0); }
 html.fx-ready [data-reveal="scale"] { transform: scale(0.94); }
-html.fx-ready [data-reveal].in { opacity: 1; transform: none; filter: none; }
+html.fx-ready [data-reveal].in { opacity: 1; transform: none; }
 
 .fx-word { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
 .fx-word-in { display: inline-block; }
@@ -256,7 +255,7 @@ html.fx-ready [data-draw].in path, html.fx-ready [data-draw].in line { stroke-da
 
 /* ───────── Interaction layer v2 ───────── */
 /* Soft light that follows the cursor across the dark page (desktop, motion on). */
-#fx-cursor { position: fixed; left: -300px; top: -300px; width: 600px; height: 600px; border-radius: 9999px; pointer-events: none; z-index: 1; opacity: 0; transition: opacity 600ms ease; background: radial-gradient(circle, rgb(255 122 69 / 0.09), transparent 62%); mix-blend-mode: screen; }
+#fx-cursor { position: fixed; left: -300px; top: -300px; width: 600px; height: 600px; border-radius: 9999px; pointer-events: none; z-index: 1; opacity: 0; transition: opacity 600ms ease; background: radial-gradient(circle, rgb(255 122 69 / 0.08), transparent 62%); will-change: transform; }
 #fx-cursor.on { opacity: 1; }
 @media (pointer: coarse) { #fx-cursor { display: none; } }
 
@@ -373,3 +372,9 @@ html.fx-ready [data-draw].in path, html.fx-ready [data-draw].in line { stroke-da
 .fx-ready .tl-item:not(.lit) .tl-chip { opacity: 0; transform: translateY(8px) scale(0.9); }
 .tl-build { background: linear-gradient(90deg, transparent, #ff7a45, #ffd2b8); animation: tl-build 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
 @keyframes tl-build { from { left: -35%; } to { left: 100%; } }
+
+/* Smooth scrolling (Lenis, see src/lib/smooth.ts). */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }

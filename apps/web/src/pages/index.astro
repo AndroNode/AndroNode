@@ -442,7 +442,13 @@ const contours = (() => {
     onScroll();
     // Gate meter: click a segment to jump to its stage; the stage nearest the middle is outlined.
     const segs = [...document.querySelectorAll<HTMLElement>("[data-tl-go]")];
-    segs.forEach((b) => b.addEventListener("click", () => document.getElementById(`tl-${b.dataset.tlGo}`)?.scrollIntoView({ behavior: "smooth", block: "center" })));
+    segs.forEach((b) => b.addEventListener("click", () => {
+      const el = document.getElementById(`tl-${b.dataset.tlGo}`);
+      if (!el) return;
+      const lenis = (window as Window & { __lenis?: { scrollTo: (t: HTMLElement, o: { offset: number }) => void } | null }).__lenis;
+      if (lenis) lenis.scrollTo(el, { offset: -(innerHeight - el.offsetHeight) / 2 });
+      else el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }));
     const near = new IntersectionObserver((entries) => {
       for (const e of entries) if (e.isIntersecting) { const i = (e.target as HTMLElement).id.slice(3); segs.forEach((b) => b.classList.toggle("on", b.dataset.tlGo === i)); }
     }, { rootMargin: "-45% 0px -45% 0px" });
