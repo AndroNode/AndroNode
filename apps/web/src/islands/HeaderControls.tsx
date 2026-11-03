@@ -134,7 +134,7 @@ function WalletPreview({ site }: { site: SiteConfig }) {
           spellCheck={false}
         />
         {error && <p id="wallet-err" className="mt-2 text-sm text-bad">{error}</p>}
-        <p className="mt-3 text-xs text-charcoal-60">Testnet features with a real wallet ({site.chain.name}) live in the Testnet App once it is enabled.</p>
+        <p className="mt-3 text-xs text-charcoal-60">Real wallet sign-in with test funds on {site.chain.name} lives in the <a href="/app" className="underline">Testnet app</a>.</p>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           {label && <button type="button" className="min-h-11 rounded-full border border-charcoal/30 px-4 text-sm" onClick={() => { setLabel(null); setValue(""); setOpen(false); }}>Disconnect</button>}
           <button type="button" className="min-h-11 rounded-full border border-charcoal/30 px-4 text-sm" onClick={() => setOpen(false)}>Cancel</button>

@@ -1,0 +1,13 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import CustomerApp from "../../islands/app/CustomerApp";
+---
+<Layout title="Customer dashboard" description="Buy verified embeddings on the AndroNode testnet. Test funds only." noindex>
+  <section class="mx-auto max-w-7xl px-4 pb-4 pt-10 sm:px-6">
+    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60"><a href="/app" class="hover:underline">Testnet app</a> · Customer dashboard</p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Buy verified embeddings</h1>
+  </section>
+  <section class="mx-auto max-w-7xl px-4 sm:px-6">
+    <CustomerApp client:only="react" />
+  </section>
+</Layout>

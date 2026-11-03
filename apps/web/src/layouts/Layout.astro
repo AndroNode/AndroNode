@@ -10,8 +10,9 @@ interface Props {
   title: string;
   description: string;
   intro?: boolean;
+  noindex?: boolean;
 }
-const { title, description, intro = false } = Astro.props;
+const { title, description, intro = false, noindex = false } = Astro.props;
 const fullTitle = title === site.displayName ? `${site.displayName} — ${site.tagline}` : `${title} · ${site.displayName}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -22,6 +23,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="any" />

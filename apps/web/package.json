@@ -11,15 +11,16 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@andronode/protocol": "workspace:*",
     "@andronode/fixtures": "workspace:*",
+    "@andronode/protocol": "workspace:*",
     "@astrojs/react": "^4.2.0",
     "@astrojs/sitemap": "^3.2.1",
     "@tailwindcss/vite": "^4.0.6",
     "astro": "^5.2.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwindcss": "^4.0.6"
+    "tailwindcss": "^4.0.6",
+    "viem": "^2.57.15"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

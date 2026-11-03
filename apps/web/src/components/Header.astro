@@ -9,8 +9,10 @@ const nav = [
   { href: "/rewards", label: "Rewards" },
   { href: "/how-it-works", label: "How it works" },
   { href: "/docs", label: "Docs" },
+  { href: "/app", label: "Testnet app" },
 ];
 const path = Astro.url.pathname.replace(/\/$/, "").replace(/\.html$/, "") || "/";
+const active = (href: string) => path === href || (href === "/app" && path.startsWith("/app"));
 ---
 <header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-charcoal focus:px-3 focus:py-2 focus:text-paper">Skip to content</a>
@@ -28,7 +30,7 @@ const path = Astro.url.pathname.replace(/\/$/, "").replace(/\.html$/, "") || "/"
       <ul class="flex items-center gap-0.5">
         {nav.map((n) => (
           <li>
-            <a href={n.href} aria-current={path === n.href ? "page" : undefined} class:list={["whitespace-nowrap rounded-full px-3 py-2 text-sm hover:bg-peach", path === n.href && "bg-peach font-bold"]}>{n.label}</a>
+            <a href={n.href} aria-current={active(n.href) ? "page" : undefined} class:list={["whitespace-nowrap rounded-full px-3 py-2 text-sm hover:bg-peach", active(n.href) && "bg-peach font-bold"]}>{n.label}</a>
           </li>
         ))}
       </ul>
@@ -44,7 +46,7 @@ const path = Astro.url.pathname.replace(/\/$/, "").replace(/\.html$/, "") || "/"
       <div class="absolute right-0 top-14 w-[min(92vw,22rem)] rounded-[var(--radius-card)] border border-line bg-paper p-3 shadow-xl">
         <ul class="grid gap-1">
           {nav.map((n) => (
-            <li><a href={n.href} aria-current={path === n.href ? "page" : undefined} class:list={["block rounded-lg px-3 py-3 hover:bg-peach", path === n.href && "bg-peach font-bold"]}>{n.label}</a></li>
+            <li><a href={n.href} aria-current={active(n.href) ? "page" : undefined} class:list={["block rounded-lg px-3 py-3 hover:bg-peach", active(n.href) && "bg-peach font-bold"]}>{n.label}</a></li>
           ))}
         </ul>
       </div>

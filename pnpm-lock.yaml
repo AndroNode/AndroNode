@@ -68,6 +68,9 @@ importers:
       tailwindcss:
         specifier: ^4.0.6
         version: 4.3.4
+      viem:
+        specifier: ^2.57.15
+        version: 2.57.15(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.4
