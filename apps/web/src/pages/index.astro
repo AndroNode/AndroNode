@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import SessionCard from "../islands/SessionCard";
 import HeroScene from "../islands/HeroScene";
+import FlowPipeline from "../components/FlowPipeline.astro";
 import site from "../site.config";
 
 const story = [
@@ -43,14 +44,19 @@ const story = [
 ];
 
 const facts = ["64 records per task", "384-number vectors", "256 tokens per record", "Every result recomputed", "75% to contributors", "Stop any time, never penalised", "Leases expire in 120 s", "External power and Wi-Fi only", "Paid only for accepted work"];
-const bars = [38, 62, 45, 80, 55, 92, 40, 70, 58, 86, 48, 74, 66, 95, 52, 78, 44, 68];
-const flow = [
-  { t: "Device", d: "Plugged in, on Wi-Fi, owner-set limits." },
-  { t: "Lease", d: "A complete small task, 120 s to finish." },
-  { t: "Compute", d: "Embeddings run on the phone's CPU." },
-  { t: "Verify", d: "A trusted verifier recomputes every vector." },
-  { t: "Paid", d: "Accepted records split 75 / 25." },
+const guards = [
+  { k: "power", t: "External power and unmetered Wi-Fi only", d: "Work only starts while the phone is charging and on an unmetered network. Unplug it and no new task is taken.", icon: '<path d="M9 2v5M15 2v5M6 7h12v4a6 6 0 0 1-12 0zM12 17v5"/>', meter: '<i></i><i></i><i></i><i></i>' },
+  { k: "heat", t: "Battery and heat limits pause work automatically", d: "The owner sets the battery floor and temperature ceiling. Crossing either one pauses the session.", icon: '<path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/><path d="M12 18v-6"/>', meter: '<svg viewBox="0 0 64 22" width="64" height="22"><path d="M0 7h64" stroke="#ff9466" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/><polyline class="sg-line" points="0,19 8,18 16,17 24,15 32,14 40,11 48,9 54,8 60,14 64,17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" pathLength="100"/></svg>' },
+  { k: "earn", t: "Earn only for verified results, never for idle time", d: "Idle time, uptime or holding a token earns nothing. Only records the verifier accepts are paid.", icon: '<path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>', meter: '<span class="sg-idle">idle $0</span><span class="sg-ok">✓ paid</span>' },
 ];
+const stages = [
+  { t: "Engineering prototype", d: "Android client, one embedding profile, coordinator, reference verifier, testnet settlement. 20 supervised devices.", st: "In progress on testnet", chips: ["Android client", "Embedding profile", "Coordinator", "Reference verifier", "Testnet settlement", "20 devices"] },
+  { t: "Closed network pilot", d: "About 100 approved devices, one million reference-checked records over seven days.", st: "Gated", chips: ["~100 devices", "1M checked records", "7 days"] },
+  { t: "Limited paid beta", d: "Audited escrow, published parameters, at least three independent paying customers, low exposure caps.", st: "Gated", chips: ["Audited escrow", "Published parameters", "3+ paying customers", "Low exposure caps"] },
+  { t: "Expansion cohorts", d: "Android TV boxes, more profiles and accelerators, each tested separately.", st: "Gated", chips: ["Android TV boxes", "More profiles", "Accelerators"] },
+];
+const lock = '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
+const bars = [38, 62, 45, 80, 55, 92, 40, 70, 58, 86, 48, 74, 66, 95, 52, 78, 44, 68];
 // Topographic contour lines behind the hero (computed at build time).
 const contours = (() => {
   const out: { d: string; orange: boolean }[] = [];
@@ -293,26 +299,7 @@ const contours = (() => {
   </section>
 
   <!-- FLOW -->
-  <section class="mx-auto max-w-7xl px-4 py-24 sm:px-6" aria-labelledby="flow-h">
-    <p data-reveal class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">One task, end to end</p>
-    <h2 id="flow-h" data-split class="mt-3 max-w-3xl text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">From an idle phone to a checked, paid result.</h2>
-    <div class="relative mt-16">
-      <div aria-hidden="true" class="absolute inset-x-[4%] top-7 hidden h-px bg-line lg:block">
-        <span class="flow-runner"></span>
-      </div>
-      <ol data-stagger class="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        {flow.map((f, i) => (
-          <li data-spotlight class="group relative rounded-[20px] border border-transparent p-3 transition-colors hover:border-line hover:bg-white/60">
-            <span class="flow-node relative grid size-14 place-items-center rounded-2xl border bg-paper font-mono text-sm font-bold transition-transform duration-300 group-hover:-translate-y-1" style={`--i:${i}`}>
-              <span class="relative">0{i + 1}</span>
-            </span>
-            <h3 class="mt-5 text-xl font-bold">{f.t}</h3>
-            <p class="mt-1 text-sm leading-relaxed text-charcoal-80">{f.d}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
+  <FlowPipeline />
 
   <!-- SESSION -->
   <section class="zone-dark relative overflow-hidden border-y border-white/5 bg-charcoal text-paper" aria-labelledby="session-h">
@@ -323,15 +310,35 @@ const contours = (() => {
         <p data-reveal class="font-mono text-xs uppercase tracking-[0.18em] text-paper/50">Watch one session</p>
         <h2 id="session-h" data-split class="mt-3 text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Visible, limited, and yours to stop.</h2>
         <p data-reveal class="mt-6 max-w-lg text-lg text-paper/70">A hypothetical phone walks through a session: ready, leased, working, verifying, accepted. Press stop at any point. Stopping is never penalised.</p>
-        <ul data-stagger class="mt-8 grid max-w-md gap-3 text-sm text-paper/80">
-          <li class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-orange/20 text-orange">●</span> External power and unmetered Wi-Fi only</li>
-          <li class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-orange/20 text-orange">●</span> Battery and heat limits pause work automatically</li>
-          <li class="flex items-center gap-3"><span class="grid size-6 place-items-center rounded-full bg-orange/20 text-orange">●</span> Earn only for verified results, never for idle time</li>
+        <ul data-stagger class="mt-8 grid max-w-lg gap-3">
+          {guards.map((g) => (
+            <li data-spotlight tabindex="0" class="sg-card group relative flex gap-4 rounded-2xl border border-snow/[0.07] bg-snow/[0.03] p-4 outline-none backdrop-blur-sm">
+              <span class="sg-ico relative grid size-11 shrink-0 place-items-center rounded-xl bg-orange/15 text-orange">
+                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={g.icon} />
+              </span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-3">
+                  <p class="text-[0.95rem] font-bold leading-snug text-paper">{g.t}</p>
+                  <span aria-hidden="true" class={`sg-meter sg-${g.k} ml-auto shrink-0`} set:html={g.meter} />
+                </div>
+                <div class="sg-more grid"><p class="min-h-0 overflow-hidden text-sm leading-relaxed text-paper/60">{g.d}</p></div>
+              </div>
+            </li>
+          ))}
         </ul>
       </div>
-      <div data-reveal="scale" class="glow-border rounded-[26px] text-charcoal">
-        <div class="rounded-[26px] bg-paper/[0.06] p-2 ring-1 ring-paper/10 shadow-[0_40px_120px_-30px_rgba(255,122,69,0.55)]">
-          <SessionCard client:visible />
+      <div class="relative">
+        <div aria-hidden="true" class="sess-radar"><i></i><i></i><i></i><b></b></div>
+        <div data-reveal="scale" data-tilt="4" class="glow-border relative rounded-[26px] text-charcoal transition-transform duration-300">
+          <div class="rounded-[26px] bg-paper/[0.06] p-2 ring-1 ring-paper/10 shadow-[0_40px_120px_-30px_rgba(255,122,69,0.55)]">
+            <SessionCard client:visible />
+          </div>
+        </div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 hidden lg:block">
+          <span class="sess-chip" style="--x:-7%;--y:-9%;--d:0s"><i class="bg-orange"></i>CPU · 2 threads</span>
+          <span class="sess-chip" style="--x:72%;--y:-11%;--d:-1.6s"><i class="bg-ok"></i>Battery <b id="sess-batt">92</b>%</span>
+          <span class="sess-chip" style="--x:-4%;--y:103%;--d:-3.1s"><i class="bg-warn"></i><b id="sess-temp">31.4</b> °C · limit 40</span>
+          <span class="sess-chip" style="--x:68%;--y:104%;--d:-4.4s"><i class="bg-orange"></i>Wi-Fi · unmetered</span>
         </div>
       </div>
     </div>
@@ -341,23 +348,41 @@ const contours = (() => {
   <section class="mx-auto max-w-7xl px-4 py-24 sm:px-6" aria-labelledby="status-h">
     <div class="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
       <div class="lg:sticky lg:top-28 lg:self-start">
-        <h2 id="status-h" data-split class="text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Where it stands today.</h2>
+        <p data-reveal class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Release status</p>
+        <h2 id="status-h" data-split class="mt-3 text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Where it stands today.</h2>
         <p data-reveal class="mt-5 text-lg text-charcoal-80">The protocol describes a design baseline, not an operating service. Releases advance only when evidence gates pass, never by calendar date.</p>
-        <a href="/docs#status" data-reveal class="mt-7 inline-flex min-h-11 items-center font-bold underline decoration-orange decoration-2 underline-offset-4">Read the release status →</a>
+        <div data-reveal class="mt-8 rounded-2xl border border-line bg-white/60 p-4">
+          <div class="flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-charcoal-60"><span>Gates</span><span><span class="text-orange">1</span> of 4 in progress</span></div>
+          <div id="tl-meter" class="mt-3 grid grid-cols-4 gap-2">
+            {stages.map((s, i) => (
+              <button type="button" data-tl-go={i} class:list={["tl-seg group relative h-12 overflow-hidden rounded-xl border text-left", i === 0 ? "tl-seg-live border-orange/60" : "border-line"]} aria-label={`Go to stage ${i + 1}: ${s.t}`}>
+                {i === 0 ? <span aria-hidden="true" class="tl-stripes absolute inset-0"></span> : <svg aria-hidden="true" viewBox="0 0 24 24" class="tl-lock absolute right-2 top-2 size-3.5 text-charcoal-60" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={lock} />}
+                <span class="absolute bottom-1.5 left-2 font-mono text-[11px] font-bold">0{i + 1}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <a href="/docs#status" data-reveal class="group mt-7 inline-flex min-h-11 items-center gap-2 font-bold underline decoration-orange decoration-2 underline-offset-4">Read the release status <span class="inline-block transition-transform duration-300 group-hover:translate-x-1.5">→</span></a>
       </div>
-      <ol id="timeline" data-stagger class="relative grid gap-4 pl-8" aria-label="Roadmap stages">
-        <span aria-hidden="true" class="tl-rail"></span>
-        {[
-          ["Engineering prototype", "Android client, one embedding profile, coordinator, reference verifier, testnet settlement. 20 supervised devices.", "In progress on testnet"],
-          ["Closed network pilot", "About 100 approved devices, one million reference-checked records over seven days.", "Gated"],
-          ["Limited paid beta", "Audited escrow, published parameters, at least three independent paying customers, low exposure caps.", "Gated"],
-          ["Expansion cohorts", "Android TV boxes, more profiles and accelerators, each tested separately.", "Gated"],
-        ].map(([t, d, st], i) => (
-          <li data-spotlight class:list={["tl-item relative rounded-[20px] border border-line bg-white/60 p-5", i === 0 && "lit"]}>
-            <span class="tl-dot absolute -left-[41px] top-6 grid size-5 place-items-center rounded-full border-2 border-line bg-paper">{i === 0 && <span class="ping absolute inset-0 rounded-full bg-orange/40"></span>}</span>
-            <p class="font-mono text-xs text-charcoal-60">Stage {i + 1}</p>
-            <p class="mt-1 text-lg font-bold">{t} <span class={`ml-2 rounded-full px-2 py-0.5 align-middle font-mono text-[11px] font-normal ${i === 0 ? "bg-orange/15 text-orange-deep" : "bg-peach"}`}>{st}</span></p>
-            <p class="mt-1 text-sm text-charcoal-80">{d}</p>
+      <ol id="timeline" class="relative grid gap-4 pl-8" aria-label="Roadmap stages">
+        <span aria-hidden="true" class="tl-rail"><i></i></span>
+        {stages.map((s, i) => (
+          <li id={`tl-${i}`} data-reveal="left" data-spotlight style={`--fx-delay:${i * 90}ms`} class:list={["tl-item group relative scroll-mt-32 rounded-[22px] border border-line bg-white/60 p-5 sm:p-6", i === 0 && "lit tl-live glow-border"]}>
+            <span aria-hidden="true" class="tl-num">0{i + 1}</span>
+            <span class="tl-dot absolute -left-[41px] top-7 grid size-5 place-items-center rounded-full border-2 border-line bg-paper">{i === 0 && <span class="ping absolute inset-0 rounded-full bg-orange/40"></span>}</span>
+            <div class="relative flex flex-wrap items-center gap-2">
+              <p class="font-mono text-xs text-charcoal-60">Stage {i + 1}</p>
+              <span class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-[11px] ${i === 0 ? "bg-orange/15 text-orange-deep" : "bg-peach text-charcoal-80"}`}>
+                {i === 0 ? <span class="relative inline-flex size-1.5"><span class="ping absolute inset-0 rounded-full bg-orange"></span><span class="relative size-1.5 rounded-full bg-orange"></span></span> : <svg aria-hidden="true" viewBox="0 0 24 24" class="tl-lock size-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" set:html={lock} />}
+                {s.st}
+              </span>
+            </div>
+            <p class="relative mt-2 text-xl font-bold sm:text-2xl">{s.t}</p>
+            <p class="relative mt-1.5 max-w-xl text-sm text-charcoal-80">{s.d}</p>
+            <ul class="relative mt-4 flex flex-wrap gap-2" aria-label="What this stage needs">
+              {s.chips.map((c, j) => <li class:list={["tl-chip rounded-full border px-2.5 py-1 font-mono text-[11px]", i === 0 ? "border-orange/35 bg-orange/[0.08] text-snow" : "border-line text-charcoal-80"]} style={`--j:${j}`}>{c}</li>)}
+            </ul>
+            {i === 0 && <div aria-hidden="true" class="relative mt-5 h-1.5 overflow-hidden rounded-full bg-snow/[0.06]"><span class="tl-build absolute inset-y-0 left-0 w-1/3 rounded-full"></span></div>}
           </li>
         ))}
       </ol>
@@ -415,7 +440,24 @@ const contours = (() => {
     };
     addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    document.addEventListener("astro:before-swap", () => { io.disconnect(); removeEventListener("scroll", onScroll); }, { once: true });
+    // Gate meter: click a segment to jump to its stage; the stage nearest the middle is outlined.
+    const segs = [...document.querySelectorAll<HTMLElement>("[data-tl-go]")];
+    segs.forEach((b) => b.addEventListener("click", () => document.getElementById(`tl-${b.dataset.tlGo}`)?.scrollIntoView({ behavior: "smooth", block: "center" })));
+    const near = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { const i = (e.target as HTMLElement).id.slice(3); segs.forEach((b) => b.classList.toggle("on", b.dataset.tlGo === i)); }
+    }, { rootMargin: "-45% 0px -45% 0px" });
+    items.forEach((it) => near.observe(it));
+    // Session telemetry chips drift a little, like a live readout (simulated).
+    const temp = document.getElementById("sess-temp");
+    const batt = document.getElementById("sess-batt");
+    let tv = 31.4, bv = 92;
+    const jitter = setInterval(() => {
+      if (document.hidden || !temp) return;
+      tv = Math.max(30.6, Math.min(33.2, tv + (Math.random() - 0.48) * 0.3));
+      temp.textContent = tv.toFixed(1);
+      if (batt && Math.random() < 0.08) { bv = bv >= 96 ? 92 : bv + 1; batt.textContent = String(bv); }
+    }, 1100);
+    document.addEventListener("astro:before-swap", () => { io.disconnect(); near.disconnect(); clearInterval(jitter); removeEventListener("scroll", onScroll); }, { once: true });
   }
   document.addEventListener("astro:page-load", initStory);
 </script>
