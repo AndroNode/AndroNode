@@ -17,6 +17,8 @@ export interface Env {
   CONFIRMATIONS: string;
   SESSION_SECRET: string;
   COORDINATOR_KEY_JWK: string;
+  RL_AUTH?: RateLimit;
+  RL_WRITE?: RateLimit;
   BASE_RPC_URL?: string;
   VERIFIER_URL?: string;
   VERIFIER_TOKEN?: string;

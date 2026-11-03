@@ -26,7 +26,7 @@ const active = (href: string) => path === href || (href === "/app" && path.start
     <a href="/" class="shrink-0" aria-label={`${site.displayName} home`}>
       <img src="/brand/AndroNode_Horizontal_charcoal.svg" alt={site.displayName} width="168" height="44" class="h-8 w-auto sm:h-11" />
     </a>
-    <nav aria-label="Main" class="hidden flex-1 justify-center lg:flex">
+    <nav aria-label="Main" class="hidden flex-1 justify-center xl:flex">
       <ul class="flex items-center gap-0.5">
         {nav.map((n) => (
           <li>
@@ -35,10 +35,10 @@ const active = (href: string) => path === href || (href === "/app" && path.start
         ))}
       </ul>
     </nav>
-    <div class="ml-auto lg:ml-0">
+    <div class="ml-auto xl:ml-0">
       <HeaderControls client:load site={site} part="wallet" />
     </div>
-    <details class="group relative lg:hidden">
+    <details class="group relative xl:hidden">
       <summary class="grid size-11 cursor-pointer list-none place-items-center rounded-full border border-charcoal/20 [&::-webkit-details-marker]:hidden" aria-label="Menu">
         <span aria-hidden="true" class="text-lg group-open:hidden">☰</span>
         <span aria-hidden="true" class="hidden text-xl group-open:inline">×</span>

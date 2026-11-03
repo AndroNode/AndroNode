@@ -23,6 +23,19 @@ app.use("/v1/*", async (c, next) => {
   c.header("cache-control", c.res.headers.get("cache-control") ?? "no-store");
 });
 
+/** Per-IP rate limits: strict for sign-in, generous for other writes (device writes are keyed by device). */
+app.use("/v1/*", async (c, next) => {
+  if (c.req.method !== "GET") {
+    const ip = c.req.header("cf-connecting-ip") ?? "local";
+    const limiter = c.req.path.startsWith("/v1/auth/") ? c.env.RL_AUTH : c.env.RL_WRITE;
+    const key = c.req.header("x-an-device") ?? ip;
+    if (limiter && !(await limiter.limit({ key })).success) {
+      return c.json({ error: { code: "RATE_LIMITED", message: "Too many requests. Wait a minute and try again." } }, 429, { "retry-after": "60" });
+    }
+  }
+  await next();
+});
+
 const v1 = new Hono<AppEnv>();
 v1.route("/", pub);
 v1.route("/auth", auth);
