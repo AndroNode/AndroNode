@@ -1,40 +1,48 @@
 ---
 /**
- * First-visit intro (PRD FR-03): a short cinematic of devices joining a network around a checked result.
- * Shows on every visit to the homepage, can be skipped at once (button or Esc), and always releases the page within 10 seconds.
- * The progress line counts real asset readiness (fonts, logo, page load), never a timed fake percentage.
- * With motion off it is a still card that fades away.
+ * Homepage intro (PRD FR-03): a short cinematic in three beats that match the title lines.
+ *   "A device."         phones fly in from the edges and lock into a turning globe
+ *   "A small task."     tasks pulse out from the core and results travel back
+ *   "A checked result." a shockwave lights every device and a check mark lands
+ * It then zooms through the globe while a ring of light opens onto the hero.
+ * Shows on every full load of the homepage, can be skipped at once (button or Esc), and always
+ * releases the page within 10 seconds. The progress line counts real asset readiness (fonts, logo,
+ * page load), never a timed fake percentage. With motion off it is a still card that fades away.
  */
 ---
 <div id="an-intro" hidden role="dialog" aria-modal="true" aria-labelledby="an-intro-title">
   <canvas id="an-intro-canvas" aria-hidden="true"></canvas>
   <div class="an-intro-vignette" aria-hidden="true"></div>
-  <div class="an-curtain an-curtain-top" aria-hidden="true"></div>
-  <div class="an-curtain an-curtain-bottom" aria-hidden="true"></div>
+  <div class="an-intro-grain" aria-hidden="true"></div>
+  <div class="an-intro-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
+  <p class="an-hud an-hud-tl" aria-hidden="true"><span class="an-hud-dot"></span>AndroNode · protocol simulation</p>
+  <p class="an-hud an-hud-br" aria-hidden="true"><span id="an-intro-tc">00:00.00</span></p>
   <button id="an-intro-skip" type="button">Skip intro <kbd>Esc</kbd></button>
 
   <div class="an-intro-center">
     <div class="an-intro-mark">
-      <svg viewBox="0 0 1000 800" width="112" height="90" aria-hidden="true">
+      <span class="an-intro-halo" aria-hidden="true"></span>
+      <svg viewBox="-20 -20 1040 840" width="120" height="97" aria-hidden="true">
         <defs>
           <linearGradient id="an-intro-grad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#FCF7F2" />
-            <stop offset="1" stop-color="#FBE0CF" />
+            <stop offset="1" stop-color="#FFD2B8" />
           </linearGradient>
-          <mask id="an-intro-mask"><rect width="1000" height="800" fill="white"/><rect class="blink-eye" x="194" y="292" width="230" height="110" fill="black"/><rect class="blink-eye" x="574" y="430" width="232" height="110" fill="black"/></mask>
+          <mask id="an-intro-mask"><rect x="-20" y="-20" width="1040" height="840" fill="white"/><rect class="blink-eye" x="194" y="292" width="230" height="110" fill="black"/><rect class="blink-eye" x="574" y="430" width="232" height="110" fill="black"/></mask>
         </defs>
-        <path d="M0 240 124 108 848 0 1000 136 1000 628 806 628 806 800 0 800Z" fill="url(#an-intro-grad)" mask="url(#an-intro-mask)"/>
+        <path class="an-mark-fill" d="M0 240 124 108 848 0 1000 136 1000 628 806 628 806 800 0 800Z" fill="url(#an-intro-grad)" mask="url(#an-intro-mask)"/>
+        <path class="an-mark-line" d="M0 240 124 108 848 0 1000 136 1000 628 806 628 806 800 0 800Z" fill="none" stroke="#ff7a45" stroke-width="14" stroke-linejoin="round" pathLength="100"/>
       </svg>
-      <span class="an-intro-halo" aria-hidden="true"></span>
+      <svg class="an-intro-check" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" /><path d="m14 24.5 7 7 13-14" pathLength="100" /></svg>
     </div>
     <p class="an-intro-word" aria-hidden="true">
-      {"AndroNode".split("").map((ch, i) => <span style={`--i:${i}`}>{ch}</span>)}
+      {"AndroNode".split("").map((ch) => <span data-ch={ch}>{ch}</span>)}
     </p>
     <h1 id="an-intro-title" class="an-intro-lines">
-      <span class="an-line" style="--d:0"><span>A device.</span></span>
-      <span class="an-line" style="--d:1"><span>A small task.</span></span>
-      <span class="an-line" style="--d:2"><span class="an-accent">A checked result.</span></span>
+      <span class="an-line an-l0"><span>A device.</span></span>
+      <span class="an-line an-l1"><span>A small task.</span></span>
+      <span class="an-line an-l2"><span class="an-accent">A checked result.</span></span>
     </h1>
     <p class="an-intro-sub">Everyday Android devices could take short AI tasks, under limits their owners set. Everything on this site is a labelled simulation.</p>
   </div>
@@ -49,48 +57,80 @@
 </div>
 
 <style>
-  #an-intro { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: transparent; color: #fcf7f2; overflow: hidden; }
+  #an-intro { --hole: 0px; position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: #0b0d12; color: #fcf7f2; overflow: hidden; }
   #an-intro[hidden] { display: none; }
+  /* The exit opens a hole in the overlay from the globe's centre. */
+  #an-intro.leaving { -webkit-mask: radial-gradient(circle at 50% var(--cy, 40%), transparent var(--hole), #000 calc(var(--hole) + 1px)); mask: radial-gradient(circle at 50% var(--cy, 40%), transparent var(--hole), #000 calc(var(--hole) + 1px)); }
   #an-intro-canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
-  .an-intro-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(60% 55% at 50% 45%, rgb(240 120 67 / 0.16), transparent 70%), radial-gradient(120% 90% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.55)); }
-  .an-curtain { position: absolute; left: 0; right: 0; height: 50.5%; background: #0b0d12; z-index: 0; pointer-events: none; transition: transform 1100ms cubic-bezier(0.76, 0, 0.24, 1); }
-  .an-curtain-top { top: 0; }
-  .an-curtain-bottom { bottom: 0; }
-  #an-intro.leaving #an-intro-canvas, #an-intro.leaving .an-intro-vignette { opacity: 0; transition: opacity 500ms ease; }
-  #an-intro.leaving .an-curtain-top { transform: translateY(-101%); }
-  #an-intro.leaving .an-curtain-bottom { transform: translateY(101%); }
-  #an-intro.leaving .an-intro-center, #an-intro.leaving .an-intro-foot, #an-intro.leaving #an-intro-skip { opacity: 0; transform: scale(1.06); filter: blur(8px); transition: all 600ms cubic-bezier(0.7, 0, 0.84, 0); }
+  .an-intro-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(36% 18% at 50% 76%, rgb(11 13 18 / 0.9), transparent 85%), radial-gradient(50% 45% at 50% 40%, rgb(255 122 69 / 0.14), transparent 70%), radial-gradient(120% 90% at 50% 50%, transparent 50%, rgb(0 0 0 / 0.7)); }
+  .an-intro-grain { position: absolute; inset: -50%; z-index: 1; pointer-events: none; opacity: 0.07; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: an-grain 0.8s steps(4) infinite; }
+  @keyframes an-grain { 25% { transform: translate(-3%, 2%); } 50% { transform: translate(2%, -3%); } 75% { transform: translate(-2%, -1%); } }
 
-  #an-intro-skip { position: absolute; top: max(1rem, env(safe-area-inset-top)); right: 1rem; z-index: 4; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid rgb(252 247 242 / 0.25); color: #fcf7f2; font-size: 0.875rem; font-weight: 700; background: rgb(252 247 242 / 0.04); backdrop-filter: blur(6px); }
-  #an-intro-skip:hover { background: rgb(252 247 242 / 0.12); }
+  .an-intro-frame i { position: absolute; z-index: 2; width: 28px; height: 28px; border: 0 solid rgb(252 247 242 / 0.35); opacity: 0; animation: an-corner 700ms cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards; }
+  .an-intro-frame i:nth-child(1) { top: 1.25rem; left: 1.25rem; border-top-width: 1.5px; border-left-width: 1.5px; --tx: -12px; --ty: -12px; }
+  .an-intro-frame i:nth-child(2) { top: 1.25rem; right: 1.25rem; border-top-width: 1.5px; border-right-width: 1.5px; --tx: 12px; --ty: -12px; }
+  .an-intro-frame i:nth-child(3) { bottom: 1.25rem; left: 1.25rem; border-bottom-width: 1.5px; border-left-width: 1.5px; --tx: -12px; --ty: 12px; }
+  .an-intro-frame i:nth-child(4) { bottom: 1.25rem; right: 1.25rem; border-bottom-width: 1.5px; border-right-width: 1.5px; --tx: 12px; --ty: 12px; }
+  @keyframes an-corner { from { opacity: 0; transform: translate(var(--tx), var(--ty)); } to { opacity: 1; transform: none; } }
+
+  .an-hud { position: absolute; z-index: 3; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(252 247 242 / 0.55); opacity: 0; animation: an-fade 600ms ease 350ms forwards; }
+  .an-hud-tl { top: 2.1rem; left: 2.6rem; }
+  .an-hud-br { bottom: 2.1rem; right: 2.6rem; font-variant-numeric: tabular-nums; }
+  .an-hud-dot { width: 6px; height: 6px; border-radius: 9999px; background: #ff7a45; box-shadow: 0 0 10px #ff7a45; animation: an-blinkdot 1s steps(2) infinite; }
+  @keyframes an-blinkdot { 50% { opacity: 0.2; } }
+  @media (max-width: 639px) { .an-hud-tl { top: 1.6rem; left: 1.9rem; font-size: 0.6rem; } .an-hud-br { display: none; } .an-intro-frame i { width: 20px; height: 20px; } }
+
+  #an-intro-skip { position: absolute; top: max(1.4rem, env(safe-area-inset-top)); right: 1.9rem; z-index: 4; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid rgb(252 247 242 / 0.25); color: #fcf7f2; font-size: 0.875rem; font-weight: 700; background: rgb(252 247 242 / 0.04); backdrop-filter: blur(6px); transition: background 200ms ease, border-color 200ms ease; }
+  #an-intro-skip:hover { background: rgb(252 247 242 / 0.12); border-color: rgb(255 122 69 / 0.6); }
   #an-intro-skip kbd { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 0.7rem; opacity: 0.6; }
+  @media (max-width: 639px) { #an-intro-skip { top: 3.2rem; right: 1.4rem; } }
 
-  .an-intro-center { position: relative; z-index: 2; width: min(92vw, 40rem); text-align: center; }
-  .an-intro-mark { position: relative; display: inline-grid; place-items: center; opacity: 0; transform: scale(0.6); filter: blur(12px); animation: an-mark-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 150ms forwards; }
-  .an-intro-halo { position: absolute; inset: -40%; border-radius: 50%; background: radial-gradient(circle, rgb(240 120 67 / 0.5), transparent 65%); filter: blur(10px); animation: an-halo 3.2s ease-in-out infinite; z-index: -1; }
-  .an-intro-word { margin-top: 1.1rem; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; }
-  .an-intro-word span { display: inline-block; opacity: 0; transform: translateY(0.6em); animation: an-char 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: calc(650ms + var(--i) * 45ms); }
-  .an-intro-lines { margin-top: 1.6rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 0.5em; font-size: clamp(1.35rem, 3.4vw, 2.1rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
+  .an-intro-center { position: relative; z-index: 2; width: min(92vw, 42rem); margin-top: -4vh; text-align: center; }
+  .an-intro-mark { position: relative; display: inline-grid; place-items: center; }
+  .an-intro-mark > svg:first-of-type { overflow: visible; }
+  .an-mark-line { stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 0 10px rgb(255 122 69 / 0.9)); animation: an-draw 1000ms cubic-bezier(0.65, 0, 0.35, 1) 200ms forwards, an-fadeout 600ms ease 1400ms forwards; }
+  .an-mark-fill { opacity: 0; animation: an-fade 600ms ease 950ms forwards; }
+  .an-intro-halo { position: absolute; inset: -55%; border-radius: 50%; background: radial-gradient(circle, rgb(255 122 69 / 0.5), transparent 65%); filter: blur(12px); opacity: 0; animation: an-fade 800ms ease 900ms forwards, an-halo 3.2s ease-in-out 1.7s infinite; z-index: -1; }
+  .an-intro-check { position: absolute; right: -30px; bottom: -14px; width: 38px; height: 38px; opacity: 0; transform: scale(0.4); }
+  .an-intro-check circle { fill: #ff7a45; filter: drop-shadow(0 0 12px rgb(255 122 69 / 0.9)); }
+  .an-intro-check path { fill: none; stroke: #0b0d12; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+  #an-intro.checked .an-intro-check { animation: an-pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  #an-intro.checked .an-intro-check path { animation: an-draw 450ms ease 200ms forwards; }
+
+  .an-intro-word { margin-top: 1.2rem; font-size: clamp(1.7rem, 4.2vw, 2.4rem); font-weight: 700; letter-spacing: -0.03em; }
+  .an-intro-word span { display: inline-block; min-width: 0.3em; opacity: 0; }
+  .an-intro-word span.on { opacity: 1; }
+  .an-intro-word span.scr { color: #ff9466; font-family: var(--font-mono); font-weight: 400; }
+  .an-intro-lines { margin-top: 1.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 0.5em; font-size: clamp(1.4rem, 3.6vw, 2.25rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
   .an-line { display: inline-block; overflow: hidden; padding-bottom: 0.1em; }
-  .an-line > span { display: inline-block; transform: translateY(110%); animation: an-line 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: calc(1250ms + var(--d) * 380ms); }
-  .an-accent { background: linear-gradient(100deg, #f07843, #ffc9a8 45%, #f07843); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: an-line 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards, an-shine 3s linear 2.4s infinite !important; animation-delay: calc(1250ms + var(--d) * 380ms), 2.4s; }
-  .an-intro-sub { margin: 1.1rem auto 0; max-width: 30rem; color: rgb(252 247 242 / 0.62); font-size: 0.95rem; line-height: 1.55; opacity: 0; animation: an-fade 900ms ease forwards 2.4s; }
+  .an-line > span { display: inline-block; transform: translateY(110%); animation: an-line 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .an-l0 > span { animation-delay: 1000ms; }
+  .an-l1 > span { animation-delay: 1800ms; }
+  .an-l2 > span { animation-delay: 2600ms; }
+  .an-accent { background: linear-gradient(100deg, #ff7a45, #ffc9a8 45%, #ff7a45); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: an-line 900ms cubic-bezier(0.16, 1, 0.3, 1) 2600ms forwards, an-shine 2.4s linear 3.2s infinite !important; }
+  .an-intro-sub { margin: 1.1rem auto 0; max-width: 30rem; color: rgb(252 247 242 / 0.62); font-size: 0.95rem; line-height: 1.55; opacity: 0; animation: an-fade 900ms ease forwards 2.9s; }
 
-  .an-intro-foot { position: absolute; z-index: 2; left: 50%; bottom: max(2rem, env(safe-area-inset-bottom)); width: min(86vw, 24rem); transform: translateX(-50%); }
+  .an-intro-foot { position: absolute; z-index: 3; left: 50%; bottom: max(2rem, env(safe-area-inset-bottom)); width: min(70vw, 22rem); transform: translateX(-50%); }
   #an-intro-bar { height: 2px; background: rgb(252 247 242 / 0.12); border-radius: 2px; overflow: hidden; }
-  #an-intro-fill { height: 100%; width: 0; background: linear-gradient(90deg, #f07843, #ffd2b8); box-shadow: 0 0 12px #f07843; transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1); }
-  .an-intro-meta { margin-top: 0.6rem; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(252 247 242 / 0.5); }
+  #an-intro-fill { height: 100%; width: 0; background: linear-gradient(90deg, #ff7a45, #ffd2b8); box-shadow: 0 0 12px #ff7a45; transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .an-intro-meta { margin-top: 0.6rem; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(252 247 242 / 0.5); }
 
-  @keyframes an-mark-in { to { opacity: 1; transform: none; filter: none; } }
-  @keyframes an-halo { 0%, 100% { opacity: 0.55; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.08); } }
-  @keyframes an-char { to { opacity: 1; transform: none; } }
+  #an-intro.leaving .an-intro-center { transform: scale(1.12) !important; opacity: 0; filter: blur(10px); transition: transform 700ms cubic-bezier(0.7, 0, 0.84, 0), opacity 500ms ease 150ms, filter 600ms ease; }
+  #an-intro.leaving .an-intro-foot, #an-intro.leaving .an-hud, #an-intro.leaving #an-intro-skip, #an-intro.leaving .an-intro-frame { opacity: 0; transition: opacity 300ms ease; animation: none; }
+
+  @keyframes an-draw { to { stroke-dashoffset: 0; } }
+  @keyframes an-fadeout { to { opacity: 0; } }
+  @keyframes an-pop { to { opacity: 1; transform: none; } }
+  @keyframes an-halo { 0%, 100% { opacity: 0.6; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.08); } }
   @keyframes an-line { to { transform: none; } }
   @keyframes an-fade { to { opacity: 1; } }
   @keyframes an-shine { to { background-position: -200% 0; } }
 
   /* Motion off: everything is simply shown. */
-  #an-intro.still .an-intro-mark, #an-intro.still .an-intro-word span, #an-intro.still .an-line > span, #an-intro.still .an-intro-sub { animation: none; opacity: 1; transform: none; filter: none; }
-  #an-intro.still .an-intro-halo { animation: none; }
+  #an-intro.still *, #an-intro.still *::before { animation: none !important; }
+  #an-intro.still .an-mark-fill, #an-intro.still .an-intro-halo, #an-intro.still .an-intro-word span, #an-intro.still .an-intro-sub, #an-intro.still .an-hud, #an-intro.still .an-intro-frame i { opacity: 1; }
+  #an-intro.still .an-mark-line { opacity: 0; }
+  #an-intro.still .an-line > span { transform: none; }
 </style>
 
 <script is:inline>
@@ -112,95 +152,226 @@
   var bar = document.getElementById("an-intro-bar");
   var status = document.getElementById("an-intro-status");
   var pctEl = document.getElementById("an-intro-pct");
+  var tc = document.getElementById("an-intro-tc");
+  var center = el.querySelector(".an-intro-center");
+  var chars = [].slice.call(el.querySelectorAll(".an-intro-word span"));
   var started = performance.now();
-  var done = false;
-  var raf = 0;
+  var done = false, leaveAt = 0, raf = 0, checked = false;
 
-  // Particle network: devices drift in from the edges and settle into a constellation around the mark.
+  // ---------- Scene ----------
   var canvas = document.getElementById("an-intro-canvas");
   var ctx = canvas && canvas.getContext("2d");
-  var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var pts = [];
-  var mouse = { x: -9999, y: -9999 };
+  var W = 0, H = 0, CX = 0, CY = 0, R = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var devs = [], order = [], links = [], pulses = [];
+  var mx = 0, my = 0, smx = 0, smy = 0;
+  var GLYPHS = "01<>/#*+=%$";
+
   function size() {
     W = canvas.clientWidth; H = canvas.clientHeight;
     canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Centre the globe on the logo mark so the network turns around it.
+    var mk = el.querySelector(".an-intro-mark"), mr = mk && mk.getBoundingClientRect();
+    CX = W / 2; CY = mr && mr.height ? mr.top + mr.height / 2 : H * 0.4; R = Math.min(W * 0.42, H * 0.34, 380);
+    el.style.setProperty("--cy", ((CY / H) * 100).toFixed(1) + "%");
   }
   function seed() {
-    var n = W < 700 ? 60 : 110;
-    pts = [];
+    var n = W < 700 ? 64 : 110;
+    devs = [];
     for (var i = 0; i < n; i++) {
-      var ang = Math.random() * Math.PI * 2;
-      var ring = 0.28 + Math.random() * 0.55;
-      var R = Math.min(W, H) * ring;
-      var far = Math.max(W, H) * (0.7 + Math.random() * 0.4);
-      pts.push({
-        x: W / 2 + Math.cos(ang) * far, y: H / 2 + Math.sin(ang) * far,
-        hx: W / 2 + Math.cos(ang) * R * (W > H ? 1.35 : 0.9), hy: H * 0.45 + Math.sin(ang) * R * 0.75,
-        r: Math.random() < 0.18 ? 2.2 : 1.2, ph: Math.random() * 6.28, hot: Math.random() < 0.22,
+      // Home position on a Fibonacci sphere; start far outside the screen.
+      var y = 1 - ((i + 0.5) / n) * 2, r = Math.sqrt(1 - y * y), th = i * 2.39996;
+      var ang = Math.random() * Math.PI * 2, far = Math.max(W, H) * (0.75 + Math.random() * 0.5);
+      devs.push({
+        sx: Math.cos(th) * r, sy: y, sz: Math.sin(th) * r,
+        ox: Math.cos(ang) * far, oy: Math.sin(ang) * far,
+        bend: (Math.random() - 0.5) * 0.9,
+        t0: 0.35 + Math.random() * 1.15,
+        flash: 0, ph: Math.random() * 6.28, locked: false, wave: 0,
+        px: 0, py: 0, ps: 1, z: 0, arrived: 0,
       });
     }
+    order = devs.slice();
+    // Links: each device to its two nearest neighbours on the sphere.
+    links = [];
+    for (var a = 0; a < n; a++) {
+      var b0 = -1, b1 = -1, d0 = 9, d1 = 9;
+      for (var b = 0; b < n; b++) {
+        if (a === b) continue;
+        var dx = devs[a].sx - devs[b].sx, dy = devs[a].sy - devs[b].sy, dz = devs[a].sz - devs[b].sz, d = dx * dx + dy * dy + dz * dz;
+        if (d < d0) { d1 = d0; b1 = b0; d0 = d; b0 = b; } else if (d < d1) { d1 = d; b1 = b; }
+      }
+      if (b0 > a) links.push([a, b0]);
+      if (b1 > a) links.push([a, b1]);
+    }
   }
+  function easeOut(x) { return 1 - Math.pow(1 - x, 3); }
+  function easeIn(x) { return x * x * x; }
+  function clamp(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
+  function bez(a, m, b, e) { var u = 1 - e; return u * u * a + 2 * u * e * m + e * e * b; }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+  }
+  function glow(x, y, rad, col, a) {
+    if (rad <= 0 || a <= 0) return;
+    var g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+    g.addColorStop(0, "rgba(" + col + "," + a.toFixed(3) + ")"); g.addColorStop(1, "rgba(" + col + ",0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill();
+  }
+
   function draw(now) {
     var t = (now - started) / 1000;
+    var ex = leaveAt ? clamp((now - leaveAt) / 1100) : 0; // exit progress
     ctx.clearRect(0, 0, W, H);
-    var settle = Math.min(1, t / 2.2);
-    var e = 1 - Math.pow(1 - settle, 3);
-    for (var i = 0; i < pts.length; i++) {
-      var p = pts[i];
-      var tx = p.hx + Math.cos(t * 0.5 + p.ph) * 10;
-      var ty = p.hy + Math.sin(t * 0.6 + p.ph) * 10;
-      p.x += (tx - p.x) * (0.02 + e * 0.05);
-      p.y += (ty - p.y) * (0.02 + e * 0.05);
-      var dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
-      if (d2 < 14000) { p.x += dx * 0.02; p.y += dy * 0.02; }
+    smx += (mx - smx) * 0.06; smy += (my - smy) * 0.06;
+    if (center && !leaveAt) center.style.transform = "translate3d(" + (smx * -14).toFixed(1) + "px," + (smy * -10).toFixed(1) + "px,0)";
+
+    // Boot: a scan line opens across the screen and the core lights.
+    var boot = clamp(t / 0.7);
+    if (boot < 1) {
+      var w = easeOut(boot) * W;
+      ctx.fillStyle = "rgba(255,148,102," + (0.7 * (1 - boot)).toFixed(3) + ")";
+      ctx.fillRect(CX - w / 2, CY - 0.5, w, 1);
     }
-    ctx.lineWidth = 1;
-    for (var a = 0; a < pts.length; a++) {
-      for (var b = a + 1; b < pts.length; b++) {
-        var ddx = pts[a].x - pts[b].x, ddy = pts[a].y - pts[b].y, dd = ddx * ddx + ddy * ddy;
-        if (dd < 12000) {
-          ctx.strokeStyle = "rgba(251,224,207," + (0.16 * (1 - dd / 12000) * e).toFixed(3) + ")";
-          ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke();
-        }
+    var core = easeOut(clamp(t / 0.6));
+    var beat = 1 + Math.sin(t * 6) * 0.08;
+    glow(CX, CY, R * 0.55 * core * beat * (1 + ex * 3), "255,122,69", 0.22 * (1 - ex));
+
+    // Globe rotation, tilted toward the pointer; the exit flies the camera through it.
+    var rotY = t * 0.42 + smx * 0.6, rotX = 0.38 + smy * 0.4;
+    var cy = Math.cos(rotY), sy = Math.sin(rotY), cx = Math.cos(rotX), sx = Math.sin(rotX);
+    var zoom = 1 + easeIn(ex) * 6;
+    var i, d;
+
+    for (i = 0; i < devs.length; i++) {
+      d = devs[i];
+      var x = d.sx * cy + d.sz * sy, z = -d.sx * sy + d.sz * cy;
+      var y = d.sy * cx - z * sx; z = d.sy * sx + z * cx;
+      var persp = 2.6 / (2.6 - z * 0.9);
+      var hx = CX + x * R * persp * zoom, hy = CY + y * R * persp * zoom;
+      var k = clamp((t - d.t0) / 0.95), e = easeOut(k);
+      d.arrived = k;
+      // Fly in along a curve from far outside the screen, leaving a short streak.
+      var sxp = CX + d.ox, syp = CY + d.oy;
+      var mxp = (sxp + hx) / 2 + (hy - syp) * d.bend, myp = (syp + hy) / 2 - (hx - sxp) * d.bend;
+      var px = bez(sxp, mxp, hx, e), py = bez(syp, myp, hy, e);
+      if (k > 0 && k < 1) {
+        var e2 = easeOut(clamp((t - 0.06 - d.t0) / 0.95));
+        var qx = bez(sxp, mxp, hx, e2), qy = bez(syp, myp, hy, e2);
+        var lg = ctx.createLinearGradient(qx, qy, px, py);
+        lg.addColorStop(0, "rgba(255,148,102,0)"); lg.addColorStop(1, "rgba(255,190,150,0.85)");
+        ctx.strokeStyle = lg; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(qx, qy); ctx.lineTo(px, py); ctx.stroke();
       }
+      d.px = px; d.py = py; d.z = z; d.ps = persp * (1 + easeIn(ex) * 2);
+      if (k === 1 && !d.locked) { d.locked = true; d.flash = Math.max(d.flash, 0.7); }
+      d.flash *= 0.94;
     }
-    // Spokes from hot devices to the centre: tasks out, results back.
-    for (var k = 0; k < pts.length; k++) {
-      var q = pts[k];
-      if (!q.hot) continue;
-      ctx.strokeStyle = "rgba(240,120,67," + (0.12 * e).toFixed(3) + ")";
-      ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(W / 2, H * 0.36); ctx.stroke();
-      var f = ((t * 0.45 + q.ph) % 1);
-      var px = q.x + (W / 2 - q.x) * f, py = q.y + (H * 0.36 - q.y) * f;
-      var g = ctx.createRadialGradient(px, py, 0, px, py, 7);
-      g.addColorStop(0, "rgba(255,190,150," + (0.9 * e).toFixed(3) + ")"); g.addColorStop(1, "rgba(240,120,67,0)");
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, 7, 0, 6.283); ctx.fill();
+
+    // Links between settled neighbours, brighter at the front.
+    ctx.lineWidth = 1;
+    for (var l = 0; l < links.length; l++) {
+      var A = devs[links[l][0]], B = devs[links[l][1]];
+      if (A.arrived < 1 || B.arrived < 1) continue;
+      var al = (0.05 + 0.14 * ((A.z + B.z) / 2 + 1) / 2) * (1 - ex);
+      ctx.strokeStyle = "rgba(252,224,207," + al.toFixed(3) + ")";
+      ctx.beginPath(); ctx.moveTo(A.px, A.py); ctx.lineTo(B.px, B.py); ctx.stroke();
     }
-    for (var j = 0; j < pts.length; j++) {
-      var s = pts[j];
-      var tw = 0.55 + Math.sin(t * 2 + s.ph) * 0.35;
-      ctx.fillStyle = s.hot ? "rgba(240,120,67," + tw.toFixed(3) + ")" : "rgba(252,247,242," + (tw * 0.75).toFixed(3) + ")";
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+
+    // Beat two: tasks pulse out from the core and results travel back.
+    if (t > 1.7 && t < 3.7 && !leaveAt && Math.random() < 0.55) {
+      var tgt = devs[(Math.random() * devs.length) | 0];
+      if (tgt.arrived === 1 && tgt.z > -0.2) pulses.push({ d: tgt, t: t, back: false });
     }
+    for (var p = pulses.length - 1; p >= 0; p--) {
+      var P = pulses[p], f = (t - P.t) / 0.55;
+      if (f >= 1) {
+        if (!P.back) { P.d.flash = 1; P.back = true; P.t = t; continue; }
+        pulses.splice(p, 1); continue;
+      }
+      var ff = P.back ? 1 - f : f;
+      ctx.strokeStyle = "rgba(255,122,69," + (0.16 * (1 - ex)).toFixed(3) + ")";
+      ctx.beginPath(); ctx.moveTo(CX, CY); ctx.lineTo(P.d.px, P.d.py); ctx.stroke();
+      glow(CX + (P.d.px - CX) * ff, CY + (P.d.py - CY) * ff, 7, P.back ? "255,236,224" : "255,148,102", 0.95 * (1 - ex));
+    }
+
+    // Beat three: the checked shockwave lights every device as it passes.
+    if (t > 2.75 && !checked) {
+      checked = true; el.classList.add("checked");
+      for (i = 0; i < devs.length; i++) devs[i].wave = 2.75 + Math.hypot(devs[i].px - CX, devs[i].py - CY) / (R * 2.4) * 0.9;
+    }
+    if (checked) {
+      var sw = t - 2.75;
+      if (sw < 1.4) {
+        var fade = 1 - sw / 1.4;
+        ctx.strokeStyle = "rgba(255,148,102," + (0.75 * fade).toFixed(3) + ")";
+        ctx.lineWidth = 2.5 * fade + 0.5;
+        ctx.beginPath(); ctx.arc(CX, CY, easeOut(clamp(sw / 1.4)) * R * 2.4, 0, 6.283); ctx.stroke();
+      }
+      for (i = 0; i < devs.length; i++) if (devs[i].wave && t > devs[i].wave) { devs[i].flash = 1; devs[i].wave = 0; }
+    }
+
+    // Devices: tiny phones, back ones dimmer; flashing ones glow orange.
+    order.sort(function (a, b) { return a.z - b.z; });
+    var small = W < 700 ? 0.8 : 1;
+    for (i = 0; i < order.length; i++) {
+      d = order[i];
+      if (d.arrived <= 0) continue;
+      var front = (d.z + 1) / 2, s = d.ps * small;
+      var dw = 5 * s, dh = 9 * s;
+      var alpha = (0.25 + 0.75 * front) * (1 - ex * 0.6);
+      var fl = d.flash;
+      if (fl > 0.05) glow(d.px, d.py, 16 * s * (0.6 + fl), "255,122,69", 0.55 * fl * alpha);
+      var tw = 0.75 + Math.sin(t * 2 + d.ph) * 0.25;
+      ctx.fillStyle = "rgba(" + Math.round(236 + 19 * fl) + "," + Math.round(238 - 116 * fl) + "," + Math.round(243 - 174 * fl) + "," + (alpha * tw).toFixed(3) + ")";
+      roundRect(d.px - dw / 2, d.py - dh / 2, dw, dh, 1.4 * s); ctx.fill();
+    }
+
+    // The exit: a ring of light rides the edge of the opening hole.
+    if (leaveAt) {
+      var hole = easeIn(ex) * Math.hypot(W, H);
+      el.style.setProperty("--hole", hole.toFixed(1) + "px");
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,170,130," + (0.9 * (1 - ex)).toFixed(3) + ")";
+      ctx.lineWidth = 3; ctx.shadowColor = "#ff7a45"; ctx.shadowBlur = 24;
+      ctx.beginPath(); ctx.arc(CX, CY, hole + 3, 0, 6.283); ctx.stroke();
+      ctx.restore();
+    }
+
+    // Wordmark decodes letter by letter; timecode ticks.
+    for (var c = 0; c < chars.length; c++) {
+      var on = t - (0.55 + c * 0.07), sp = chars[c];
+      if (on < 0) continue;
+      if (on < 0.32) { sp.className = "on scr"; sp.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
+      else if (sp.className !== "on") { sp.className = "on"; sp.textContent = sp.getAttribute("data-ch"); }
+    }
+    if (tc) tc.textContent = "00:" + (t < 10 ? "0" : "") + t.toFixed(2);
+
     raf = requestAnimationFrame(draw);
   }
+
   if (motion && ctx) {
     size(); seed(); raf = requestAnimationFrame(draw);
-    window.addEventListener("resize", function () { size(); seed(); });
-    el.addEventListener("pointermove", function (ev) { mouse.x = ev.clientX; mouse.y = ev.clientY; });
+    window.addEventListener("resize", function () { if (!done) { size(); seed(); } });
+    el.addEventListener("pointermove", function (ev) { mx = ev.clientX / W - 0.5; my = ev.clientY / H - 0.5; });
+  } else {
+    chars.forEach(function (sp) { sp.className = "on"; });
   }
 
   // Blink twice once the mark has landed.
   var mark = el.querySelector(".an-intro-mark svg");
   function blink() { if (!mark) return; mark.classList.remove("is-blinking"); void mark.getBBox(); mark.classList.add("is-blinking"); }
-  if (motion) { setTimeout(blink, 1300); setTimeout(blink, 1600); }
+  if (motion) { setTimeout(blink, 1500); setTimeout(blink, 1800); }
 
   function finish() {
     cancelAnimationFrame(raf);
     el.hidden = true;
     el.classList.remove("leaving");
+    el.style.removeProperty("--hole");
     document.documentElement.style.overflow = "";
   }
   function release(reason) {
@@ -209,7 +380,8 @@
     window.__anIntroSeen = true;
     if (reason === "timeout" && status) status.textContent = "Some assets are still loading";
     window.dispatchEvent(new Event("an-intro-done"));
-    if (!motion || reason === "skip") { finish(); return; }
+    if (!motion || reason === "skip" || !ctx) { finish(); return; }
+    leaveAt = performance.now();
     el.classList.add("leaving");
     setTimeout(finish, 1150);
   }
@@ -218,7 +390,7 @@
 
   var tasks = [
     { label: "Fonts", p: (document.fonts && document.fonts.ready) || Promise.resolve() },
-    { label: "Logo", p: new Promise(function (r) { var i = new Image(); i.onload = i.onerror = r; i.src = "/brand/AndroNode_Horizontal_charcoal.svg"; }) },
+    { label: "Logo", p: new Promise(function (r) { var i = new Image(); i.onload = i.onerror = r; i.src = "/brand/AndroNode_Horizontal_paper.svg"; }) },
     { label: "Page", p: document.readyState === "complete" ? Promise.resolve() : new Promise(function (r) { window.addEventListener("load", r, { once: true }); }) },
   ];
   var finished = 0;
@@ -231,8 +403,8 @@
       bar.setAttribute("aria-valuenow", String(pct));
       status.textContent = finished === tasks.length ? "Ready" : t.label + " ready";
       if (finished === tasks.length) {
-        // Let the title sequence finish (about 3.4 s from start) before the curtain opens.
-        var wait = motion ? Math.max(600, 3400 - (performance.now() - started)) : 1200;
+        // Let the three beats finish (about 3.9 s from start) before the light opens.
+        var wait = motion ? Math.max(600, 3900 - (performance.now() - started)) : 1200;
         setTimeout(function () { release("ready"); }, wait);
       }
     });
