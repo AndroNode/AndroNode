@@ -37,6 +37,7 @@
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius-card: 14px;
+  --container-7xl: 86rem; /* a little wider than Tailwind's 80rem so wide screens feel fuller */
   --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -65,9 +66,9 @@ html {
 }
 
 /* Wide screens (or a zoomed-out browser): scale the whole rem-based layout with the viewport
-   instead of leaving wide empty margins. 1680px stays at 16px; capped at 28px (about 2940px wide). */
+   instead of leaving wide empty margins. 1680px stays at 16px; it also follows the height so the hero still fits one screen. Capped at 40px. */
 @media (min-width: 1680px) {
-  html { font-size: min(calc(100vw / 105), 28px); }
+  html { font-size: max(16px, min(calc(100vw / 105), calc(100vh / 59), 40px)); }
 }
 
 body {
@@ -219,3 +220,21 @@ html.fx-ready [data-draw].in path, html.fx-ready [data-draw].in line { stroke-da
 .ping { animation: an-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite; }
 @keyframes an-scrollcue { 0% { transform: translate(-50%, 0); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(-50%, 14px); opacity: 0; } }
 .min-h-13 { min-height: 3.25rem; }
+
+/* Full-bleed hero backdrop: drifting contour lines, a perspective grid floor and a pulsing ring. */
+.hero-contours { animation: hero-drift 40s ease-in-out infinite alternate; transform-origin: 60% 50%; }
+@keyframes hero-drift { from { transform: scale(1.04) translate3d(-1%, 0, 0); } to { transform: scale(1.1) translate3d(1.5%, -1%, 0); } }
+.hero-floor {
+  left: 30%; right: -10%; bottom: -8%; height: 46%;
+  background-image: linear-gradient(rgba(255, 122, 69, 0.22) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 122, 69, 0.22) 1px, transparent 1px);
+  background-size: 64px 64px;
+  transform: perspective(600px) rotateX(68deg);
+  transform-origin: 50% 100%;
+  -webkit-mask-image: radial-gradient(60% 90% at 50% 100%, black, transparent 75%);
+  mask-image: radial-gradient(60% 90% at 50% 100%, black, transparent 75%);
+  animation: hero-floor 6s linear infinite;
+}
+@keyframes hero-floor { to { background-position: 0 64px; } }
+.hero-ring-pulse { transform-origin: 400px 110px; animation: hero-ring 3.6s ease-in-out infinite; }
+@keyframes hero-ring { 0%, 100% { opacity: 0.4; transform: scale(0.96); } 50% { opacity: 1; transform: scale(1.04); } }
+@media (max-width: 1023px) { .hero-floor { left: -20%; right: -20%; height: 30%; opacity: 0.6; } }

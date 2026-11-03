@@ -17,12 +17,12 @@ const active = (href: string) => path === href || (href === "/app" && path.start
 <header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-charcoal focus:px-3 focus:py-2 focus:text-paper">Skip to content</a>
   <div class="border-b border-line/70 bg-peach-soft">
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-1.5 sm:px-6">
+    <div class="flex items-center justify-between gap-3 px-[clamp(1rem,5vw,8rem)] py-1.5">
       <p class="hidden font-mono text-[11px] text-charcoal-60 md:block"><a href="/docs#status" class="hover:underline">Simulation website · proposed protocol · not live</a></p>
       <HeaderControls client:load site={site} part="utility" />
     </div>
   </div>
-  <div class="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
+  <div class="flex h-16 items-center gap-2 px-[clamp(1rem,5vw,8rem)] sm:gap-4">
     <a href="/" class="shrink-0" aria-label={`${site.displayName} home`}>
       <img src="/brand/AndroNode_Horizontal_paper.svg" alt={site.displayName} width="168" height="44" class="h-8 w-auto sm:h-11" />
     </a>
