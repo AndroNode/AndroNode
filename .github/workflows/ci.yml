@@ -1,0 +1,44 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Protocol package
+        run: pnpm --filter @andronode/protocol test
+      - name: Contracts (compile + tests)
+        run: pnpm --filter ./contracts build && pnpm --filter ./contracts test
+      - name: ABI is up to date
+        run: pnpm --filter ./contracts export-abi && git diff --exit-code packages/protocol/src/abi.ts
+      - name: Website build
+        run: pnpm --filter @andronode/web build
+      - name: API typecheck and Workers-runtime tests
+        run: pnpm --filter @andronode/api typecheck && pnpm --filter @andronode/api test
+      - name: API bundle (dry run)
+        run: pnpm --filter @andronode/api build
+      - name: Test node and verifier worker typecheck
+        run: pnpm --filter @andronode/test-node typecheck && pnpm --filter @andronode/verifier typecheck
+
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults: { run: { working-directory: services/verifier } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt pytest httpx
+      - run: python -m pytest -q test_app.py

@@ -14,3 +14,4 @@ coverage
 .DS_Store
 __pycache__
 .venv
+apps/api/wrangler.deploy.jsonc

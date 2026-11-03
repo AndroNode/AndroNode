@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit",
     "deploy": "wrangler deploy"
   },
   "dependencies": {

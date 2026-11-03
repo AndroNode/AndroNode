@@ -1,0 +1,29 @@
+name: Deploy verifier container
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: testnet
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Check token secret
+        run: test -n "${{ secrets.VERIFIER_TOKEN }}" || { echo "::error::Add a VERIFIER_TOKEN secret (any long random string)"; exit 1; }
+      - name: Deploy container and front Worker
+        working-directory: services/verifier
+        run: |
+          npx wrangler deploy
+          printf '%s' "${{ secrets.VERIFIER_TOKEN }}" | npx wrangler secret put VERIFIER_TOKEN
+      - run: echo "Set VERIFIER_URL secret to the URL above and VERIFIER_MODE=container, then re-run Deploy to Cloudflare." >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,54 @@
+name: Deploy escrow contract
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: Target network
+        type: choice
+        options: [baseSepolia]
+        default: baseSepolia
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: testnet
+    env:
+      DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+      BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
+      ESCROW_ADMIN: ${{ vars.ESCROW_ADMIN }}
+      OPERATOR_TREASURY: ${{ vars.OPERATOR_TREASURY }}
+      BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Check inputs
+        run: |
+          test -n "$DEPLOYER_PRIVATE_KEY" || { echo "::error::Add the DEPLOYER_PRIVATE_KEY secret (testnet-only key)"; exit 1; }
+          test -n "$ESCROW_ADMIN" || { echo "::error::Set the ESCROW_ADMIN variable (2-of-3 Safe address)"; exit 1; }
+          test -n "$OPERATOR_TREASURY" || { echo "::error::Set the OPERATOR_TREASURY variable"; exit 1; }
+      - name: Test contracts
+        run: pnpm --filter ./contracts test
+      - name: Deploy
+        run: pnpm --filter ./contracts deploy:base-sepolia
+      - name: Summary
+        run: |
+          F=contracts/deployments/${{ inputs.network }}.json
+          echo '### Escrow deployed' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"; cat "$F" >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "Set the ESCROW_ADDRESS repository variable to $(jq -r .escrow "$F") and re-run 'Deploy to Cloudflare'." >> "$GITHUB_STEP_SUMMARY"
+      - name: Open a PR with the deployment record
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: deployments/${{ inputs.network }}
+          title: "Record escrow deployment on ${{ inputs.network }}"
+          commit-message: "Record escrow deployment on ${{ inputs.network }}"
+          add-paths: contracts/deployments/*.json
+          body: "Deployment record written by the Deploy escrow contract workflow."
