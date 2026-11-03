@@ -19,6 +19,7 @@ interface DeployConfig {
   maxOutstandingEscrowUnits: string;
   maxHardCloseWindowSeconds: number;
   requiresAudit?: boolean;
+  deployTestToken?: boolean;
 }
 
 function need(label: string, v: string | null | undefined): `0x${string}` {
@@ -39,8 +40,15 @@ async function main() {
     asset = mock.address;
     cfg = { network: net, chainId: 31337, explorer: "", asset: { symbol: "mUSDC", decimals: 6, address: asset }, admin: deployer.account.address, operatorTreasury: deployer.account.address, maxOutstandingEscrowUnits: "500000000", maxHardCloseWindowSeconds: 1209600 };
   } else {
-    const file = net === "baseSepolia" ? "base-sepolia.json" : net === "base" ? "base-mainnet.json" : `${net}.json`;
+    const files: Record<string, string> = { baseSepolia: "base-sepolia.json", base: "base-mainnet.json", robinhoodTestnet: "robinhood-testnet.json" };
+    const file = files[net] ?? `${net}.json`;
     cfg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "deploy", file), "utf8"));
+    if (!cfg.asset.address && cfg.deployTestToken && !cfg.requiresAudit) {
+      // Testnets without official USDC get a faucet token. TestUSDC itself refuses known mainnet chain ids.
+      const token = await hre.viem.deployContract("TestUSDC");
+      console.log(`Deployed TestUSDC at ${token.address}`);
+      cfg.asset.address = token.address;
+    }
     asset = need("asset.address", cfg.asset.address);
   }
 

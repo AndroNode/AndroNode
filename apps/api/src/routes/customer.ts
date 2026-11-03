@@ -8,7 +8,7 @@ import { orderCreateSchema, quoteRequestSchema, recordSchema } from "@andronode/
 import { validateRecords } from "@andronode/protocol/tasks";
 import type { AppEnv } from "../env";
 import { requireUser } from "../lib/auth";
-import { checkFundingTx, escrowConfigured, orderIdFor, profileIdBytes32 } from "../lib/chain";
+import { checkFundingTx, escrowConfigured, orderIdFor, profileIdBytes32, isMainnet } from "../lib/chain";
 import { tokenCounts } from "../lib/embedder";
 import { ApiError, bad, body, conflict, forbidden, notFound, now } from "../lib/http";
 import { activateOrder, sweep, type QuoteRow } from "../lib/orders";
@@ -79,7 +79,7 @@ customer.post("/orders", async (c) => {
 
   let funding: { state: string; reason?: string } = { state: "AWAITING_FUNDING" };
   if (req.mockFunding) {
-    if (c.env.ALLOW_MOCK_FUNDING !== "true" || c.env.NETWORK === "base") throw forbidden("Mock funding is disabled on this network");
+    if (c.env.ALLOW_MOCK_FUNDING !== "true" || isMainnet(c.env)) throw forbidden("Mock funding is disabled on this network");
     await activateOrder(c.env, q.order_id, { mode: "mock", fundedUnits: BigInt(q.max_charge_units), at });
     funding = { state: "FUNDED", reason: "MOCK" };
   } else if (req.fundingTxHash) {

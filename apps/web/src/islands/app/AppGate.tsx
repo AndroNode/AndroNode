@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { api, ApiError, type ApiConfig } from "../../lib/api";
-import { discoverWallets, signIn, signOut, useSession, type Account, type WalletInfo } from "../../lib/wallet";
+import { chainFor, discoverWallets, signIn, signOut, useSession, type Account, type WalletInfo } from "../../lib/wallet";
 import SimChip from "../../components/SimChip";
 import { Button, ErrorState, Panel } from "../../components/ui";
 
@@ -46,7 +46,7 @@ export default function AppGate({ need, children }: { need?: "admin"; children: 
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-line bg-white/60 px-4 py-3 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <SimChip kind="Testnet" />
-        <span>{c.chainId === 84532 ? "Base Sepolia" : `Chain ${c.chainId}`}</span>
+        <span>{chainFor(c.chainId).name}</span>
         <span className="text-charcoal-60">·</span>
         <span className="text-charcoal-60">{c.escrowAddress ? <>Escrow <span className="font-mono text-xs">{short(c.escrowAddress)}</span></> : "Escrow not deployed yet: test funding is simulated"}</span>
         {c.verifierMode === "fixture" && <span className="rounded-full bg-peach px-2 py-0.5 font-mono text-[11px]">pipeline test profile</span>}
@@ -70,7 +70,7 @@ export default function AppGate({ need, children }: { need?: "admin"; children: 
           {wallets === null ? (
             <p className="mt-4 text-sm text-charcoal-60">Looking for browser wallets…</p>
           ) : wallets.length === 0 ? (
-            <p className="mt-4 rounded-lg bg-peach-soft p-3 text-sm">No browser wallet found. Install a wallet extension that supports Base Sepolia, then reload this page.</p>
+            <p className="mt-4 rounded-lg bg-peach-soft p-3 text-sm">No browser wallet found. Install a wallet extension such as MetaMask or Rabby, then reload this page. The app adds Robinhood Chain Testnet to the wallet for you.</p>
           ) : (
             <div className="mt-4 flex flex-wrap gap-2">
               {wallets.map((w) => (

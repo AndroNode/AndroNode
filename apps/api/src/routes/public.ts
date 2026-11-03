@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { PILOT_CAPS, PRICING, PROBATION, LEASE_RULES } from "@andronode/protocol/params";
 import type { AppEnv } from "../env";
 import { coordinatorPublicKey } from "../lib/coordinator";
-import { escrowConfigured } from "../lib/chain";
+import { escrowConfigured, chainOf, isMainnet } from "../lib/chain";
 import { activeProfiles } from "../lib/profiles";
 import { notFound } from "../lib/http";
 
@@ -17,9 +17,10 @@ pub.get("/config", (c) =>
   c.json({
     network: c.env.NETWORK,
     chainId: Number(c.env.CHAIN_ID),
-    settlementAsset: { symbol: "USDC", address: c.env.USDC_ADDRESS, decimals: 6 },
+    chain: { name: chainOf(c.env).name, rpcUrl: chainOf(c.env).rpcUrls.default.http[0], explorerUrl: chainOf(c.env).blockExplorers?.default.url ?? null, testnet: !isMainnet(c.env) },
+    settlementAsset: { symbol: c.env.ASSET_SYMBOL || "USDC", address: c.env.USDC_ADDRESS || null, decimals: 6, faucet: !isMainnet(c.env) && (c.env.ASSET_SYMBOL || "") === "tUSDC" },
     escrowAddress: escrowConfigured(c.env) ? c.env.ESCROW_ADDRESS : null,
-    mockFunding: c.env.ALLOW_MOCK_FUNDING === "true" && c.env.NETWORK !== "base",
+    mockFunding: c.env.ALLOW_MOCK_FUNDING === "true" && !isMainnet(c.env),
     verifierMode: c.env.VERIFIER_MODE,
     pricing: { ratePer1kUnits: PRICING.illustrativeRatePer1kUnits.toString(), label: "Illustrative testnet rate" },
     caps: { unsettledExposureUnits: PILOT_CAPS.maxUnsettledExposureUnits.toString(), outstandingEscrowUnits: PILOT_CAPS.maxOutstandingEscrowUnits.toString(), probationDeviceUnits: PROBATION.deviceProvisionalCapUnits.toString() },

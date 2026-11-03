@@ -48,7 +48,7 @@ else if (process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID) 
   if (sub) cfg.vars.SITE_ORIGIN = `https://${cfg.name}.${sub}.workers.dev`;
   else console.warn("Could not read the workers.dev subdomain; SITE_ORIGIN stays", cfg.vars.SITE_ORIGIN);
 }
-for (const k of ["ESCROW_ADDRESS"]) if (process.env[k]) cfg.vars[k] = process.env[k];
+for (const k of ["ESCROW_ADDRESS", "USDC_ADDRESS"]) if (process.env[k]) cfg.vars[k] = process.env[k];
 
 writeFileSync("wrangler.deploy.jsonc", JSON.stringify(cfg, null, 2));
 console.log(JSON.stringify({ origin: cfg.vars.SITE_ORIGIN, d1: cfg.d1_databases.map((d) => d.database_id), kv: cfg.kv_namespaces.map((k) => k.id), r2: cfg.r2_buckets.map((b) => b.bucket_name), queues: [...queues] }));

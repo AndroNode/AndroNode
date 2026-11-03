@@ -35,7 +35,8 @@ export async function api<T = any>(path: string, init: { method?: string; json?:
 export interface ApiConfig {
   network: string;
   chainId: number;
-  settlementAsset: { symbol: string; address: string; decimals: number };
+  chain?: { name: string; rpcUrl: string; explorerUrl: string | null; testnet: boolean };
+  settlementAsset: { symbol: string; address: string | null; decimals: number; faucet?: boolean };
   escrowAddress: string | null;
   mockFunding: boolean;
   verifierMode: "fixture" | "container";

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Hex } from "viem";
-import { escrowAbi, erc20Abi } from "@andronode/protocol/abi";
+import { escrowAbi, erc20Abi, testUsdcAbi } from "@andronode/protocol/abi";
 import { api, type ApiConfig } from "../../lib/api";
 import { explorerTx, walletOnChain } from "../../lib/wallet";
 import { download } from "../../lib/format";
@@ -60,7 +60,7 @@ function NewOrder({ cfg, onCreated }: { cfg: ApiConfig; onCreated: () => void })
       const { wallet, publicClient, address } = await walletOnChain(cfg);
       const max = BigInt(f.maxCharge);
       const bal = (await publicClient.readContract({ address: f.asset as Hex, abi: erc20Abi, functionName: "balanceOf", args: [address] })) as bigint;
-      if (bal < max) throw new Error(`Your wallet has ${usdc(bal)} test USDC; this order needs ${usdc(max)}. Get test USDC from a Base Sepolia faucet.`);
+      if (bal < max) throw new Error(`Your wallet has ${usdc(bal)} test USDC; this order needs ${usdc(max)}. Use "Get test USDC" first.`);
       const allowance = (await publicClient.readContract({ address: f.asset as Hex, abi: erc20Abi, functionName: "allowance", args: [address, f.escrow as Hex] })) as bigint;
       if (allowance < max) {
         setStep("1/3 Approve test USDC in your wallet…");
@@ -76,6 +76,28 @@ function NewOrder({ cfg, onCreated }: { cfg: ApiConfig; onCreated: () => void })
       if (r.funding.state !== "FUNDED") setErr(`Funding recorded; the coordinator will pick it up shortly (${r.funding.reason}).`);
       setQuote(null); onCreated();
     } catch (e) { setErr(errText(e)); } finally { setStep(null); }
+  };
+
+  const claimTestUsdc = async () => {
+    const token = (quote?.funding.asset ?? cfg.settlementAsset.address) as Hex | null;
+    if (!token) return;
+    setErr(null); setStep("Claim 1,000 test USDC in your wallet…");
+    try {
+      const { wallet, publicClient, address } = await walletOnChain(cfg);
+      const [last, cooldown] = await Promise.all([
+        publicClient.readContract({ address: token, abi: testUsdcAbi, functionName: "lastClaim", args: [address] }),
+        publicClient.readContract({ address: token, abi: testUsdcAbi, functionName: "FAUCET_COOLDOWN" }),
+      ]);
+      const block = await publicClient.getBlock();
+      if (last > 0n && block.timestamp < last + cooldown) throw new Error(`You already claimed test USDC. The faucet opens again at ${new Date(Number(last + cooldown) * 1000).toLocaleString()}.`);
+      const h = await wallet.writeContract({ account: address, address: token, abi: testUsdcAbi, functionName: "faucet" });
+      setStep("Waiting for the faucet transaction…");
+      await publicClient.waitForTransactionReceipt({ hash: h });
+      const bal = (await publicClient.readContract({ address: token, abi: erc20Abi, functionName: "balanceOf", args: [address] })) as bigint;
+      setErr(`Done. Your wallet now holds ${(Number(bal) / 1e6).toLocaleString("en-US")} test USDC.`);
+    } catch (e) {
+      setErr(errText(e));
+    } finally { setStep(null); }
   };
 
   const fundMock = async () => {
@@ -121,6 +143,7 @@ function NewOrder({ cfg, onCreated }: { cfg: ApiConfig; onCreated: () => void })
               <p className="mt-2 text-xs text-charcoal-60">You pay only for accepted records. The rest is refundable after the order closes, or by you alone after the hard close date.</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {quote.funding.escrow && <Button variant="accent" disabled={!!step || left === 0} onClick={fundOnChain}>Fund with test USDC</Button>}
+                {quote.funding.escrow && cfg.settlementAsset.faucet && <Button variant="ghost" disabled={!!step} onClick={claimTestUsdc}>Get test USDC</Button>}
                 {cfg.mockFunding && <Button variant={quote.funding.escrow ? "ghost" : "accent"} disabled={!!step || left === 0} onClick={fundMock}>Use simulated funding</Button>}
               </div>
               {left === 0 && <p className="mt-2 text-sm text-bad">Quote expired. Get a new one.</p>}

@@ -13,9 +13,12 @@
   },
   "observability": { "enabled": true },
   "vars": {
-    "NETWORK": "base-sepolia",
-    "CHAIN_ID": "84532",
-    "USDC_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "NETWORK": "robinhood-testnet",
+    "CHAIN_ID": "46630",
+    // No official USDC on Robinhood Chain testnet: this is the TestUSDC faucet token, set after /app/deploy.
+    "USDC_ADDRESS": "",
+    "ASSET_SYMBOL": "tUSDC",
+    "RPC_URL": "https://rpc.testnet.chain.robinhood.com",
     "ESCROW_ADDRESS": "",
     "ADMIN_ADDRESSES": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
     "SITE_ORIGIN": "https://andronode.workers.dev",
@@ -24,7 +27,7 @@
     "REVIEW_WINDOW_SECONDS": "172800",
     "CONFIRMATIONS": "3"
   },
-  // Secrets (wrangler secret put): SESSION_SECRET, COORDINATOR_KEY_JWK, BASE_RPC_URL, VERIFIER_URL, VERIFIER_TOKEN
+  // Secrets (wrangler secret put): SESSION_SECRET, COORDINATOR_KEY_JWK, BASE_RPC_URL (fallback only when RPC_URL is empty), VERIFIER_URL, VERIFIER_TOKEN
   "d1_databases": [
     { "binding": "DB", "database_name": "andronode", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
   ],

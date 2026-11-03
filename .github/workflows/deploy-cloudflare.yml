@@ -46,7 +46,7 @@ jobs:
         working-directory: apps/api
         run: |
           set -o pipefail
-          VARS=(--var "ESCROW_ADDRESS:${{ vars.ESCROW_ADDRESS }}" --var "ADMIN_ADDRESSES:${{ vars.ADMIN_ADDRESSES }}" --var "VERIFIER_MODE:${{ vars.VERIFIER_MODE || 'fixture' }}" --var "ALLOW_MOCK_FUNDING:${{ vars.ALLOW_MOCK_FUNDING || 'true' }}")
+          VARS=(--var "ESCROW_ADDRESS:${{ vars.ESCROW_ADDRESS }}" --var "USDC_ADDRESS:${{ vars.USDC_ADDRESS }}" --var "ADMIN_ADDRESSES:${{ vars.ADMIN_ADDRESSES }}" --var "VERIFIER_MODE:${{ vars.VERIFIER_MODE || 'fixture' }}" --var "ALLOW_MOCK_FUNDING:${{ vars.ALLOW_MOCK_FUNDING || 'true' }}")
           ORIGIN="${{ vars.SITE_ORIGIN }}"
           OUT=$(npx wrangler deploy --config wrangler.deploy.jsonc "${VARS[@]}" ${ORIGIN:+--var "SITE_ORIGIN:$ORIGIN"} 2>&1 | tee /dev/stderr)
           URL=$(echo "$OUT" | grep -oE 'https://[a-z0-9.-]+\.workers\.dev' | head -1)

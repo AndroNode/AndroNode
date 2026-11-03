@@ -30,6 +30,7 @@ const config: HardhatUserConfig = {
   networks: {
     baseSepolia: { url: process.env.BASE_SEPOLIA_RPC_URL ?? "https://sepolia.base.org", chainId: 84532, accounts },
     base: { url: process.env.BASE_RPC_URL ?? "https://mainnet.base.org", chainId: 8453, accounts },
+    robinhoodTestnet: { url: process.env.ROBINHOOD_TESTNET_RPC_URL ?? "https://rpc.testnet.chain.robinhood.com", chainId: 46630, accounts },
   },
   etherscan: {
     apiKey: process.env.BASESCAN_API_KEY ?? "",

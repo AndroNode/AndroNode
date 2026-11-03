@@ -1,0 +1,17 @@
+{
+  "network": "robinhoodTestnet",
+  "chainId": 46630,
+  "explorer": "https://explorer.testnet.chain.robinhood.com",
+  "asset": {
+    "symbol": "tUSDC",
+    "decimals": 6,
+    "address": null,
+    "source": "No official USDC on Robinhood Chain testnet. Leave null to deploy TestUSDC (faucet token) alongside the escrow."
+  },
+  "admin": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
+  "operatorTreasury": "0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E",
+  "note": "Testnet uses a single EOA admin. Mainnet must use a 2-of-3 Safe.",
+  "maxOutstandingEscrowUnits": "500000000",
+  "maxHardCloseWindowSeconds": 1209600,
+  "deployTestToken": true
+}

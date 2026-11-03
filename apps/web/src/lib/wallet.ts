@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPublicClient, createWalletClient, custom, http, numberToHex, type EIP1193Provider, type Hex } from "viem";
-import { base, baseSepolia } from "viem/chains";
+import { base, baseSepolia, robinhood, robinhoodTestnet } from "viem/chains";
 import { createSiweMessage } from "viem/siwe";
 import { api, setSessionToken, sessionToken, type ApiConfig } from "./api";
 
@@ -26,7 +26,8 @@ export function discoverWallets(timeoutMs = 300): Promise<WalletInfo[]> {
   });
 }
 
-export const chainFor = (id: number) => (id === 8453 ? base : baseSepolia);
+const CHAINS = { 46630: robinhoodTestnet, 4663: robinhood, 84532: baseSepolia, 8453: base } as const;
+export const chainFor = (id: number) => CHAINS[id as keyof typeof CHAINS] ?? robinhoodTestnet;
 
 export interface Account { id: string; address: string; isAdmin: boolean }
 interface SessionState { status: "loading" | "signed-out" | "signed-in"; account: Account | null; provider: EIP1193Provider | null; address: Hex | null }

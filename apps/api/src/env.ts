@@ -5,9 +5,11 @@ export interface Env {
   KV: KVNamespace;
   VERIFY_QUEUE: Queue<VerifyJob>;
   WEBHOOK_QUEUE: Queue<WebhookJob>;
-  NETWORK: "base-sepolia" | "base" | "local";
+  NETWORK: "robinhood-testnet" | "base-sepolia" | "robinhood" | "base" | "local";
   CHAIN_ID: string;
   USDC_ADDRESS: string;
+  ASSET_SYMBOL?: string;
+  RPC_URL?: string;
   ESCROW_ADDRESS: string;
   ADMIN_ADDRESSES: string;
   SITE_ORIGIN: string;

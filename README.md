@@ -2,7 +2,7 @@
 
 Website, testnet coordinator and USDC escrow for AndroNode, a proposed network where Android devices run small, verified AI embedding tasks for paying customers. Based on Whitepaper v1.0 and the website PRD.
 
-> Status: the public website is a labelled simulation. The testnet app runs the real pipeline on Base Sepolia with test funds only. Nothing here is live on mainnet.
+> Status: the public website is a labelled simulation. The testnet app runs the real pipeline on Robinhood Chain Testnet (chain 46630) with test funds only. Nothing here is live on mainnet.
 
 ## What is in the repo
 
@@ -10,7 +10,7 @@ Website, testnet coordinator and USDC escrow for AndroNode, a proposed network w
 | --- | --- |
 | `apps/web` | Astro 5 site. Public pages and labs (simulations), docs, and the testnet app at `/app` (customer, contributor, admin). |
 | `apps/api` | Cloudflare Worker: serves the site and the `/v1` API. D1 (authoritative state and double-entry ledger), R2 (records and results), Queues (verification, webhooks), KV (replay protection), rate limits, cron (lease expiry, chain sync). |
-| `contracts` | `AndroNodeEscrow.sol`: non-upgradeable USDC escrow with strict 75/25 settlement, pull withdrawals and permissionless refund after hard close. Hardhat tests and deploy script. |
+| `contracts` | `AndroNodeEscrow.sol`: non-upgradeable USDC escrow (on testnet it settles in `TestUSDC.sol`, a valueless faucet token, because Robinhood Chain Testnet has no official USDC) with strict 75/25 settlement, pull withdrawals and permissionless refund after hard close. Hardhat tests and deploy script. |
 | `packages/protocol` | Shared rules: whitepaper parameters, money math, state machines, verification, schemas, escrow ABI. |
 | `packages/fixtures` | Bundled demo data for the simulations. |
 | `services/verifier` | Python ONNX reference verifier (all-MiniLM-L6-v2) for Cloudflare Containers. |
@@ -61,7 +61,7 @@ Repository **secrets**:
 | --- | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare deploys | Workers, D1, R2, KV, Queues edit permissions. |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare deploys | |
-| `DEPLOYER_PRIVATE_KEY` | Contract deploy | Fresh testnet-only wallet with a little Base Sepolia ETH. Never reuse a mainnet key. |
+| `DEPLOYER_PRIVATE_KEY` | Contract deploy | Fresh testnet-only wallet with a little Robinhood Chain Testnet ETH. Not needed if you deploy from `/app/deploy` with a browser wallet. Never reuse a mainnet key. |
 | `BASE_SEPOLIA_RPC_URL` | Contract deploy, chain sync | Optional; defaults to the public endpoint for deploys. Needed by the Worker to read the chain. |
 | `BASESCAN_API_KEY` | Contract verification | Optional. |
 | `VERIFIER_TOKEN`, `VERIFIER_URL` | Verifier container | Only when `VERIFIER_MODE=container`. |
@@ -71,8 +71,8 @@ Repository **variables**: `ESCROW_ADMIN` (2-of-3 Safe), `OPERATOR_TREASURY`, `ES
 Order of operations:
 
 1. Push to `main`. **Deploy to Cloudflare** creates D1/R2/KV/Queues if missing, applies migrations, deploys the Worker, generates `SESSION_SECRET` and `COORDINATOR_KEY_JWK` on first run, and smoke-tests `/v1/health`.
-2. Run **Deploy escrow contract** (manual). It tests, deploys to Base Sepolia and opens a PR with `contracts/deployments/baseSepolia.json`.
-3. Set `ESCROW_ADDRESS` and `BASE_SEPOLIA_RPC_URL`, then re-run **Deploy to Cloudflare**. Set `ALLOW_MOCK_FUNDING=false` once real test USDC funding is working.
+2. Run **Deploy escrow contract** (manual). It tests, deploys TestUSDC and the escrow to the chosen network (default `robinhoodTestnet`) and opens a PR with `contracts/deployments/<network>.json`.
+3. Set the `ESCROW_ADDRESS` and `USDC_ADDRESS` variables, then re-run **Deploy to Cloudflare**. Set `ALLOW_MOCK_FUNDING=false` once real test USDC funding is working.
 4. Optional: run **Deploy verifier container**, then set `VERIFIER_MODE=container` and `VERIFIER_URL`.
 
 ## Deploying without GitHub
@@ -84,13 +84,15 @@ export CLOUDFLARE_API_TOKEN=...   # from the environment or a secret store, neve
 export CLOUDFLARE_ACCOUNT_ID=...
 export ADMIN_ADDRESSES=0xBB4aCCF4F4FbBED2abc8A86300C55365bea0108E
 ./scripts/deploy-direct.sh
+# after /app/deploy:
+ESCROW_ADDRESS=0x... USDC_ADDRESS=0x... ./scripts/deploy-direct.sh
 ```
 
 It builds, tests, provisions D1/R2/KV/Queues, migrates, deploys, creates the Worker secrets on first run and smoke-tests the URL.
 The script sets `SITE_ORIGIN` from the account's workers.dev subdomain, or from `SITE_ORIGIN` if you export one.
 
-The escrow contract is deployed from the browser at `/app/deploy` with the operator's own wallet, so no private key is handed to anyone.
-After that, rerun the script with `ESCROW_ADDRESS=0x...` so the API reads and settles against it.
+The test token and escrow are deployed from the browser at `/app/deploy` with the operator's own wallet, so no private key is handed to anyone.
+After that, rerun the script with both addresses so the API reads and settles against them.
 
 ## Mainnet readiness (not done, by design)
 
@@ -98,6 +100,7 @@ After that, rerun the script with `ESCROW_ADDRESS=0x...` so the API reads and se
 - Calibrated tolerances and a pinned model revision and SHA-256 in the verifier image.
 - Published signer addresses, chain parameters and terms; `ALLOW_MOCK_FUNDING` and the fixture verifier are refused on mainnet.
 - Pilot caps (500 USDC escrow, 50 USDC unsettled exposure) stay until reviewed.
+- Mainnet chain is still open. The code supports Base (8453, native USDC) and Robinhood Chain (4663). Before choosing Robinhood Chain mainnet, confirm a native USDC exists there. Its docs list USDG, which would need a review of the settlement asset.
 
 ## Notes on the implementation plan
 

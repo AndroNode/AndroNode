@@ -6,7 +6,7 @@ import { newId } from "@andronode/protocol/hash";
 import { PILOT_CAPS } from "@andronode/protocol/params";
 import type { AppEnv } from "../env";
 import { requireAdmin } from "../lib/auth";
-import { escrowConfigured, publicClient } from "../lib/chain";
+import { escrowConfigured, publicClient, isMainnet } from "../lib/chain";
 import { body, conflict, forbidden, notFound, now } from "../lib/http";
 import { balance } from "../lib/ledger";
 import { applySettlement, confirmSettlementTx, prepareSettlement, syncChain } from "../lib/settlement";
@@ -69,7 +69,7 @@ admin.post("/settlements/:id/confirm", async (c) => {
   const id = c.req.param("id");
   let changed: boolean;
   if (req.mock) {
-    if (c.env.ALLOW_MOCK_FUNDING !== "true" || c.env.NETWORK === "base") throw forbidden("Mock settlement is disabled on this network");
+    if (c.env.ALLOW_MOCK_FUNDING !== "true" || isMainnet(c.env)) throw forbidden("Mock settlement is disabled on this network");
     changed = await applySettlement(c.env, id, null, now());
   } else if (req.txHash) {
     changed = await confirmSettlementTx(c.env, id, req.txHash as Hex, now());

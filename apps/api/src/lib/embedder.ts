@@ -1,10 +1,11 @@
+import { isMainnet } from "./chain";
 import { fixtureEmbedding } from "@andronode/protocol/fixture-embed";
 import type { Env } from "../env";
 
 export interface Reference { vectors: number[][]; verifier: string }
 
 function assertAllowed(env: Env) {
-  if (env.VERIFIER_MODE === "fixture" && env.NETWORK === "base") throw new Error("Fixture verifier is not allowed on mainnet");
+  if (env.VERIFIER_MODE === "fixture" && isMainnet(env)) throw new Error("Fixture verifier is not allowed on mainnet");
 }
 
 async function callVerifier<T>(env: Env, path: string, payload: unknown): Promise<T> {

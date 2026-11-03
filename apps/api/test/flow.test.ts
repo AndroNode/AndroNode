@@ -31,7 +31,7 @@ describe("public API", () => {
   it("serves health, config and profiles", async () => {
     expect((await call("/v1/health")).data.ok).toBe(true);
     const cfg = await call("/v1/config");
-    expect(cfg.data.chainId).toBe(84532);
+    expect(cfg.data.chainId).toBe(46630);
     expect(cfg.data.mockFunding).toBe(true);
     expect((await call("/v1/profiles")).data.profiles[0].dimensions).toBe(384);
     expect((await call("/v1/nope")).status).toBe(404);

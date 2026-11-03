@@ -5,8 +5,8 @@ on:
       network:
         description: Target network
         type: choice
-        options: [baseSepolia]
-        default: baseSepolia
+        options: [robinhoodTestnet, baseSepolia]
+        default: robinhoodTestnet
 
 permissions:
   contents: write
@@ -20,6 +20,7 @@ jobs:
     env:
       DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
       BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
+      ROBINHOOD_TESTNET_RPC_URL: ${{ secrets.ROBINHOOD_TESTNET_RPC_URL || 'https://rpc.testnet.chain.robinhood.com' }}
       ESCROW_ADMIN: ${{ vars.ESCROW_ADMIN }}
       OPERATOR_TREASURY: ${{ vars.OPERATOR_TREASURY }}
       BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
@@ -37,7 +38,7 @@ jobs:
       - name: Test contracts
         run: pnpm --filter ./contracts test
       - name: Deploy
-        run: pnpm --filter ./contracts deploy:base-sepolia
+        run: pnpm --filter ./contracts exec hardhat run scripts/deploy.ts --network ${{ inputs.network }}
       - name: Summary
         run: |
           F=contracts/deployments/${{ inputs.network }}.json

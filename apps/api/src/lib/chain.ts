@@ -1,13 +1,18 @@
 import { createPublicClient, encodeAbiParameters, http, keccak256, parseEventLogs, toBytes, type Hex, type PublicClient } from "viem";
-import { base, baseSepolia } from "viem/chains";
+import { base, baseSepolia, robinhood, robinhoodTestnet } from "viem/chains";
 import { escrowAbi } from "@andronode/protocol/abi";
 import type { Env } from "../env";
 
-export const chainOf = (env: Env) => (env.CHAIN_ID === "8453" ? base : baseSepolia);
+const CHAINS = { 46630: robinhoodTestnet, 4663: robinhood, 84532: baseSepolia, 8453: base } as const;
+export const chainOf = (env: Env) => CHAINS[Number(env.CHAIN_ID) as keyof typeof CHAINS] ?? robinhoodTestnet;
+
+/** Real-money networks. Mock funding, mock settlement and the fixture verifier are refused here. */
+export const isMainnet = (env: Env) => env.NETWORK === "base" || env.NETWORK === "robinhood" || env.CHAIN_ID === "8453" || env.CHAIN_ID === "4663";
 
 export function publicClient(env: Env): PublicClient | null {
-  if (!env.BASE_RPC_URL) return null;
-  return createPublicClient({ chain: chainOf(env), transport: http(env.BASE_RPC_URL) }) as PublicClient;
+  const url = env.RPC_URL || env.BASE_RPC_URL;
+  if (!url) return null;
+  return createPublicClient({ chain: chainOf(env), transport: http(url) }) as PublicClient;
 }
 
 export const escrowConfigured = (env: Env) => /^0x[0-9a-fA-F]{40}$/.test(env.ESCROW_ADDRESS);
