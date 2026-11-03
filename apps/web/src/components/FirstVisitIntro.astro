@@ -1,7 +1,7 @@
 ---
 /**
  * First-visit intro (PRD FR-03): a short cinematic of devices joining a network around a checked result.
- * Shows once per browser, can be skipped at once (button or Esc), and always releases the page within 10 seconds.
+ * Shows on every visit to the homepage, can be skipped at once (button or Esc), and always releases the page within 10 seconds.
  * The progress line counts real asset readiness (fonts, logo, page load), never a timed fake percentage.
  * With motion off it is a still card that fades away.
  */
@@ -95,10 +95,9 @@
 
 <script is:inline>
 (function () {
-  var KEY = "an-intro-seen";
-  var seen = false;
-  try { seen = localStorage.getItem(KEY) === "1"; } catch (e) { seen = !!window.__anIntroSeen; }
-  if (seen || window.__anIntroSeen) return;
+  // Plays on every visit (each full page load of the homepage). Moving between pages inside the
+  // site keeps the same window, so returning home in the same visit does not replay it.
+  if (window.__anIntroSeen) return;
   var el = document.getElementById("an-intro");
   if (!el) return;
   var motion = true;
@@ -208,7 +207,6 @@
     if (done) return;
     done = true;
     window.__anIntroSeen = true;
-    try { localStorage.setItem(KEY, "1"); } catch (e) {}
     if (reason === "timeout" && status) status.textContent = "Some assets are still loading";
     window.dispatchEvent(new Event("an-intro-done"));
     if (!motion || reason === "skip") { finish(); return; }
