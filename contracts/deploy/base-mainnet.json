@@ -1,0 +1,16 @@
+{
+  "network": "base",
+  "chainId": 8453,
+  "explorer": "https://basescan.org",
+  "asset": {
+    "symbol": "USDC",
+    "decimals": 6,
+    "address": null,
+    "source": "Must be copied from Circle's official list at deploy time and checked by two people."
+  },
+  "admin": null,
+  "operatorTreasury": null,
+  "maxOutstandingEscrowUnits": "500000000",
+  "maxHardCloseWindowSeconds": 1209600,
+  "requiresAudit": true
+}

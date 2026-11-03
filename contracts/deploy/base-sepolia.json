@@ -1,0 +1,15 @@
+{
+  "network": "baseSepolia",
+  "chainId": 84532,
+  "explorer": "https://sepolia.basescan.org",
+  "asset": {
+    "symbol": "USDC",
+    "decimals": 6,
+    "address": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "source": "Circle testnet USDC on Base Sepolia. Re-check against https://developers.circle.com/stablecoins/usdc-contract-addresses before deploying."
+  },
+  "admin": null,
+  "operatorTreasury": null,
+  "maxOutstandingEscrowUnits": "500000000",
+  "maxHardCloseWindowSeconds": 1209600
+}
