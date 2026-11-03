@@ -37,6 +37,8 @@ for (const k of cfg.kv_namespaces) {
 }
 // SKIP_R2=1: deploy without R2 (blobs fall back to KV, see src/lib/blobs.ts).
 if (process.env.SKIP_R2) cfg.r2_buckets = [];
+// SKIP_CRON=1: deploy without the cron trigger (Workers Free allows 5 per account). Periodic jobs then run from API traffic.
+if (process.env.SKIP_CRON) delete cfg.triggers;
 for (const b of cfg.r2_buckets) tryWr("r2", "bucket", "create", b.bucket_name);
 const queues = new Set([...cfg.queues.producers.map((q) => q.queue), ...cfg.queues.consumers.flatMap((q) => [q.queue, q.dead_letter_queue].filter(Boolean))]);
 for (const q of queues) tryWr("queues", "create", q);

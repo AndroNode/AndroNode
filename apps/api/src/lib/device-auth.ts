@@ -65,9 +65,9 @@ export const requireDevice: MiddlewareHandler<AppEnv> = async (c, next) => {
   const url = new URL(c.req.url);
   const msg = await requestSigningString(c.req.method, url.pathname + url.search, ts, raw);
   if (!(await verifyDeviceSig(JSON.parse(dev.public_key_jwk), msg, sig))) throw new ApiError(401, "DEVICE_AUTH", "Bad device signature");
-  const replayKey = "sig:" + (await sha256Hex(sig));
-  if (await c.env.KV.get(replayKey)) throw new ApiError(401, "DEVICE_REPLAY", "Signature already used");
-  await c.env.KV.put(replayKey, "1", { expirationTtl: 180 });
+  // Atomic replay guard in D1: a signature can be inserted once. Rows expire after the skew window.
+  const ins = await c.env.DB.prepare("INSERT OR IGNORE INTO device_replay (sig_hash, expires_at) VALUES (?, ?)").bind(await sha256Hex(sig), now() + 3 * SKEW_MS).run();
+  if (!ins.meta.changes) throw new ApiError(401, "DEVICE_REPLAY", "Signature already used");
   await c.env.DB.prepare("UPDATE devices SET last_seen_at = ? WHERE id = ?").bind(now(), deviceId).run();
   c.set("deviceId", deviceId);
   await next();

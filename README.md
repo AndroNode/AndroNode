@@ -89,6 +89,9 @@ ESCROW_ADDRESS=0x... USDC_ADDRESS=0x... ./scripts/deploy-direct.sh
 ```
 
 It builds, tests, provisions D1/R2/KV/Queues, migrates, deploys, creates the Worker secrets on first run and smoke-tests the URL.
+
+Workers Free works too. Without an R2 plan, run with `SKIP_R2=1`: blobs are stored in D1 in parts (KV is avoided because the free plan allows only 1,000 KV writes a day).
+Device replay protection also lives in D1. If the account has no free cron slot, add `SKIP_CRON=1`; the 2-minute sweep and chain sync run from ordinary API traffic instead, at most once per window.
 The script sets `SITE_ORIGIN` from the account's workers.dev subdomain, or from `SITE_ORIGIN` if you export one.
 
 The test token and escrow are deployed from the browser at `/app/deploy` with the operator's own wallet, so no private key is handed to anyone.

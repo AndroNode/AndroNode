@@ -22,6 +22,15 @@ app.use("*", async (c, next) => {
   await next();
 });
 
+app.use("/v1/*", async (c, next) => {
+  await next();
+  try {
+    c.executionCtx.waitUntil(runPeriodic(c.env, Date.now()).catch((e) => console.error("periodic run failed", e)));
+  } catch {
+    // No execution context (unit tests calling app.fetch directly).
+  }
+});
+
 app.use("/v1/*", secureHeaders());
 app.use("/v1/*", async (c, next) => cors({ origin: c.env.SITE_ORIGIN, credentials: true, allowHeaders: ["content-type", "authorization", "x-an-device", "x-an-ts", "x-an-sig"] })(c, next));
 app.use("/v1/*", async (c, next) => {
@@ -59,6 +68,22 @@ app.onError((err, c) => {
 });
 app.notFound((c) => (c.req.path.startsWith("/v1/") ? c.json({ error: { code: "NOT_FOUND", message: "No such endpoint" } }, 404) : c.env.ASSETS.fetch(c.req.raw)));
 
+/**
+ * Sweep expired leases, sync the chain and re-queue stuck verifications. Runs from the cron trigger, and also
+ * from ordinary API traffic at most once every 2 minutes, so it keeps working when the account has no free
+ * cron slot (Workers Free allows 5 per account). The UPDATE is the claim: only one request wins each window.
+ */
+async function runPeriodic(env: Env, at: number, fromCron = false) {
+  const claim = await env.DB.prepare("UPDATE job_runs SET last_at = ? WHERE name = 'periodic' AND last_at < ?").bind(at, at - (fromCron ? 60_000 : 120_000)).run();
+  if (!claim.meta.changes) return;
+  await sweep(env, at);
+  await syncChain(env, at).catch((e) => console.error("chain sync failed", e));
+  // Re-queue submissions stuck in Verifying (e.g. verifier outage). Timely submissions never expire (§16.2).
+  const stuck = await env.DB.prepare("SELECT id FROM leases WHERE state IN ('SUBMITTED','VERIFYING') AND submitted_at < ? LIMIT 100").bind(at - 10 * 60_000).all<{ id: string }>();
+  if (stuck.results.length) await env.VERIFY_QUEUE.sendBatch(stuck.results.map((r) => ({ body: { leaseId: r.id } })));
+  await env.DB.prepare("DELETE FROM device_replay WHERE expires_at < ?").bind(at).run();
+}
+
 export default {
   fetch: app.fetch,
   async queue(batch: MessageBatch<VerifyJob | WebhookJob>, env: Env) {
@@ -81,13 +106,6 @@ export default {
   },
   async scheduled(_ctl: ScheduledController, env: Env, ctx: ExecutionContext) {
     withBlobs(env);
-    const at = Date.now();
-    ctx.waitUntil((async () => {
-      await sweep(env, at);
-      await syncChain(env, at).catch((e) => console.error("chain sync failed", e));
-      // Re-queue submissions stuck in Verifying (e.g. verifier outage). Timely submissions never expire (§16.2).
-      const stuck = await env.DB.prepare("SELECT id FROM leases WHERE state IN ('SUBMITTED','VERIFYING') AND submitted_at < ? LIMIT 100").bind(at - 10 * 60_000).all<{ id: string }>();
-      if (stuck.results.length) await env.VERIFY_QUEUE.sendBatch(stuck.results.map((r) => ({ body: { leaseId: r.id } })));
-    })());
+    ctx.waitUntil(runPeriodic(env, Date.now(), true));
   },
 } satisfies ExportedHandler<Env, VerifyJob | WebhookJob>;

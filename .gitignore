@@ -15,3 +15,4 @@ coverage
 __pycache__
 .venv
 apps/api/wrangler.deploy.jsonc
+.andronode-device.json
