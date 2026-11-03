@@ -13,8 +13,14 @@ import { verifyLease } from "./jobs/verify";
 import { deliverWebhook } from "./lib/webhooks";
 import { sweep } from "./lib/orders";
 import { syncChain } from "./lib/settlement";
+import { withBlobs } from "./lib/blobs";
 
 export const app = new Hono<AppEnv>();
+
+app.use("*", async (c, next) => {
+  withBlobs(c.env);
+  await next();
+});
 
 app.use("/v1/*", secureHeaders());
 app.use("/v1/*", async (c, next) => cors({ origin: c.env.SITE_ORIGIN, credentials: true, allowHeaders: ["content-type", "authorization", "x-an-device", "x-an-ts", "x-an-sig"] })(c, next));
@@ -56,6 +62,7 @@ app.notFound((c) => (c.req.path.startsWith("/v1/") ? c.json({ error: { code: "NO
 export default {
   fetch: app.fetch,
   async queue(batch: MessageBatch<VerifyJob | WebhookJob>, env: Env) {
+    withBlobs(env);
     for (const msg of batch.messages) {
       try {
         if (batch.queue.includes("verify")) {
@@ -73,6 +80,7 @@ export default {
     }
   },
   async scheduled(_ctl: ScheduledController, env: Env, ctx: ExecutionContext) {
+    withBlobs(env);
     const at = Date.now();
     ctx.waitUntil((async () => {
       await sweep(env, at);
