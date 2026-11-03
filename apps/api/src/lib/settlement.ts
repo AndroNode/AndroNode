@@ -3,7 +3,7 @@ import { escrowAbi } from "@andronode/protocol/abi";
 import { canonicalJson, newId } from "@andronode/protocol/hash";
 import { ESCROW_TIMING } from "@andronode/protocol/params";
 import type { Env } from "../env";
-import { escrowConfigured, fetchEscrowLogs, publicClient } from "./chain";
+import { checkFundingTx, escrowConfigured, fetchEscrowLogs, publicClient } from "./chain";
 import { ApiError, conflict } from "./http";
 import { journal } from "./ledger";
 import { activateOrder } from "./orders";
@@ -117,4 +117,20 @@ export async function syncChain(env: Env, at: number): Promise<{ processed: numb
   }
   await db.prepare("INSERT INTO chain_cursor (chain_id, last_block) VALUES (?, ?) ON CONFLICT(chain_id) DO UPDATE SET last_block = excluded.last_block").bind(chainId, Number(res.toBlock)).run();
   return { processed, toBlock: res.toBlock.toString() };
+}
+
+/**
+ * Confirms on-chain funding for orders whose transaction was submitted but not yet visible to the RPC
+ * (lagging node, RPC outage). Runs from the periodic job; looks back 24 hours, a few orders per run.
+ */
+export async function recheckPendingFunding(env: Env, at: number): Promise<number> {
+  const rows = await env.DB.prepare(
+    "SELECT o.id, o.funding_tx, q.quote_hash, q.max_charge_units, a.address FROM orders o JOIN quotes q ON q.id = o.quote_id JOIN accounts a ON a.id = o.account_id WHERE o.state = 'QUOTED' AND o.funding_tx IS NOT NULL AND o.created_at > ? LIMIT 5",
+  ).bind(at - 24 * 3600_000).all<{ id: string; funding_tx: string; quote_hash: string; max_charge_units: number; address: string }>();
+  let funded = 0;
+  for (const r of rows.results) {
+    const chk = await checkFundingTx(env, r.funding_tx as Hex, { orderId: r.id as Hex, customer: r.address, quoteHash: r.quote_hash as Hex, maxCharge: BigInt(r.max_charge_units) });
+    if (chk.ok && (await activateOrder(env, r.id, { mode: "chain", txHash: r.funding_tx, fundedUnits: chk.amount!, at }))) funded++;
+  }
+  return funded;
 }

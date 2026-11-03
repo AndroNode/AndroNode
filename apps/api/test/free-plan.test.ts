@@ -14,7 +14,7 @@ describe("Workers Free fallbacks", () => {
     expect(parts!.n).toBeGreaterThan(2);
     const got = await store.get("orders/test/input.json");
     expect(await got!.text()).toBe(big);
-    expect((await got!.json()).length).toBe(30_000);
+    expect(((await got!.json()) as unknown[]).length).toBe(30_000);
     // Overwrite with a smaller value leaves no stale parts.
     await store.put("orders/test/input.json", '{"small":true}');
     expect(await (await store.get("orders/test/input.json"))!.json()).toEqual({ small: true });

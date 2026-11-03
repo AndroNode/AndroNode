@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { PILOT_CAPS, PRICING, PROBATION, LEASE_RULES } from "@andronode/protocol/params";
 import type { AppEnv } from "../env";
 import { coordinatorPublicKey } from "../lib/coordinator";
-import { escrowConfigured, chainOf, isMainnet } from "../lib/chain";
+import { escrowConfigured, chainOf, isMainnet, publicClient } from "../lib/chain";
 import { activeProfiles } from "../lib/profiles";
 import { notFound } from "../lib/http";
 
@@ -10,7 +10,14 @@ export const pub = new Hono<AppEnv>();
 
 pub.get("/health", async (c) => {
   const db = await c.env.DB.prepare("SELECT 1 AS ok").first<{ ok: number }>().catch(() => null);
-  return c.json({ ok: !!db, network: c.env.NETWORK, time: Date.now() });
+  // ?chain=1 also checks that the Worker can reach the chain RPC (used to diagnose funding checks).
+  let chain: { ok: boolean; head?: string; error?: string } | undefined;
+  if (c.req.query("chain")) {
+    const client = publicClient(c.env);
+    if (!client) chain = { ok: false, error: "No RPC configured" };
+    else chain = await client.getBlockNumber().then((h) => ({ ok: true, head: h.toString() }), (e: any) => ({ ok: false, error: String(e?.shortMessage ?? e?.message ?? e).slice(0, 200) }));
+  }
+  return c.json({ ok: !!db, network: c.env.NETWORK, time: Date.now(), ...(chain ? { chain } : {}) });
 });
 
 pub.get("/config", (c) =>

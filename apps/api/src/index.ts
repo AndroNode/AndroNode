@@ -12,7 +12,7 @@ import { admin } from "./routes/admin";
 import { verifyLease } from "./jobs/verify";
 import { deliverWebhook } from "./lib/webhooks";
 import { sweep } from "./lib/orders";
-import { syncChain } from "./lib/settlement";
+import { recheckPendingFunding, syncChain } from "./lib/settlement";
 import { withBlobs } from "./lib/blobs";
 
 export const app = new Hono<AppEnv>();
@@ -78,6 +78,7 @@ async function runPeriodic(env: Env, at: number, fromCron = false) {
   if (!claim.meta.changes) return;
   await sweep(env, at);
   await syncChain(env, at).catch((e) => console.error("chain sync failed", e));
+  await recheckPendingFunding(env, at).catch((e) => console.error("funding recheck failed", e));
   // Re-queue submissions stuck in Verifying (e.g. verifier outage). Timely submissions never expire (§16.2).
   const stuck = await env.DB.prepare("SELECT id FROM leases WHERE state IN ('SUBMITTED','VERIFYING') AND submitted_at < ? LIMIT 100").bind(at - 10 * 60_000).all<{ id: string }>();
   if (stuck.results.length) await env.VERIFY_QUEUE.sendBatch(stuck.results.map((r) => ({ body: { leaseId: r.id } })));

@@ -25,14 +25,30 @@ export function orderIdFor(env: Env, customer: Hex, quoteHash: Hex): Hex {
 
 export const profileIdBytes32 = (profileId: string): Hex => keccak256(toBytes(profileId));
 
-export interface FundingCheck { ok: boolean; reason?: string; amount?: bigint; blockNumber?: bigint }
+export interface FundingCheck { ok: boolean; reason?: string; detail?: string; amount?: bigint; blockNumber?: bigint }
 
 /** Confirms a funding transaction emitted OrderFunded for exactly this order and quote. */
 export async function checkFundingTx(env: Env, txHash: Hex, expect: { orderId: Hex; customer: string; quoteHash: Hex; maxCharge: bigint }): Promise<FundingCheck> {
   const client = publicClient(env);
   if (!client || !escrowConfigured(env)) return { ok: false, reason: "CHAIN_NOT_CONFIGURED" };
-  const receipt = await client.getTransactionReceipt({ hash: txHash }).catch(() => null);
-  if (!receipt) return { ok: false, reason: "TX_NOT_FOUND" };
+  // Public RPCs behind load balancers can lag the node the wallet used, so retry briefly.
+  // A missing receipt and an RPC failure are reported separately so outages are not mistaken for bad hashes.
+  let receipt: Awaited<ReturnType<typeof client.getTransactionReceipt>> | null = null;
+  let rpcError: string | null = null;
+  for (let i = 0; i < 3 && !receipt; i++) {
+    if (i) await new Promise((r) => setTimeout(r, 1500));
+    try {
+      receipt = await client.getTransactionReceipt({ hash: txHash });
+      rpcError = null;
+    } catch (e: any) {
+      if (e?.name === "TransactionReceiptNotFoundError") rpcError = null;
+      else {
+        rpcError = String(e?.shortMessage ?? e?.message ?? e).slice(0, 200);
+        console.error("funding check RPC error", txHash, rpcError);
+      }
+    }
+  }
+  if (!receipt) return { ok: false, reason: rpcError ? "RPC_ERROR" : "TX_NOT_FOUND", detail: rpcError ?? undefined };
   if (receipt.status !== "success") return { ok: false, reason: "TX_FAILED" };
   const head = await client.getBlockNumber();
   if (head - receipt.blockNumber + 1n < BigInt(env.CONFIRMATIONS)) return { ok: false, reason: "AWAITING_CONFIRMATIONS" };

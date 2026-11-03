@@ -8,7 +8,7 @@ import { Button, EmptyState, Field, Panel, Select, StatusBadge, type StatusTone 
 import AppGate, { errText, short, usdc, useAsync, when } from "./AppGate";
 
 interface Quote { quote: { id: string; profileId: string; recordCount: number; maxChargeUnits: string; expiresAt: number }; funding: { escrow: string | null; asset: string; maxCharge: string; quoteHash: Hex; profileId: Hex; hardCloseAt: number; orderId: Hex } }
-interface Order { id: string; state: string; record_count: number; accepted_records: number; charged_units: number; funded_units: number; funding_mode: string; created_at: number; deadline_at: number | null; hard_close_at: number | null; finished_at: number | null }
+interface Order { id: string; state: string; funding_tx?: string | null; record_count: number; accepted_records: number; charged_units: number; funded_units: number; funding_mode: string; created_at: number; deadline_at: number | null; hard_close_at: number | null; finished_at: number | null }
 
 const TONE: Record<string, StatusTone> = { QUOTED: "idle", FUNDED: "busy", RUNNING: "busy", COMPLETED: "ok", PARTIAL: "warn", CANCELLED: "idle", FAILED: "bad", CLOSED: "idle" };
 
@@ -72,8 +72,8 @@ function NewOrder({ cfg, onCreated }: { cfg: ApiConfig; onCreated: () => void })
       setTx(hash);
       setStep("3/3 Waiting for confirmations…");
       await publicClient.waitForTransactionReceipt({ hash, confirmations: 3 });
-      const r = await api<{ funding: { state: string; reason?: string } }>("/v1/orders", { json: { quoteId: quote.quote.id, fundingTxHash: hash } });
-      if (r.funding.state !== "FUNDED") setErr(`Funding recorded; the coordinator will pick it up shortly (${r.funding.reason}).`);
+      const r = await api<{ funding: { state: string; reason?: string; detail?: string } }>("/v1/orders", { json: { quoteId: quote.quote.id, fundingTxHash: hash } });
+      if (r.funding.state !== "FUNDED") setErr(`Your payment is on-chain. The coordinator could not confirm it yet (${r.funding.reason}${r.funding.detail ? `: ${r.funding.detail}` : ""}) and keeps re-checking every few minutes. You can also open the order below and press Check funding.`);
       setQuote(null); onCreated();
     } catch (e) { setErr(errText(e)); } finally { setStep(null); }
   };
@@ -187,6 +187,11 @@ function OrderDetail({ cfg, id, onChange }: { cfg: ApiConfig; id: string; onChan
     const h = await wallet.writeContract({ account: address, address: cfg.escrowAddress as Hex, abi: escrowAbi, functionName: "refundRemainder", args: [o.id as Hex] });
     await publicClient.waitForTransactionReceipt({ hash: h });
   };
+  const checkFunding = async () => {
+    const typed = (document.getElementById(`tx-${o.id}`) as HTMLInputElement | null)?.value.trim();
+    const r = await api<{ funding: { state: string; reason?: string; detail?: string } }>(`/v1/orders/${o.id}/check-funding`, { json: typed ? { fundingTxHash: typed } : {} });
+    if (r.funding.state !== "FUNDED") throw new Error(`Not confirmed yet: ${r.funding.reason}${r.funding.detail ? ` (${r.funding.detail})` : ""}. Try again in a minute.`);
+  };
   const canRefund = cfg.escrowAddress && o.funding_mode === "chain" && (o.state === "CLOSED" || (o.hard_close_at && Date.now() > o.hard_close_at));
   return (
     <div className="mt-4 rounded-lg border border-line p-4 text-sm">
@@ -203,6 +208,14 @@ function OrderDetail({ cfg, id, onChange }: { cfg: ApiConfig; id: string; onChan
       </dl>
       <p className="mt-2 text-xs text-charcoal-60">Tasks: {d.data.tasks.map((t: any) => `${t.state.toLowerCase()} ${t.n}`).join(" · ") || "none"}. Deadline {when(o.deadline_at)}. Hard close {when(o.hard_close_at)}.</p>
       {d.data.receipts.some((r: any) => r.decision === "REJECTED") && <p className="mt-1 text-xs">Rejected attempts (not charged, retried elsewhere): {d.data.receipts.filter((r: any) => r.decision === "REJECTED").map((r: any) => `${r.reason} ×${r.n}`).join(", ")}</p>}
+      {o.state === "QUOTED" && o.funding_mode === "chain" && cfg.escrowAddress && (
+        <div className="mt-4 rounded-lg bg-peach-soft p-3">
+          <p className="text-sm">Waiting for on-chain funding. If you already paid, check it now. The coordinator also re-checks automatically.</p>
+          <label className="mt-2 block text-xs text-charcoal-60" htmlFor={`tx-${o.id}`}>Funding transaction hash</label>
+          <input id={`tx-${o.id}`} defaultValue={o.funding_tx ?? ""} placeholder="0x…" spellCheck={false} className="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 font-mono text-xs" />
+          <div className="mt-2"><Button variant="accent" onClick={() => act(checkFunding, "Funding confirmed. Work starts now.")}>Check funding</Button></div>
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap gap-2">
         {o.accepted_records > 0 && <Button variant="ghost" onClick={() => act(results, "Download started")}>Download results (JSONL)</Button>}
         {["FUNDED", "RUNNING"].includes(o.state) && <Button variant="ghost" onClick={() => act(() => api(`/v1/orders/${o.id}/cancel`, { method: "POST" }), "Cancelled. Already-leased work may still finish and be charged.")}>Cancel order</Button>}

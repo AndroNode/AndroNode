@@ -87,10 +87,33 @@ customer.post("/orders", async (c) => {
     if (chk.ok) {
       await activateOrder(c.env, q.order_id, { mode: "chain", txHash: req.fundingTxHash, fundedUnits: chk.amount!, at });
       funding = { state: "FUNDED" };
-    } else funding = { state: "AWAITING_FUNDING", reason: chk.reason };
+    } else {
+      // Keep the hash so the periodic job (and "Check funding") can confirm it later.
+      await c.env.DB.prepare("UPDATE orders SET funding_tx = ? WHERE id = ? AND state = 'QUOTED'").bind(req.fundingTxHash, q.order_id).run();
+      funding = { state: "AWAITING_FUNDING", reason: chk.reason, ...(chk.detail ? { detail: chk.detail } : {}) };
+    }
   }
   const order = await c.env.DB.prepare("SELECT * FROM orders WHERE id = ?").bind(q.order_id).first();
   return c.json({ order, funding }, funding.state === "FUNDED" ? 201 : 202);
+});
+
+/** Re-checks an on-chain funding transaction for an order still in QUOTED, using the stored hash or a new one. */
+customer.post("/orders/:id/check-funding", async (c) => {
+  const user = c.get("user");
+  const o = await ownOrder(c, c.req.param("id"));
+  if (o.state !== "QUOTED") return c.json({ order: o, funding: { state: o.state === "CANCELLED" ? o.state : "FUNDED" } });
+  const req = await body(c, z.object({ fundingTxHash: z.string().regex(/^0x[0-9a-fA-F]{64}$/).optional() }));
+  const tx = (req.fundingTxHash ?? o.funding_tx) as Hex | null;
+  if (!tx) throw bad("NO_FUNDING_TX", "Paste the funding transaction hash from your wallet or the explorer.");
+  const q = await c.env.DB.prepare("SELECT * FROM quotes WHERE id = ?").bind(o.quote_id).first<QuoteRow>();
+  const chk = await checkFundingTx(c.env, tx, { orderId: o.id as Hex, customer: user.address, quoteHash: q!.quote_hash as Hex, maxCharge: BigInt(q!.max_charge_units) });
+  let funding: { state: string; reason?: string; detail?: string } = { state: "AWAITING_FUNDING", reason: chk.reason, detail: chk.detail };
+  if (chk.ok) {
+    await activateOrder(c.env, o.id, { mode: "chain", txHash: tx, fundedUnits: chk.amount!, at: now() });
+    funding = { state: "FUNDED" };
+  } else await c.env.DB.prepare("UPDATE orders SET funding_tx = ? WHERE id = ? AND state = 'QUOTED'").bind(tx, o.id).run();
+  const order = await c.env.DB.prepare("SELECT * FROM orders WHERE id = ?").bind(o.id).first();
+  return c.json({ order, funding });
 });
 
 customer.get("/orders", async (c) => {
