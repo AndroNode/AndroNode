@@ -9,6 +9,7 @@ export default defineConfig({
   trailingSlash: "never",
   build: { format: "file" },
   integrations: [react(), sitemap()],
-  vite: { plugins: [tailwindcss()] },
+  // Never inline page scripts: the client router re-runs inline module scripts as data: URLs, which the CSP blocks.
+  vite: { plugins: [tailwindcss()], build: { assetsInlineLimit: 0 } },
   prefetch: { prefetchAll: true, defaultStrategy: "hover" },
 });

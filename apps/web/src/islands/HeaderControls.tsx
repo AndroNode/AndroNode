@@ -74,8 +74,17 @@ function XControl({ site }: { site: SiteConfig }) {
 
 function MotionToggle() {
   const [pref, setPref] = useState<MotionPref>("system");
-  useEffect(() => setPref(motionPref()), []);
-  const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  // Read the OS setting after hydration, so the first client render matches the server's HTML.
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    setPref(motionPref());
+    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!mq) return;
+    setReduced(mq.matches);
+    const on = () => setReduced(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
   const on = pref === "on" || (pref === "system" && !reduced);
   return (
     <button
