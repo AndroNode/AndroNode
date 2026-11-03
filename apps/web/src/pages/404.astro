@@ -1,0 +1,17 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Companion from "../components/Companion";
+---
+<Layout title="Page not found" description="This page does not exist.">
+  <section class="mx-auto grid max-w-3xl place-items-center px-4 py-24 text-center sm:px-6">
+    <Companion size={96} />
+    <p class="mt-6 font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Error 404</p>
+    <h1 class="mt-2 text-4xl font-bold tracking-tight">Nothing here</h1>
+    <p class="mt-3 max-w-md text-charcoal-80">The page may have moved, or the link is wrong. If you followed a link promising an app download or token sale, it is not from AndroNode.</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <button type="button" onclick="location.reload()" class="min-h-11 rounded-full border border-charcoal/30 px-5 font-bold">Retry</button>
+      <a href="/" class="inline-flex min-h-11 items-center rounded-full bg-charcoal px-5 font-bold text-paper">Home</a>
+      <a href="/docs" class="inline-flex min-h-11 items-center rounded-full border border-charcoal/30 px-5 font-bold">Docs</a>
+    </div>
+  </section>
+</Layout>

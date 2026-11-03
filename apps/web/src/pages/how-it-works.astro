@@ -1,0 +1,64 @@
+---
+import Layout from "../layouts/Layout.astro";
+const steps = [
+  { t: "Customer funds an order", b: "Picks the embedding profile, uploads approved non-sensitive text and funds the maximum charge in USDC escrow.", where: "On-chain deposit", href: "/workloads" },
+  { t: "Coordinator leases tasks", b: "Records are grouped into tasks of up to 64. Each attempt gets a lease of at most 120 seconds and a fixed reward.", where: "Off-chain", href: "/workloads" },
+  { t: "Your device computes", b: "During a session you started, on power and Wi-Fi, within your limits. Stop works at any time without penalty.", where: "On your device", href: "/contribute" },
+  { t: "Verifier recomputes", b: "A trusted verifier recomputes every vector and accepts or rejects with a reason code.", where: "Off-chain", href: "/verify" },
+  { t: "Settlement and withdrawal", b: "After review, 75% of accepted charges are credited to contributors on-chain. You withdraw when you choose. Unused escrow returns to the customer.", where: "On-chain credit", href: "/rewards" },
+];
+const trust = [
+  ["Quoting, scheduling and disputes", "The operator", "Published rules and receipts"],
+  ["Is a result correct?", "The trusted verifier", "Public tolerances and reason codes"],
+  ["Settlement of accepted work", "2-of-3 administrator keys", "Contract enforces 75/25, funding limits and no replays"],
+  ["Credited balances", "Nobody: you withdraw yourself", "Pull payments, even while paused"],
+  ["Unused customer funds after hard close", "Nobody: customer reclaims", "Permissionless refund after 14 days"],
+];
+---
+<Layout title="How it works" description="Five steps from a funded order to a withdrawn reward, and exactly where trust in the operator remains.">
+  <section class="mx-auto max-w-7xl px-4 pb-10 pt-12 sm:px-6">
+    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">How it works</p>
+    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">Useful work in. Verified results out.</h1>
+    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">AndroNode is a proposed network where Android devices run small, checkable AI tasks for paying customers. AI work stays off-chain; only money moves on-chain.</p>
+  </section>
+
+  <section class="mx-auto max-w-7xl px-4 sm:px-6" aria-label="Steps">
+    <ol class="grid gap-4 md:grid-cols-5">
+      {steps.map((s, i) => (
+        <li class="relative flex flex-col rounded-[var(--radius-card)] border border-line bg-white/60 p-5">
+          <span class="grid size-9 place-items-center rounded-full bg-charcoal font-mono text-sm text-paper">{i + 1}</span>
+          <h2 class="mt-4 font-bold">{s.t}</h2>
+          <p class="mt-2 flex-1 text-sm text-charcoal-80">{s.b}</p>
+          <p class="mt-3 font-mono text-[11px] uppercase tracking-wide text-orange-deep">{s.where}</p>
+          <a href={s.href} class="mt-2 inline-flex min-h-11 items-center text-sm font-bold underline decoration-orange decoration-2 underline-offset-4">Try it →</a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="mx-auto mt-16 max-w-7xl px-4 sm:px-6">
+    <h2 class="text-3xl font-bold tracking-tight">Who you are trusting</h2>
+    <p class="mt-3 max-w-2xl text-charcoal-80">The first release is coordinator-managed. Receipts and on-chain balances make parts of the process auditable; they do not remove the operator.</p>
+    <div class="mt-6 overflow-x-auto rounded-[var(--radius-card)] border border-line bg-white/60">
+      <table class="w-full min-w-[40rem] text-left text-sm">
+        <thead class="text-charcoal-60"><tr><th class="p-4 font-normal">Decision</th><th class="p-4 font-normal">Who decides</th><th class="p-4 font-normal">What limits them</th></tr></thead>
+        <tbody>{trust.map(([a, b, c]) => <tr class="border-t border-line"><td class="p-4 font-bold">{a}</td><td class="p-4">{b}</td><td class="p-4 text-charcoal-80">{c}</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mx-auto mt-16 grid max-w-7xl gap-6 px-4 sm:px-6 md:grid-cols-3">
+    <div class="rounded-[var(--radius-card)] bg-charcoal p-6 text-paper">
+      <h2 class="text-xl font-bold">What earns</h2>
+      <p class="mt-2 text-paper/80">Accepted records from paid orders. Same work, same quote, same pay. No token, membership or multiplier changes it.</p>
+    </div>
+    <div class="rounded-[var(--radius-card)] border border-line p-6">
+      <h2 class="text-xl font-bold">What never earns</h2>
+      <p class="mt-2 text-charcoal-80">Installing, registering, uptime, idle charging, taps, referrals or holding a token.</p>
+    </div>
+    <div class="rounded-[var(--radius-card)] border border-line p-6">
+      <h2 class="text-xl font-bold">What it costs you</h2>
+      <p class="mt-2 text-charcoal-80">Electricity, heat, battery wear and data. Rewards may be smaller than these costs. <a href="/docs#risks" class="underline">Read the risks</a>.</p>
+    </div>
+  </section>
+</Layout>
