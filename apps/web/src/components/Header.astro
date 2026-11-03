@@ -12,7 +12,7 @@ const nav = [
 ];
 const path = Astro.url.pathname.replace(/\/$/, "").replace(/\.html$/, "") || "/";
 ---
-<header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur" transition:persist="site-header">
+<header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-charcoal focus:px-3 focus:py-2 focus:text-paper">Skip to content</a>
   <div class="border-b border-line/70 bg-peach-soft">
     <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-1.5 sm:px-6">

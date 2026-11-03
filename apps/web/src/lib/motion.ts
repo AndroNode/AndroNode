@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { getItem, setItem } from "./storage";
 
 export type MotionPref = "on" | "off" | "system";
@@ -21,4 +22,21 @@ export function setMotion(p: MotionPref) {
   if (p === "system") document.documentElement.removeAttribute("data-motion");
   else document.documentElement.setAttribute("data-motion", p);
   window.dispatchEvent(new CustomEvent("an-motion", { detail: p }));
+}
+
+/** React hook: true when animations may play. Updates on the header toggle. */
+export function useMotion(): boolean {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const update = () => setOn(motionAllowed());
+    update();
+    window.addEventListener("an-motion", update);
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    mq.addEventListener("change", update);
+    return () => {
+      window.removeEventListener("an-motion", update);
+      mq.removeEventListener("change", update);
+    };
+  }, []);
+  return on;
 }

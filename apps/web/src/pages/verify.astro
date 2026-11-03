@@ -1,0 +1,14 @@
+---
+import Layout from "../layouts/Layout.astro";
+import VerifyLab from "../islands/VerifyLab";
+---
+<Layout title="Verification & Receipts" description="Pick a submission and see each verification step, the numeric tolerances and the reason code when something fails.">
+  <section class="mx-auto max-w-7xl px-4 pb-6 pt-12 sm:px-6">
+    <p class="font-mono text-xs uppercase tracking-[0.18em] text-charcoal-60">Verification &amp; Receipts · Simulation</p>
+    <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">Every result is checked</h1>
+    <p class="mt-4 max-w-2xl text-lg text-charcoal-80">Pick a submission and see each verification step, the numeric tolerances and the reason code when something fails.</p>
+  </section>
+  <section class="mx-auto max-w-7xl px-4 sm:px-6">
+    <VerifyLab client:load />
+  </section>
+</Layout>
