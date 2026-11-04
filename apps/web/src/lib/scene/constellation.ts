@@ -398,6 +398,10 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   };
   for (let i = 0; i < (opts.compact ? 10 : 18); i++) makePulse(false);
   const flash = new Float32Array(N);
+  // Real work only (a task arrived), kept apart from hover and scan highlights so the label tells the truth.
+  const work = new Float32Array(N);
+  // Idle status per device, matched to what its screen shows.
+  const IDLE_STATUS: Record<number, string> = { 2: "result verified", 3: "charging", 6: "uploading result", 7: "locked · waiting for charger" };
   const hoverScale = new Float32Array(N);
   const col = new THREE.Color();
 
@@ -617,6 +621,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       screens.setMatrixAt(i, m);
       if (i === hovered) flash[i] = Math.max(flash[i]!, 1);
       flash[i] = Math.max(0, flash[i]! - dt * 1.4);
+      work[i] = Math.max(0, work[i]! - dt * 0.6);
       col.copy(bb.idle).lerp(ORANGE, Math.min(1, flash[i]!)).lerp(PEACH, Math.max(0, flash[i]! - 0.7));
       screens.setColorAt(i, col);
     }
@@ -634,7 +639,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       wp.copy(pos).applyMatrix4(world.matrixWorld).project(camera);
       const x = (wp.x * 0.5 + 0.5) * canvas.clientWidth;
       const y = (-wp.y * 0.5 + 0.5) * canvas.clientHeight;
-      label.textContent = `Device ${String(hovered + 1).padStart(2, "0")} · ${base[hovered]!.form.name} · ${flash[hovered]! > 0.2 ? "computing 64 records" : "idle"} · click to dispatch`;
+      label.textContent = `Device ${String(hovered + 1).padStart(2, "0")} · ${base[hovered]!.form.name} · ${work[hovered]! > 0.05 ? "computing 64 records" : (IDLE_STATUS[variant[hovered]!] ?? "idle")} · click to dispatch`;
       // Keep the label inside the hero: flip to the left of the device near the right edge.
       const lw = label.offsetWidth, lh = label.offsetHeight;
       const vw = Math.min(canvas.clientWidth, window.innerWidth - canvas.getBoundingClientRect().left);
@@ -654,7 +659,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       p.t += md * p.speed;
       if (p.t >= 1) {
         p.t = 0;
-        if (!p.back) flash[p.dev] = 1.25; // task arrived: the screen lights up while it works
+        if (!p.back) { flash[p.dev] = 1.25; work[p.dev] = 1; } // task arrived: the screen lights up while it works
         p.back = !p.back;
         if (p.burst && !p.back) { // burst pulses retire after one round trip
           world.remove(p.sprite);
