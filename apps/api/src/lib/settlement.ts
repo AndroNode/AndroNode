@@ -48,6 +48,23 @@ export async function prepareSettlement(env: Env, orderId: string, at: number) {
   return out;
 }
 
+/**
+ * Rebuilds the escrow call for a proposed settlement from its stored manifest, so it can be sent later
+ * (from the admin wallet or the Safe). Recipients keep the order they had when the chunk was prepared.
+ */
+export async function settlementTransaction(env: Env, settlementId: string) {
+  if (!escrowConfigured(env)) throw new ApiError(409, "CHAIN_NOT_CONFIGURED", "No escrow address configured");
+  const s = await env.DB.prepare("SELECT id, order_id, manifest_hash, manifest_json, status FROM settlements WHERE id = ?").bind(settlementId)
+    .first<{ id: string; order_id: string; manifest_hash: string; manifest_json: string; status: string }>();
+  if (!s) throw new ApiError(404, "NOT_FOUND", "Settlement not found");
+  if (s.status !== "proposed") throw conflict("ALREADY_CONFIRMED", "This settlement is already confirmed");
+  const manifest = JSON.parse(s.manifest_json) as { charge: string; rewards: { recipient: string; units: string }[] };
+  const sums = new Map<string, bigint>();
+  for (const r of manifest.rewards) sums.set(r.recipient, (sums.get(r.recipient) ?? 0n) + BigInt(r.units));
+  const args = [s.order_id as Hex, s.id as Hex, s.manifest_hash as Hex, BigInt(manifest.charge), [...sums.keys()] as Hex[], [...sums.values()]] as const;
+  return { settlementId: s.id, to: env.ESCROW_ADDRESS, value: "0", data: encodeFunctionData({ abi: escrowAbi, functionName: "settleChunk", args }) };
+}
+
 /** Marks a settlement confirmed on-chain and moves its rewards to Claimable. Idempotent. */
 export async function applySettlement(env: Env, settlementId: string, txHash: string | null, at: number) {
   const db = env.DB;

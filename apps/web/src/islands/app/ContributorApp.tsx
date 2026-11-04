@@ -143,7 +143,7 @@ function Rewards({ cfg, account }: { cfg: ApiConfig; account: Account }) {
     } catch (e) { setMsg(errText(e)); }
   };
   const cards: [string, string, string][] = [
-    ["Provisional", d.provisional.units, "Accepted, in the review window. Not yet money you can move."],
+    ["Provisional", d.provisional.units, `Accepted, in the review window (${cfg.reviewWindowSeconds >= 3600 ? `${Math.round(cfg.reviewWindowSeconds / 3600)} h` : `${Math.max(1, Math.round(cfg.reviewWindowSeconds / 60))} min`} here). Not yet money you can move.`],
     ["Held", d.held.units, "Paused by an open dispute. Not deleted."],
     ["Claimable", d.claimable.units, d.claimable.source === "chain" ? "Credited on the escrow contract. Withdraw any time." : "Credited by settlement (simulated on this deployment)."],
     ["Withdrawn", d.withdrawn.units, "Sent to your wallet."],

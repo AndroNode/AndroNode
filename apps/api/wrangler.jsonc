@@ -24,7 +24,8 @@
     "SITE_ORIGIN": "https://andronode.workers.dev",
     "VERIFIER_MODE": "fixture",
     "ALLOW_MOCK_FUNDING": "true",
-    "REVIEW_WINDOW_SECONDS": "172800",
+    // Testnet: accepted rewards can be settled 10 minutes after verification. Mainnet enforces at least 48 hours in code.
+    "REVIEW_WINDOW_SECONDS": "600",
     "CONFIRMATIONS": "3"
   },
   // Secrets (wrangler secret put): SESSION_SECRET, COORDINATOR_KEY_JWK, BASE_RPC_URL (fallback only when RPC_URL is empty), VERIFIER_URL, VERIFIER_TOKEN

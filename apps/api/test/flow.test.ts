@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { canonicalJson } from "@andronode/protocol/hash";
 import { fixtureEmbedding } from "@andronode/protocol/fixture-embed";
+import { encodeFunctionData } from "viem";
+import { escrowAbi } from "@andronode/protocol/abi";
 import { verifyLease } from "../src/jobs/verify";
+import { settlementTransaction } from "../src/lib/settlement";
 import { E, buildResult, call, login, records, registerDevice } from "./helpers";
 
 const fromB64url = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
@@ -121,11 +124,17 @@ describe("end-to-end testnet flow", () => {
     expect(prep.status).toBe(201);
     expect(prep.data.chunks[0].charge).toBe("14000");
     expect(prep.data.chunks[0].amounts).toEqual(["10500"]);
+    // The stored manifest rebuilds exactly the call that was prepared (used by "send from wallet").
+    const ch = prep.data.chunks[0];
+    expect((await call(`/v1/admin/settlements/${ch.settlementId}/tx`, { token: adm.token })).status).toBe(409); // no escrow in tests
+    const rebuilt = await settlementTransaction({ ...E, ESCROW_ADDRESS: "0x" + "11".repeat(20) }, ch.settlementId);
+    expect(rebuilt.data).toBe(encodeFunctionData({ abi: escrowAbi, functionName: "settleChunk", args: [order.id, ch.settlementId, ch.manifestHash, BigInt(ch.charge), ch.recipients, ch.amounts.map(BigInt)] }));
     const conf = await call(`/v1/admin/settlements/${prep.data.chunks[0].settlementId}/confirm`, { method: "POST", token: adm.token, json: { mock: true } });
     expect(conf.status).toBe(200);
     const r2 = await call("/v1/rewards", { token: contrib.token });
     expect(r2.data.provisional.units).toBe("0");
     expect(r2.data.claimable.units).toBe("10500");
+    await expect(settlementTransaction({ ...E, ESCROW_ADDRESS: "0x" + "11".repeat(20) }, ch.settlementId)).rejects.toThrow(/already confirmed/);
 
     const ov = await call("/v1/admin/overview", { token: adm.token });
     expect(ov.data.reconciliation.unbalancedJournals).toEqual([]);

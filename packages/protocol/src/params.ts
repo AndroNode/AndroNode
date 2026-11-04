@@ -64,6 +64,9 @@ export const REVIEW_WINDOWS = {
   customerDisputeMs: 48 * 3600 * 1000,
 } as const;
 
+/** Minimum hold before accepted rewards can be settled on a mainnet deployment (testnet may set less). */
+export const MAINNET_MIN_REVIEW_SECONDS = 48 * 3600;
+
 /** §13.2 escrow timing. */
 export const ESCROW_TIMING = {
   maxExecutionWindowMs: 7 * 24 * 3600 * 1000,

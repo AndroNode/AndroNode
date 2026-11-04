@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { PILOT_CAPS, PRICING, PROBATION, LEASE_RULES } from "@andronode/protocol/params";
+import { MAINNET_MIN_REVIEW_SECONDS, PILOT_CAPS, PRICING, PROBATION, LEASE_RULES } from "@andronode/protocol/params";
 import type { AppEnv } from "../env";
 import { coordinatorPublicKey } from "../lib/coordinator";
 import { escrowConfigured, chainOf, isMainnet, publicClient, rpcProvider, rpcUrlOf } from "../lib/chain";
@@ -36,7 +36,7 @@ pub.get("/config", (c) =>
     pricing: { ratePer1kUnits: PRICING.illustrativeRatePer1kUnits.toString(), label: "Illustrative testnet rate" },
     caps: { unsettledExposureUnits: PILOT_CAPS.maxUnsettledExposureUnits.toString(), outstandingEscrowUnits: PILOT_CAPS.maxOutstandingEscrowUnits.toString(), probationDeviceUnits: PROBATION.deviceProvisionalCapUnits.toString() },
     lease: LEASE_RULES,
-    reviewWindowSeconds: Number(c.env.REVIEW_WINDOW_SECONDS),
+    reviewWindowSeconds: Math.max(Number(c.env.REVIEW_WINDOW_SECONDS) || 0, isMainnet(c.env) ? MAINNET_MIN_REVIEW_SECONDS : 0),
   }),
 );
 

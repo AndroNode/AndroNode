@@ -3,11 +3,13 @@ import { caState } from "@andronode/protocol/ca";
 import type { SiteConfig } from "@andronode/protocol/config";
 import Dialog from "../components/Dialog";
 import { copyText } from "../lib/format";
+import { api, sessionToken, type ApiConfig } from "../lib/api";
+import type { SessionState, WalletInfo } from "../lib/wallet";
 import { motionPref, setMotion, type MotionPref } from "../lib/motion";
 
-/** Header controls: CA chip, X control, wallet preview, motion toggle (PRD FR-01, FR-05, FR-14, FR-16, FR-17). */
+/** Header controls: CA chip, X control, wallet sign-in, motion toggle (PRD FR-01, FR-05, FR-14, FR-16, FR-17). */
 export default function HeaderControls({ site, part = "utility" }: { site: SiteConfig; part?: "utility" | "wallet" }) {
-  if (part === "wallet") return <WalletPreview site={site} />;
+  if (part === "wallet") return <WalletButton site={site} />;
   return (
     <div className="flex items-center gap-2">
       <CaChip site={site} />
@@ -103,53 +105,140 @@ function MotionToggle() {
   );
 }
 
-function WalletPreview({ site }: { site: SiteConfig }) {
+type WalletMod = typeof import("../lib/wallet");
+
+/**
+ * Header wallet button. Signs in with Ethereum (EIP-4361) on the testnet, shared with the /app pages.
+ * The wallet code loads only when needed: on click, or when a saved session exists.
+ */
+function WalletButton({ site }: { site: SiteConfig }) {
+  const [mod, setMod] = useState<WalletMod | null>(null);
+  const [sess, setSess] = useState<SessionState | null>(null);
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [label, setLabel] = useState<string | null>(null); // never persisted (FR-14)
-  const submit = () => {
-    const v = value.trim();
-    if (!v) return setError("Enter a public address, or cancel.");
-    if (!/^0x[0-9a-fA-F]{40}$/.test(v)) return setError("That does not look like an EVM address (0x followed by 40 hex characters).");
-    setLabel(`${v.slice(0, 6)}…${v.slice(-4)}`);
-    setError(null);
-    setOpen(false);
-  };
+  const [cfg, setCfg] = useState<ApiConfig | null>(null);
+  const [wallets, setWallets] = useState<WalletInfo[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [balance, setBalance] = useState<bigint | null | undefined>(undefined);
+
+  useEffect(() => {
+    let live = true;
+    let unsub: (() => void) | null = null;
+    const attach = async () => {
+      if (unsub) return;
+      const m = await import("../lib/wallet");
+      if (!live || unsub) return;
+      setMod(m);
+      unsub = m.subscribeSession((s) => live && setSess({ ...s }));
+    };
+    if (sessionToken()) attach();
+    window.addEventListener("an-session", attach);
+    return () => { live = false; unsub?.(); window.removeEventListener("an-session", attach); };
+  }, []);
+
+  const signedIn = sess?.status === "signed-in" && sess.account;
+
+  // Load what the dialog needs when it opens.
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    setErr(null); setNote(null);
+    (async () => {
+      try {
+        const m = mod ?? (await import("../lib/wallet"));
+        if (!live) return;
+        if (!mod) { setMod(m); m.subscribeSession((s) => live && setSess({ ...s })); }
+        const c = cfg ?? (await api<ApiConfig>("/v1/config", { auth: false }));
+        if (!live) return;
+        setCfg(c);
+        if (!wallets) m.discoverWallets().then((w) => live && setWallets(w));
+      } catch (e) { if (live) setErr(errMsg(e)); }
+    })();
+    return () => { live = false; };
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Settlement-asset balance for the signed-in address.
+  useEffect(() => {
+    if (!open || !signedIn || !mod || !cfg) return;
+    let live = true;
+    setBalance(undefined);
+    mod.assetBalance(cfg, sess!.account!.address).then((b) => live && setBalance(b)).catch(() => live && setBalance(null));
+    return () => { live = false; };
+  }, [open, signedIn, mod, cfg]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const label = signedIn ? `${sess!.account!.address.slice(0, 6)}…${sess!.account!.address.slice(-4)}` : null;
+  const chainName = cfg && mod ? mod.chainFor(cfg.chainId).name : site.chain.name;
+  const units = (b: bigint, d: number) => { const s = b.toString().padStart(d + 1, "0"); return `${s.slice(0, -d)}.${s.slice(-d, -d + 2)}`; };
+  const btn = "min-h-11 rounded-full border border-charcoal/30 px-4 text-sm hover:bg-peach";
+
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-charcoal px-3 text-sm font-bold sm:px-4 text-paper hover:bg-charcoal-80">
-        {label ? <><span className="font-mono text-xs">{label}</span><span className="rounded bg-peach px-1 font-mono text-[10px] text-charcoal">DEMO</span></> : <><span className="sm:hidden">Connect</span><span className="hidden sm:inline">Connect wallet</span></>}
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-charcoal px-3 text-sm font-bold text-paper hover:bg-charcoal-80 sm:px-4" aria-label={label ? `Wallet ${label}` : "Connect wallet"}>
+        {label ? <><span aria-hidden="true" className="size-2 rounded-full bg-ok" /><span className="font-mono text-xs">{label}</span>{sess!.account!.isAdmin && <span className="hidden rounded bg-orange px-1 font-mono text-[10px] text-paper sm:inline">ADMIN</span>}</> : <><span className="sm:hidden">Connect</span><span className="hidden sm:inline">Connect wallet</span></>}
       </button>
-      <Dialog open={open} onClose={() => setOpen(false)} title="Connect wallet (preview)">
-        <p className="text-sm">
-          A real wallet connection is not available on these public pages. You can enter a <strong>public</strong> address to label this browser tab. It is only format-checked, never proves ownership and is not saved.
-        </p>
-        <ul className="mt-3 list-disc pl-5 text-sm text-charcoal-60">
-          <li>No signature, transaction, chain switch or custody.</li>
-          <li>Never enter a seed phrase or private key anywhere.</li>
-          <li>Every demo works without an address.</li>
-        </ul>
-        <label className="mt-4 block text-sm font-bold" htmlFor="wallet-addr">Public address</label>
-        <input
-          id="wallet-addr"
-          className="mt-1 w-full rounded-lg border border-charcoal/30 bg-white px-3 py-2 font-mono text-sm"
-          placeholder="0x…"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          aria-invalid={!!error}
-          aria-describedby={error ? "wallet-err" : undefined}
-          autoComplete="off"
-          spellCheck={false}
-        />
-        {error && <p id="wallet-err" className="mt-2 text-sm text-bad">{error}</p>}
-        <p className="mt-3 text-xs text-charcoal-60">Real wallet sign-in with test funds on {site.chain.name} lives in the <a href="/app" className="underline">Testnet app</a>.</p>
-        <div className="mt-5 flex flex-wrap justify-end gap-2">
-          {label && <button type="button" className="min-h-11 rounded-full border border-charcoal/30 px-4 text-sm" onClick={() => { setLabel(null); setValue(""); setOpen(false); }}>Disconnect</button>}
-          <button type="button" className="min-h-11 rounded-full border border-charcoal/30 px-4 text-sm" onClick={() => setOpen(false)}>Cancel</button>
-          <button type="button" className="min-h-11 rounded-full bg-charcoal px-4 text-sm font-bold text-paper" onClick={submit}>Use as demo label</button>
-        </div>
+      <Dialog open={open} onClose={() => setOpen(false)} title={signedIn ? "Your testnet wallet" : "Connect wallet"}>
+        {signedIn ? (
+          <div className="grid gap-4 text-sm">
+            <div className="rounded-lg border border-line p-3">
+              <p className="text-charcoal-60">Signed in as {sess!.account!.isAdmin && <span className="ml-1 rounded bg-orange px-1 font-mono text-[10px] text-paper">ADMIN</span>}</p>
+              <p className="mt-1 break-all font-mono text-xs">{sess!.account!.address}</p>
+              <dl className="mt-3 grid grid-cols-2 gap-2">
+                <div><dt className="text-charcoal-60">Network</dt><dd>{chainName}</dd></div>
+                <div><dt className="text-charcoal-60">{cfg?.settlementAsset.symbol ?? "tUSDC"} balance</dt><dd className="font-mono">{balance === undefined ? "…" : balance === null ? "n/a" : units(balance, cfg?.settlementAsset.decimals ?? 6)}</dd></div>
+              </dl>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className={btn} onClick={async () => setNote((await copyText(sess!.account!.address)) ? "Address copied." : "Copy failed.")}>Copy address</button>
+              {cfg && mod && <button type="button" className={btn} disabled={busy} onClick={async () => {
+                setBusy(true); setErr(null);
+                try { await mod.walletOnChain(cfg); setNote(`Wallet is on ${chainName}.`); } catch (e) { setErr(errMsg(e)); } finally { setBusy(false); }
+              }}>Switch wallet network</button>}
+            </div>
+            <nav aria-label="Testnet app" className="grid grid-cols-2 gap-2">
+              <a href="/app/contributor" className="rounded-lg border border-line p-3 hover:bg-peach"><span className="font-bold">Contributor</span><span className="block text-xs text-charcoal-60">Devices and rewards</span></a>
+              <a href="/app/customer" className="rounded-lg border border-line p-3 hover:bg-peach"><span className="font-bold">Customer</span><span className="block text-xs text-charcoal-60">Orders and test funds</span></a>
+              {sess!.account!.isAdmin && <a href="/app/admin" className="col-span-2 rounded-lg border border-line p-3 hover:bg-peach"><span className="font-bold">Admin</span><span className="block text-xs text-charcoal-60">Settlements, disputes, devices</span></a>}
+            </nav>
+            {note && <p role="status" className="text-charcoal-60">{note}</p>}
+            {err && <p role="alert" className="text-bad">{err}</p>}
+            <div className="flex justify-end">
+              <button type="button" className={btn} onClick={async () => { await mod?.signOut(); setOpen(false); }}>Sign out</button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm">
+            <p>Sign a message to prove you control the address. It sends no transaction and costs no gas. Use a testnet-only wallet: nothing here involves real money.</p>
+            {err ? <p role="alert" className="mt-4 text-bad">{err}</p> : wallets === null ? (
+              <p className="mt-4 animate-pulse text-charcoal-60">Looking for browser wallets…</p>
+            ) : wallets.length === 0 ? (
+              <p className="mt-4 rounded-lg bg-peach-soft p-3">No browser wallet found. Install a wallet extension such as MetaMask or Rabby, then reload. {site.chain.name} is added to the wallet for you.</p>
+            ) : (
+              <div className="mt-4 grid gap-2">
+                {wallets.map((w) => (
+                  <button key={w.id} type="button" disabled={busy || !cfg} className="flex min-h-12 items-center gap-3 rounded-xl border border-charcoal/20 px-4 text-left font-bold hover:bg-peach disabled:opacity-60" onClick={async () => {
+                    if (!mod || !cfg) return;
+                    setBusy(true); setErr(null);
+                    try { await mod.signIn(w, cfg); } catch (e) { setErr(errMsg(e)); } finally { setBusy(false); }
+                  }}>
+                    {w.icon ? <img src={w.icon} alt="" width={24} height={24} /> : <span aria-hidden="true" className="grid size-6 place-items-center rounded bg-charcoal/10">◇</span>}
+                    {busy ? "Check your wallet…" : w.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            <ul className="mt-4 list-disc pl-5 text-charcoal-60">
+              <li>Never enter a seed phrase or private key anywhere.</li>
+              <li>Every demo on this site works without a wallet.</li>
+            </ul>
+          </div>
+        )}
       </Dialog>
     </>
   );
 }
+
+const errMsg = (e: unknown) => {
+  const m = e instanceof Error ? e.message.split("\n")[0]! : "Something went wrong";
+  return /user rejected|denied/i.test(m) ? "Request cancelled in the wallet." : m;
+};

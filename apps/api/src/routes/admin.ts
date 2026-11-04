@@ -9,7 +9,7 @@ import { requireAdmin } from "../lib/auth";
 import { escrowConfigured, publicClient, isMainnet } from "../lib/chain";
 import { body, conflict, forbidden, notFound, now } from "../lib/http";
 import { balance } from "../lib/ledger";
-import { applySettlement, confirmSettlementTx, prepareSettlement, syncChain } from "../lib/settlement";
+import { applySettlement, confirmSettlementTx, prepareSettlement, settlementTransaction, syncChain } from "../lib/settlement";
 import { sweep } from "../lib/orders";
 
 export const admin = new Hono<AppEnv>();
@@ -61,8 +61,11 @@ admin.post("/settlements/prepare", async (c) => {
   const { orderId } = await body(c, z.object({ orderId: z.string() }));
   const chunks = await prepareSettlement(c.env, orderId, now());
   await audit(c, "settlement.prepare", orderId, { chunks: chunks.map((x) => x.settlementId) });
-  return c.json({ chunks, note: "Submit each safeTransaction from the 2-of-3 admin Safe, then confirm with its transaction hash." }, 201);
+  return c.json({ chunks, note: "Send each safeTransaction from the escrow admin (wallet or Safe), then confirm with its transaction hash." }, 201);
 });
+
+// The escrow call for a proposed settlement, for sending from the admin wallet or the Safe.
+admin.get("/settlements/:id/tx", async (c) => c.json(await settlementTransaction(c.env, c.req.param("id"))));
 
 admin.post("/settlements/:id/confirm", async (c) => {
   const req = await body(c, z.object({ txHash: z.string().regex(/^0x[0-9a-fA-F]{64}$/).optional(), mock: z.boolean().optional() }));

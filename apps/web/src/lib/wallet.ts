@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createPublicClient, createWalletClient, custom, fallback, http, numberToHex, type EIP1193Provider, type Hex } from "viem";
+import { createPublicClient, createWalletClient, custom, erc20Abi, fallback, http, numberToHex, type EIP1193Provider, type Hex } from "viem";
 import { base, baseSepolia, robinhood, robinhoodTestnet } from "viem/chains";
 import { createSiweMessage } from "viem/siwe";
 import { api, BASE, setSessionToken, sessionToken, type ApiConfig } from "./api";
@@ -30,13 +30,15 @@ const CHAINS = { 46630: robinhoodTestnet, 4663: robinhood, 84532: baseSepolia, 8
 export const chainFor = (id: number) => CHAINS[id as keyof typeof CHAINS] ?? robinhoodTestnet;
 
 export interface Account { id: string; address: string; isAdmin: boolean }
-interface SessionState { status: "loading" | "signed-out" | "signed-in"; account: Account | null; provider: EIP1193Provider | null; address: Hex | null }
+export interface SessionState { status: "loading" | "signed-out" | "signed-in"; account: Account | null; provider: EIP1193Provider | null; address: Hex | null }
 
 let state: SessionState = { status: "loading", account: null, provider: null, address: null };
 const subs = new Set<(s: SessionState) => void>();
 const set = (p: Partial<SessionState>) => {
   state = { ...state, ...p };
   subs.forEach((f) => f(state));
+  // Lets the header button follow sign-in and sign-out from any island without loading this module first.
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("an-session"));
 };
 
 async function restore() {
@@ -50,16 +52,20 @@ async function restore() {
 }
 let restored = false;
 
+/** Follows the session; the first subscriber restores it from the saved token. Returns an unsubscribe function. */
+export function subscribeSession(f: (s: SessionState) => void) {
+  subs.add(f);
+  if (!restored) {
+    restored = true;
+    restore();
+  }
+  f(state);
+  return () => void subs.delete(f);
+}
+
 export function useSession() {
   const [s, setS] = useState(state);
-  useEffect(() => {
-    subs.add(setS);
-    if (!restored) {
-      restored = true;
-      restore();
-    } else setS(state);
-    return () => void subs.delete(setS);
-  }, []);
+  useEffect(() => subscribeSession(setS), []);
   return s;
 }
 
@@ -114,3 +120,10 @@ export const explorerTx = (cfg: ApiConfig, hash: string) => `${chainFor(cfg.chai
 /** The coordinator's read-only RPC relay. Its upstream key (Alchemy) stays on the server. */
 const relay = () => http(`${BASE || (typeof location !== "undefined" ? location.origin : "")}/v1/rpc`, { batch: { batchSize: 20 }, retryCount: 1 });
 export const readClient = (cfg: ApiConfig) => createPublicClient({ chain: chainFor(cfg.chainId), transport: fallback([relay(), http()]) });
+
+/** The settlement asset (tUSDC on testnet) balance of an address, in base units, or null when no asset is configured. */
+export async function assetBalance(cfg: ApiConfig, address: string): Promise<bigint | null> {
+  const token = cfg.settlementAsset.address;
+  if (!token) return null;
+  return readClient(cfg).readContract({ address: token as Hex, abi: erc20Abi, functionName: "balanceOf", args: [address as Hex] });
+}

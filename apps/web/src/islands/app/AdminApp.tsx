@@ -1,5 +1,8 @@
 import { useState } from "react";
+import type { Hex } from "viem";
+import { escrowAbi } from "@andronode/protocol/abi";
 import { api, type ApiConfig } from "../../lib/api";
+import { explorerTx, walletOnChain } from "../../lib/wallet";
 import { copyText } from "../../lib/format";
 import { Button, Panel, StatusBadge } from "../../components/ui";
 import AppGate, { errText, short, usdc, useAsync, when } from "./AppGate";
@@ -35,6 +38,8 @@ function Overview() {
   );
 }
 
+const reviewText = (sec: number) => (sec >= 3600 ? `${Math.round(sec / 360) / 10} h` : sec >= 60 ? `${Math.round(sec / 60)} min` : `${sec} s`);
+
 function Settlements({ cfg }: { cfg: ApiConfig }) {
   const orders = useAsync(() => api<{ orders: any[] }>("/v1/admin/orders"));
   const st = useAsync(() => api<{ settlements: any[] }>("/v1/admin/settlements"));
@@ -51,10 +56,35 @@ function Settlements({ cfg }: { cfg: ApiConfig }) {
     if (!mock && !txHash) return;
     try { await api(`/v1/admin/settlements/${id}/confirm`, { json: mock ? { mock: true } : { txHash } }); setMsg("Settlement confirmed. Rewards are now claimable."); reload(); } catch (e) { setMsg(errText(e)); }
   };
+  const [busy, setBusy] = useState<string | null>(null);
+  const [lastTx, setLastTx] = useState<string | null>(null);
+  // Sends the settlement from the connected wallet when it is the escrow admin, then confirms it with the hash.
+  const sendFromWallet = async (id: string) => {
+    setMsg(null); setLastTx(null); setBusy(id);
+    try {
+      const tx = await api<{ to: Hex; data: Hex }>(`/v1/admin/settlements/${id}/tx`);
+      const { wallet, publicClient, address } = await walletOnChain(cfg);
+      const escrowAdmin = await publicClient.readContract({ address: tx.to, abi: escrowAbi, functionName: "admin" }) as string;
+      if (escrowAdmin.toLowerCase() !== address.toLowerCase()) {
+        throw new Error(`The connected wallet (${short(address)}) is not the escrow admin (${short(escrowAdmin)}). Switch accounts, or send the data from the admin Safe and use "Confirm with tx hash".`);
+      }
+      setMsg("Confirm the transaction in your wallet…");
+      const hash = await wallet.sendTransaction({ account: address, to: tx.to, data: tx.data });
+      setLastTx(hash);
+      setMsg("Sent. Waiting for the chain to confirm it…");
+      const receipt = await publicClient.waitForTransactionReceipt({ hash, confirmations: 2 });
+      if (receipt.status !== "success") throw new Error("The settlement transaction reverted on-chain. Nothing was credited.");
+      await api(`/v1/admin/settlements/${id}/confirm`, { json: { txHash: hash } });
+      setMsg("Settlement confirmed on-chain. Contributors can now withdraw their rewards.");
+      setChunks((cs) => cs?.filter((c) => c.settlementId !== id) ?? null);
+      reload();
+    } catch (e) { setMsg(errText(e)); } finally { setBusy(null); }
+  };
   return (
     <Panel title="Settlement">
-      <p className="text-sm text-charcoal-60">Orders with rewards past the review window can be settled in chunks of up to 100 recipients. Each chunk is executed from the 2-of-3 admin Safe; this page prepares the exact transaction data.</p>
+      <p className="text-sm text-charcoal-60">Orders with rewards past the review window ({reviewText(cfg.reviewWindowSeconds)} on this deployment) can be settled in chunks of up to 100 recipients. Send each chunk straight from the escrow admin wallet, or copy the data into the admin Safe and confirm with its transaction hash.</p>
       {msg && <p className="mt-3 text-sm" role="status">{msg}</p>}
+      {lastTx && <a className="mt-1 block text-sm underline" href={explorerTx(cfg, lastTx)} target="_blank" rel="noopener noreferrer">View settlement transaction</a>}
       <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[40rem] text-left text-sm">
         <thead className="text-charcoal-60"><tr><th className="py-1 font-normal">Order</th><th className="font-normal">Customer</th><th className="font-normal">State</th><th className="font-normal">Accepted</th><th className="font-normal">Settleable</th><th /></tr></thead>
         <tbody>{orders.data?.orders.map((o) => (
@@ -68,7 +98,7 @@ function Settlements({ cfg }: { cfg: ApiConfig }) {
           {c.safeTransaction ? (
             <div className="mt-2"><p className="text-xs">To <span className="font-mono">{c.safeTransaction.to}</span>, value 0. Data:</p>
               <textarea readOnly rows={3} className="mt-1 w-full rounded border border-line bg-white p-2 font-mono text-[11px]" value={c.safeTransaction.data} aria-label="Safe transaction data" />
-              <Button variant="ghost" onClick={() => copyText(c.safeTransaction.data)}>Copy data</Button></div>
+              <div className="mt-2 flex flex-wrap gap-2"><Button variant="accent" disabled={busy !== null} onClick={() => sendFromWallet(c.settlementId)}>{busy === c.settlementId ? "Sending…" : "Send from wallet"}</Button><Button variant="ghost" onClick={() => copyText(c.safeTransaction.data)}>Copy data</Button></div></div>
           ) : <p className="mt-2 text-xs">Escrow not deployed: confirm with simulated settlement.</p>}
         </div>
       ))}
@@ -77,7 +107,7 @@ function Settlements({ cfg }: { cfg: ApiConfig }) {
         <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line p-2">
           <span className="font-mono text-xs">{short(s.id)} · order {short(s.order_id)}</span><span className="font-mono">{usdc(s.charge_units)}</span>
           <StatusBadge tone={s.status === "confirmed" ? "ok" : "warn"}>{s.status}</StatusBadge>
-          {s.status === "proposed" && <span className="flex gap-2">{cfg.escrowAddress && <Button variant="ghost" onClick={() => confirm(s.id, false)}>Confirm with tx hash</Button>}{cfg.mockFunding && <Button variant="ghost" onClick={() => confirm(s.id, true)}>Confirm (simulated)</Button>}</span>}
+          {s.status === "proposed" && <span className="flex flex-wrap gap-2">{cfg.escrowAddress && <Button variant="accent" disabled={busy !== null} onClick={() => sendFromWallet(s.id)}>{busy === s.id ? "Sending…" : "Send from wallet"}</Button>}{cfg.escrowAddress && <Button variant="ghost" onClick={() => confirm(s.id, false)}>Confirm with tx hash</Button>}{cfg.mockFunding && <Button variant="ghost" onClick={() => confirm(s.id, true)}>Confirm (simulated)</Button>}</span>}
           {s.tx_hash && <span className="font-mono text-[11px]">{short(s.tx_hash)}</span>}
         </li>
       ))}</ul>

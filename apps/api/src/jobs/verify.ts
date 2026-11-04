@@ -1,8 +1,9 @@
 import { newId } from "@andronode/protocol/hash";
 import { verifySubmission } from "@andronode/protocol/verify";
 import { allocate } from "@andronode/protocol/money";
-import { PROBATION } from "@andronode/protocol/params";
+import { MAINNET_MIN_REVIEW_SECONDS, PROBATION } from "@andronode/protocol/params";
 import type { Env } from "../env";
+import { isMainnet } from "../lib/chain";
 import { referenceVectors } from "../lib/embedder";
 import { journal } from "../lib/ledger";
 import { loadRecords, sweep } from "../lib/orders";
@@ -45,7 +46,8 @@ export async function verifyLease(env: Env, leaseId: string, at = Date.now()): P
 
   if (report.decision === "ACCEPTED") {
     const alloc = allocate(BigInt(task.charge_units));
-    const review = Number(env.REVIEW_WINDOW_SECONDS) * 1000;
+    // Testnet can use a short review window; mainnet never goes below the 48-hour design minimum.
+    const review = Math.max(Number(env.REVIEW_WINDOW_SECONDS) || 0, isMainnet(env) ? MAINNET_MIN_REVIEW_SECONDS : 0) * 1000;
     const graduate = dev.status === "probation" && dev.accepted_tasks + 1 >= PROBATION.tasksToGraduate && at - dev.created_at >= PROBATION.cleanDaysToGraduate * 86400_000;
     try {
       await db.batch([
