@@ -21,6 +21,10 @@ describe("read-only RPC relay", () => {
     expect((await rpc(Array.from({ length: 21 }, (_, i) => ({ jsonrpc: "2.0", id: i, method: "eth_chainId" })))).status).toBe(400);
     expect((await call("/v1/rpc", { method: "POST", body: "x".repeat(40_000) })).status).toBe(413);
   });
+  it("refuses browser calls from other sites", async () => {
+    const r = await call("/v1/rpc", { method: "POST", json: { jsonrpc: "2.0", id: 1, method: "eth_chainId" }, headers: { origin: "https://evil.example" } });
+    expect(r.status).toBe(403);
+  });
   it("does not expose the RPC URL or key in the public config", async () => {
     const r = await call("/v1/config");
     expect(JSON.stringify(r.data)).not.toContain("alchemy");

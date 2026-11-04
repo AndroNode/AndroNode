@@ -63,6 +63,9 @@ type RpcReq = { jsonrpc?: string; id?: unknown; method?: unknown; params?: unkno
 const rpcError = (id: unknown, code: number, message: string) => ({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
 
 pub.post("/rpc", async (c) => {
+  // Only this site's pages may use the relay from a browser, so other sites cannot spend the RPC quota.
+  const origin = c.req.header("origin");
+  if (origin && origin !== new URL(c.env.SITE_ORIGIN).origin) return c.json(rpcError(null, -32003, "Origin not allowed"), 403);
   const url = rpcUrlOf(c.env);
   if (!url) return c.json(rpcError(null, -32000, "No RPC configured"), 503);
   const raw = await c.req.text();
