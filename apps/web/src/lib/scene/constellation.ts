@@ -205,7 +205,14 @@ function fresnelMaterial(color: THREE.Color, power: number, strength: number): T
   });
 }
 
-export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: boolean; compact: boolean }): SceneHandle {
+/** Hands control back to the browser until after the next frame, so long setup work never blocks one frame. */
+const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+
+/**
+ * Builds the scene in a few slices, one per frame (renderer, environment map, screens and geometry),
+ * so building it while the intro plays does not freeze the intro's animation.
+ */
+export async function createConstellation(canvas: HTMLCanvasElement, opts: { motion: boolean; compact: boolean }): Promise<SceneHandle> {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
   // Render at least at 1.5x so edges and 1px lines stay crisp on standard (1x) monitors.
   renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2));
@@ -213,10 +220,12 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
 
+  await nextFrame();
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environment = envTex;
+  await nextFrame();
 
   const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
   camera.position.set(0, 0.4, 9.2);
@@ -297,6 +306,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   // Instance colours carry each frame's finish, so the base colour is white.
   const bodyMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.95, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 });
   const bodies = new THREE.InstancedMesh(bodyGeo, bodyMat, N);
+  await nextFrame();
   const screenTex = screenAtlas();
   const screenGeo = new THREE.PlaneGeometry(0.36, 0.72);
   // Each instance picks one of the atlas screens through a per-instance attribute.
@@ -498,6 +508,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       : Math.max(3.3 / (0.74 * tanHalf), 3.3 / (0.8 * tanHalf * aspect));
     camera.updateProjectionMatrix();
   };
+  await nextFrame();
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);
   resize();

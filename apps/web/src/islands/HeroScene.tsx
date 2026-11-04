@@ -11,6 +11,8 @@ export default function HeroScene() {
   const handle = useRef<SceneHandle | null>(null);
   const motion = useMotion();
   const [ready, setReady] = useState(false);
+  const motionRef = useRef(motion);
+  motionRef.current = motion;
 
   useEffect(() => {
     let cancelled = false;
@@ -18,9 +20,12 @@ export default function HeroScene() {
     if (!el) return;
     const gl = document.createElement("canvas").getContext("webgl2") || document.createElement("canvas").getContext("webgl");
     if (!gl) return;
-    import("../lib/scene/constellation").then(({ createConstellation }) => {
+    import("../lib/scene/constellation").then(async ({ createConstellation }) => {
       if (cancelled || !canvas.current) return;
-      handle.current = createConstellation(canvas.current, { motion, compact: window.innerWidth < 768 });
+      const h = await createConstellation(canvas.current, { motion, compact: window.innerWidth < 768 });
+      if (cancelled) return h.dispose();
+      handle.current = h;
+      h.setMotion(motionRef.current); // motion may have changed while the scene was being built
       requestAnimationFrame(() => setReady(true));
     });
     const onScroll = () => {
