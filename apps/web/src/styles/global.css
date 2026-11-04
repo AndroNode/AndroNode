@@ -82,6 +82,8 @@ html {
 
 /* Headings and big figures use the display face; body copy stays on Manrope. */
 @layer base {
+  /* Keep the scrollbar space reserved, so the page does not shift sideways when the intro unlocks scrolling. */
+  html { scrollbar-gutter: stable; }
   h1, h2, h3 { font-family: var(--font-display); }
 }
 

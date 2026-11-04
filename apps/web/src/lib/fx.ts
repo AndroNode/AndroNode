@@ -104,7 +104,7 @@ export function initFx() {
     const intro = document.getElementById("an-intro");
     const start = () => targets.forEach((el) => io.observe(el));
     if (intro && !intro.hidden) {
-      const go = () => setTimeout(start, 350);
+      const go = () => setTimeout(start, 120); // the hero animates in while the intro dissolves
       window.addEventListener("an-intro-done", go, { once: true });
       cleanups.push(() => window.removeEventListener("an-intro-done", go));
     } else start();

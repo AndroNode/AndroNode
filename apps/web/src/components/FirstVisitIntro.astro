@@ -4,7 +4,7 @@
  *   "A device."         phones fly in from the edges and lock into a turning globe
  *   "A small task."     tasks pulse out from the core and results travel back
  *   "A checked result." a shockwave lights every device and a check mark lands
- * It then zooms through the globe while a ring of light opens onto the hero.
+ * It then zooms through the globe while a ring of light spreads and the overlay dissolves onto the hero.
  * Shows on every full load of the homepage, can be skipped at once (button or Esc), and always
  * releases the page within 10 seconds. The progress line counts real asset readiness (fonts, logo,
  * page load), never a timed fake percentage. With motion off it is a still card that fades away.
@@ -57,13 +57,15 @@
 </div>
 
 <style>
-  #an-intro { --hole: 0px; position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: #0b0d12; color: #fcf7f2; overflow: hidden; }
+  #an-intro { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: #0b0d12; color: #fcf7f2; overflow: hidden; contain: strict; }
   #an-intro[hidden] { display: none; }
-  /* The exit opens a hole in the overlay from the globe's centre. */
-  #an-intro.leaving { -webkit-mask: radial-gradient(circle at 50% var(--cy, 40%), transparent var(--hole), #000 calc(var(--hole) + 1px)); mask: radial-gradient(circle at 50% var(--cy, 40%), transparent var(--hole), #000 calc(var(--hole) + 1px)); }
+  /* The exit: the camera flies through the globe while the whole overlay dissolves onto the hero.
+     Only opacity and transform change, so the browser can run it on the compositor. */
+  #an-intro.leaving { opacity: 0; pointer-events: none; transition: opacity 900ms cubic-bezier(0.4, 0, 0.2, 1) 220ms; }
+  #an-intro.leaving.quick { transition: opacity 300ms ease; }
   #an-intro-canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
   .an-intro-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(36% 18% at 50% 76%, rgb(11 13 18 / 0.9), transparent 85%), radial-gradient(50% 45% at 50% 40%, rgb(255 122 69 / 0.14), transparent 70%), radial-gradient(120% 90% at 50% 50%, transparent 50%, rgb(0 0 0 / 0.7)); }
-  .an-intro-grain { position: absolute; inset: -50%; z-index: 1; pointer-events: none; opacity: 0.07; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: an-grain 0.8s steps(4) infinite; }
+  .an-intro-grain { position: absolute; inset: -6%; z-index: 1; pointer-events: none; opacity: 0.07; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: an-grain 0.8s steps(4) infinite; }
   @keyframes an-grain { 25% { transform: translate(-3%, 2%); } 50% { transform: translate(2%, -3%); } 75% { transform: translate(-2%, -1%); } }
 
   .an-intro-frame i { position: absolute; z-index: 2; width: 28px; height: 28px; border: 0 solid rgb(252 247 242 / 0.35); opacity: 0; animation: an-corner 700ms cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards; }
@@ -90,7 +92,7 @@
   .an-intro-mark > svg:first-of-type { overflow: visible; }
   .an-mark-line { stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 0 10px rgb(255 122 69 / 0.9)); animation: an-draw 1000ms cubic-bezier(0.65, 0, 0.35, 1) 200ms forwards, an-fadeout 600ms ease 1400ms forwards; }
   .an-mark-fill { opacity: 0; animation: an-fade 600ms ease 950ms forwards; }
-  .an-intro-halo { position: absolute; inset: -55%; border-radius: 50%; background: radial-gradient(circle, rgb(255 122 69 / 0.5), transparent 65%); filter: blur(12px); opacity: 0; animation: an-fade 800ms ease 900ms forwards, an-halo 3.2s ease-in-out 1.7s infinite; z-index: -1; }
+  .an-intro-halo { position: absolute; inset: -55%; border-radius: 50%; background: radial-gradient(circle, rgb(255 122 69 / 0.42), rgb(255 122 69 / 0.12) 40%, transparent 68%); opacity: 0; will-change: transform, opacity; animation: an-fade 800ms ease 900ms forwards, an-halo 3.2s ease-in-out 1.7s infinite; z-index: -1; }
   .an-intro-check { position: absolute; right: -30px; bottom: -14px; width: 38px; height: 38px; opacity: 0; transform: scale(0.4); }
   .an-intro-check circle { fill: #ff7a45; filter: drop-shadow(0 0 12px rgb(255 122 69 / 0.9)); }
   .an-intro-check path { fill: none; stroke: #0b0d12; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
@@ -115,8 +117,9 @@
   #an-intro-fill { height: 100%; width: 0; background: linear-gradient(90deg, #ff7a45, #ffd2b8); box-shadow: 0 0 12px #ff7a45; transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1); }
   .an-intro-meta { margin-top: 0.6rem; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(252 247 242 / 0.5); }
 
-  #an-intro.leaving .an-intro-center { transform: scale(1.12) !important; opacity: 0; filter: blur(10px); transition: transform 700ms cubic-bezier(0.7, 0, 0.84, 0), opacity 500ms ease 150ms, filter 600ms ease; }
-  #an-intro.leaving .an-intro-foot, #an-intro.leaving .an-hud, #an-intro.leaving #an-intro-skip, #an-intro.leaving .an-intro-frame { opacity: 0; transition: opacity 300ms ease; animation: none; }
+  .an-intro-center { will-change: transform; }
+  #an-intro.leaving .an-intro-center { transform: scale(1.18) !important; opacity: 0; transition: transform 1000ms cubic-bezier(0.55, 0, 0.2, 1), opacity 520ms ease 80ms; }
+  #an-intro.leaving .an-intro-foot, #an-intro.leaving .an-hud, #an-intro.leaving #an-intro-skip, #an-intro.leaving .an-intro-frame, #an-intro.leaving .an-intro-grain { opacity: 0; transition: opacity 280ms ease; animation: none; }
 
   @keyframes an-draw { to { stroke-dashoffset: 0; } }
   @keyframes an-fadeout { to { opacity: 0; } }
@@ -161,7 +164,7 @@
   // ---------- Scene ----------
   var canvas = document.getElementById("an-intro-canvas");
   var ctx = canvas && canvas.getContext("2d");
-  var W = 0, H = 0, CX = 0, CY = 0, R = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0, CX = 0, CY = 0, R = 0, dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   var devs = [], order = [], links = [], pulses = [];
   var mx = 0, my = 0, smx = 0, smy = 0;
   var GLYPHS = "01<>/#*+=%$";
@@ -173,10 +176,9 @@
     // Centre the globe on the logo mark so the network turns around it.
     var mk = el.querySelector(".an-intro-mark"), mr = mk && mk.getBoundingClientRect();
     CX = W / 2; CY = mr && mr.height ? mr.top + mr.height / 2 : H * 0.4; R = Math.min(W * 0.42, H * 0.34, 380);
-    el.style.setProperty("--cy", ((CY / H) * 100).toFixed(1) + "%");
   }
   function seed() {
-    var n = W < 700 ? 64 : 110;
+    var n = W < 700 ? 60 : 90;
     devs = [];
     for (var i = 0; i < n; i++) {
       // Home position on a Fibonacci sphere; start far outside the screen.
@@ -217,16 +219,26 @@
     ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
     ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
   }
+  // Glows are drawn from small pre-rendered sprites: far cheaper than a new gradient per dot per frame.
+  var sprites = {};
+  function sprite(col) {
+    if (sprites[col]) return sprites[col];
+    var c = document.createElement("canvas"); c.width = c.height = 64;
+    var g = c.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, "rgba(" + col + ",1)"); gr.addColorStop(0.35, "rgba(" + col + ",0.45)"); gr.addColorStop(1, "rgba(" + col + ",0)");
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    return (sprites[col] = c);
+  }
   function glow(x, y, rad, col, a) {
-    if (rad <= 0 || a <= 0) return;
-    var g = ctx.createRadialGradient(x, y, 0, x, y, rad);
-    g.addColorStop(0, "rgba(" + col + "," + a.toFixed(3) + ")"); g.addColorStop(1, "rgba(" + col + ",0)");
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill();
+    if (rad <= 0.5 || a <= 0.01) return;
+    ctx.globalAlpha = a > 1 ? 1 : a;
+    ctx.drawImage(sprite(col), x - rad, y - rad, rad * 2, rad * 2);
+    ctx.globalAlpha = 1;
   }
 
   function draw(now) {
     var t = (now - started) / 1000;
-    var ex = leaveAt ? clamp((now - leaveAt) / 1100) : 0; // exit progress
+    var ex = leaveAt ? clamp((now - leaveAt) / 1150) : 0; // exit progress
     ctx.clearRect(0, 0, W, H);
     smx += (mx - smx) * 0.06; smy += (my - smy) * 0.06;
     if (center && !leaveAt) center.style.transform = "translate3d(" + (smx * -14).toFixed(1) + "px," + (smy * -10).toFixed(1) + "px,0)";
@@ -263,9 +275,8 @@
       if (k > 0 && k < 1) {
         var e2 = easeOut(clamp((t - 0.06 - d.t0) / 0.95));
         var qx = bez(sxp, mxp, hx, e2), qy = bez(syp, myp, hy, e2);
-        var lg = ctx.createLinearGradient(qx, qy, px, py);
-        lg.addColorStop(0, "rgba(255,148,102,0)"); lg.addColorStop(1, "rgba(255,190,150,0.85)");
-        ctx.strokeStyle = lg; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(qx, qy); ctx.lineTo(px, py); ctx.stroke();
+        ctx.strokeStyle = "rgba(255,190,150," + (0.6 * (1 - k)).toFixed(3) + ")";
+        ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(qx, qy); ctx.lineTo(px, py); ctx.stroke();
       }
       d.px = px; d.py = py; d.z = z; d.ps = persp * (1 + easeIn(ex) * 2);
       if (k === 1 && !d.locked) { d.locked = true; d.flash = Math.max(d.flash, 0.7); }
@@ -273,13 +284,19 @@
     }
 
     // Links between settled neighbours, brighter at the front.
+    // Drawn in three depth bands, one path each, instead of one stroke per link.
     ctx.lineWidth = 1;
-    for (var l = 0; l < links.length; l++) {
-      var A = devs[links[l][0]], B = devs[links[l][1]];
-      if (A.arrived < 1 || B.arrived < 1) continue;
-      var al = (0.05 + 0.14 * ((A.z + B.z) / 2 + 1) / 2) * (1 - ex);
-      ctx.strokeStyle = "rgba(252,224,207," + al.toFixed(3) + ")";
-      ctx.beginPath(); ctx.moveTo(A.px, A.py); ctx.lineTo(B.px, B.py); ctx.stroke();
+    for (var band = 0; band < 3; band++) {
+      ctx.beginPath();
+      for (var l = 0; l < links.length; l++) {
+        var A = devs[links[l][0]], B = devs[links[l][1]];
+        if (A.arrived < 1 || B.arrived < 1) continue;
+        var depth = ((A.z + B.z) / 2 + 1) / 2, bnd = depth < 0.33 ? 0 : depth < 0.66 ? 1 : 2;
+        if (bnd !== band) continue;
+        ctx.moveTo(A.px, A.py); ctx.lineTo(B.px, B.py);
+      }
+      ctx.strokeStyle = "rgba(252,224,207," + ((0.06 + 0.06 * band) * (1 - ex)).toFixed(3) + ")";
+      ctx.stroke();
     }
 
     // Beat two: tasks pulse out from the core and results travel back.
@@ -331,25 +348,23 @@
       roundRect(d.px - dw / 2, d.py - dh / 2, dw, dh, 1.4 * s); ctx.fill();
     }
 
-    // The exit: a ring of light rides the edge of the opening hole.
+    // The exit: a ring of light spreads from the core as the overlay dissolves.
     if (leaveAt) {
-      var hole = easeIn(ex) * Math.hypot(W, H);
-      el.style.setProperty("--hole", hole.toFixed(1) + "px");
-      ctx.save();
-      ctx.strokeStyle = "rgba(255,170,130," + (0.9 * (1 - ex)).toFixed(3) + ")";
-      ctx.lineWidth = 3; ctx.shadowColor = "#ff7a45"; ctx.shadowBlur = 24;
-      ctx.beginPath(); ctx.arc(CX, CY, hole + 3, 0, 6.283); ctx.stroke();
-      ctx.restore();
+      var ring = easeOut(ex) * Math.hypot(W, H) * 0.75, ra = 1 - ex;
+      ctx.lineWidth = 18; ctx.strokeStyle = "rgba(255,122,69," + (0.12 * ra).toFixed(3) + ")";
+      ctx.beginPath(); ctx.arc(CX, CY, ring, 0, 6.283); ctx.stroke();
+      ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,190,150," + (0.85 * ra).toFixed(3) + ")";
+      ctx.beginPath(); ctx.arc(CX, CY, ring, 0, 6.283); ctx.stroke();
     }
 
     // Wordmark decodes letter by letter; timecode ticks.
     for (var c = 0; c < chars.length; c++) {
       var on = t - (0.55 + c * 0.07), sp = chars[c];
       if (on < 0) continue;
-      if (on < 0.32) { sp.className = "on scr"; sp.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
+      if (on < 0.32) { if (now - (sp._t || 0) > 60) { sp._t = now; sp.className = "on scr"; sp.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0]; } }
       else if (sp.className !== "on") { sp.className = "on"; sp.textContent = sp.getAttribute("data-ch"); }
     }
-    if (tc) tc.textContent = "00:" + (t < 10 ? "0" : "") + t.toFixed(2);
+    if (tc && !leaveAt) tc.textContent = "00:" + (t < 10 ? "0" : "") + t.toFixed(2);
 
     raf = requestAnimationFrame(draw);
   }
@@ -370,8 +385,7 @@
   function finish() {
     cancelAnimationFrame(raf);
     el.hidden = true;
-    el.classList.remove("leaving");
-    el.style.removeProperty("--hole");
+    el.classList.remove("leaving", "quick");
     document.documentElement.style.overflow = "";
   }
   function release(reason) {
@@ -380,10 +394,11 @@
     window.__anIntroSeen = true;
     if (reason === "timeout" && status) status.textContent = "Some assets are still loading";
     window.dispatchEvent(new Event("an-intro-done"));
-    if (!motion || reason === "skip" || !ctx) { finish(); return; }
+    // Skip and motion-off still fade out (briefly) instead of cutting to the page.
+    if (!motion || reason === "skip" || !ctx) { el.classList.add("leaving", "quick"); setTimeout(finish, 340); return; }
     leaveAt = performance.now();
     el.classList.add("leaving");
-    setTimeout(finish, 1150);
+    setTimeout(finish, 1180);
   }
   document.getElementById("an-intro-skip").addEventListener("click", function () { release("skip"); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") release("skip"); });

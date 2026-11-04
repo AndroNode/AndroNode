@@ -515,9 +515,16 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   const wp = new THREE.Vector3();
   const host = canvas.parentElement!;
 
+  // While the first-visit intro covers the page, compile shaders in the background and draw one frame,
+  // so the hero is ready (no first-render stall) when the intro dissolves. It renders again once the exit starts.
+  const covered = () => !!intro && !intro.hidden && !intro.classList.contains("leaving");
+  let warm: 0 | 1 | 2 = covered() ? 0 : 2; // 0 compiling, 1 compiled (draw once), 2 ready
+  if (warm === 0) renderer.compileAsync(scene, camera).catch(() => {}).finally(() => { if (warm === 0) warm = 1; });
+
   function frame() {
     raf = requestAnimationFrame(frame);
-    if (!visible || document.hidden || intro?.hidden === false) { clock.getDelta(); return; }
+    if (!visible || document.hidden || (covered() && warm !== 1)) { clock.getDelta(); return; }
+    if (warm === 1) warm = 2;
     const dt = Math.min(clock.getDelta(), 0.05);
     if (motion) elapsed += dt;
     const t = elapsed;

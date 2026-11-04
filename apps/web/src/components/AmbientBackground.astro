@@ -137,7 +137,10 @@
     const loop = (now: number) => {
       raf = 0;
       if (!running) return;
-      if (now - last >= FRAME) { last = now; frame(now); }
+      // Skip drawing while the first-visit intro fully covers the page (it resumes as the intro dissolves).
+      const intro = document.getElementById("an-intro");
+      const covered = !!intro && !intro.hidden && !intro.classList.contains("leaving");
+      if (!covered && now - last >= FRAME) { last = now; frame(now); }
       raf = requestAnimationFrame(loop);
     };
     const play = () => {
