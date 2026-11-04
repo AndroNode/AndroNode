@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { createPublicClient, createWalletClient, custom, http, numberToHex, type EIP1193Provider, type Hex } from "viem";
+import { createPublicClient, createWalletClient, custom, fallback, http, numberToHex, type EIP1193Provider, type Hex } from "viem";
 import { base, baseSepolia, robinhood, robinhoodTestnet } from "viem/chains";
 import { createSiweMessage } from "viem/siwe";
-import { api, setSessionToken, sessionToken, type ApiConfig } from "./api";
+import { api, BASE, setSessionToken, sessionToken, type ApiConfig } from "./api";
 
 /** EIP-6963 wallet discovery with a window.ethereum fallback. No wallet SDK, no tracking. */
 export interface WalletInfo { id: string; name: string; icon?: string; provider: EIP1193Provider }
@@ -105,9 +105,12 @@ export async function walletOnChain(cfg: ApiConfig) {
   }
   const wallet = createWalletClient({ chain, transport: custom(provider) });
   const [address] = await wallet.requestAddresses();
-  const publicClient = createPublicClient({ chain, transport: custom(provider) });
+  // Reads go through the coordinator's relay (Alchemy when configured), falling back to the wallet's own RPC.
+  const publicClient = createPublicClient({ chain, transport: fallback([relay(), custom(provider)]) });
   return { wallet, publicClient, address: address!, chain };
 }
 
 export const explorerTx = (cfg: ApiConfig, hash: string) => `${chainFor(cfg.chainId).blockExplorers?.default.url}/tx/${hash}`;
-export const readClient = (cfg: ApiConfig) => createPublicClient({ chain: chainFor(cfg.chainId), transport: http() });
+/** The coordinator's read-only RPC relay. Its upstream key (Alchemy) stays on the server. */
+const relay = () => http(`${BASE || (typeof location !== "undefined" ? location.origin : "")}/v1/rpc`, { batch: { batchSize: 20 }, retryCount: 1 });
+export const readClient = (cfg: ApiConfig) => createPublicClient({ chain: chainFor(cfg.chainId), transport: fallback([relay(), http()]) });

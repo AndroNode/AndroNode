@@ -63,6 +63,7 @@ Repository **secrets**:
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare deploys | |
 | `DEPLOYER_PRIVATE_KEY` | Contract deploy | Fresh testnet-only wallet with a little Robinhood Chain Testnet ETH. Not needed if you deploy from `/app/deploy` with a browser wallet. Never reuse a mainnet key. |
 | `BASE_SEPOLIA_RPC_URL` | Contract deploy, chain sync | Optional; defaults to the public endpoint for deploys. Needed by the Worker to read the chain. |
+| `ALCHEMY_API_KEY` | Worker chain reads, `/v1/rpc` relay | Optional. When set, the Worker reads Robinhood Chain Testnet (and Base) through Alchemy instead of the public RPC. The browser app reads through the read-only `/v1/rpc` relay, so the key never reaches the client. Can also be added in the Cloudflare dashboard as a Worker secret. |
 | `BASESCAN_API_KEY` | Contract verification | Optional. |
 | `VERIFIER_TOKEN`, `VERIFIER_URL` | Verifier container | Only when `VERIFIER_MODE=container`. |
 

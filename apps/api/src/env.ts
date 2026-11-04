@@ -10,6 +10,8 @@ export interface Env {
   USDC_ADDRESS: string;
   ASSET_SYMBOL?: string;
   RPC_URL?: string;
+  /** Optional secret. When set, chain reads go through Alchemy instead of the public RPC. */
+  ALCHEMY_API_KEY?: string;
   ESCROW_ADDRESS: string;
   ADMIN_ADDRESSES: string;
   SITE_ORIGIN: string;

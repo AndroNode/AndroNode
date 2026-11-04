@@ -12,7 +12,7 @@ if (!have.has("COORDINATOR_KEY_JWK")) {
   const pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
   put("COORDINATOR_KEY_JWK", JSON.stringify(await crypto.subtle.exportKey("jwk", pair.privateKey)));
 }
-for (const [name, env] of [["BASE_RPC_URL", "BASE_RPC_URL"], ["VERIFIER_TOKEN", "VERIFIER_TOKEN"], ["VERIFIER_URL", "VERIFIER_URL"]]) {
+for (const [name, env] of [["ALCHEMY_API_KEY", "ALCHEMY_API_KEY"], ["BASE_RPC_URL", "BASE_RPC_URL"], ["VERIFIER_TOKEN", "VERIFIER_TOKEN"], ["VERIFIER_URL", "VERIFIER_URL"]]) {
   if (process.env[env]) put(name, process.env[env]);
 }
 console.log("secrets ok:", [...have].join(", ") || "(created)");

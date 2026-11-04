@@ -9,8 +9,19 @@ export const chainOf = (env: Env) => CHAINS[Number(env.CHAIN_ID) as keyof typeof
 /** Real-money networks. Mock funding, mock settlement and the fixture verifier are refused here. */
 export const isMainnet = (env: Env) => env.NETWORK === "base" || env.NETWORK === "robinhood" || env.CHAIN_ID === "8453" || env.CHAIN_ID === "4663";
 
+/** Alchemy network names for the chains this coordinator supports (only those Alchemy documents). */
+const ALCHEMY_NETWORKS: Record<string, string> = { "46630": "robinhood-testnet", "84532": "base-sepolia", "8453": "base-mainnet" };
+
+/** The RPC the Worker uses: Alchemy when ALCHEMY_API_KEY is set for a supported chain, else RPC_URL. Never sent to clients. */
+export function rpcUrlOf(env: Env): string | null {
+  const net = ALCHEMY_NETWORKS[env.CHAIN_ID];
+  if (env.ALCHEMY_API_KEY && net) return `https://${net}.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`;
+  return env.RPC_URL || env.BASE_RPC_URL || null;
+}
+export const rpcProvider = (env: Env) => (env.ALCHEMY_API_KEY && ALCHEMY_NETWORKS[env.CHAIN_ID] ? "alchemy" : "public");
+
 export function publicClient(env: Env): PublicClient | null {
-  const url = env.RPC_URL || env.BASE_RPC_URL;
+  const url = rpcUrlOf(env);
   if (!url) return null;
   return createPublicClient({ chain: chainOf(env), transport: http(url) }) as PublicClient;
 }

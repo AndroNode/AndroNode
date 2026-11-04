@@ -1,7 +1,7 @@
 import { getItem, setItem, removeItem } from "./storage";
 
 /** Testnet API client. Same origin in production; PUBLIC_API_BASE overrides for local development. */
-const BASE = (import.meta.env.PUBLIC_API_BASE as string | undefined)?.replace(/\/$/, "") ?? "";
+export const BASE = (import.meta.env.PUBLIC_API_BASE as string | undefined)?.replace(/\/$/, "") ?? "";
 const TOKEN_KEY = "an-session";
 
 export class ApiError extends Error {
