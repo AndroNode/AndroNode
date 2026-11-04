@@ -71,12 +71,14 @@ function rayTexture(): THREE.Texture {
   return t;
 }
 
-/** A phone screen drawn once: rounded glass, status bar, a task card and a progress bar.
- *  Greyscale so each instance can tint it (idle slate, orange while working). */
-function screenTexture(): THREE.Texture {
+/** Eight phone screens drawn once into a 4×2 atlas, so neighbouring devices show different apps:
+ *  a task ring, vector bars, a verified list, charging, the 64-record grid, a reward chart, a log and a
+ *  lock screen. Greyscale, so each instance can tint it (idle tones, orange while working). */
+export const SCREEN_VARIANTS = 8;
+function screenAtlas(): THREE.Texture {
   const W = 256, H = 512, r = 30;
   const c = document.createElement("canvas");
-  c.width = W; c.height = H;
+  c.width = W * 4; c.height = H * 2;
   const g = c.getContext("2d")!;
   const rr = (x: number, y: number, w: number, h: number, rad: number) => {
     g.beginPath();
@@ -87,31 +89,94 @@ function screenTexture(): THREE.Texture {
     g.arcTo(x, y, x + w, y, rad);
     g.closePath();
   };
-  const bg = g.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, "#6a6f7c");
-  bg.addColorStop(1, "#2c3039");
-  rr(0, 0, W, H, r); g.fillStyle = bg; g.fill();
-  g.fillStyle = "rgba(255,255,255,0.55)";
-  rr(W / 2 - 28, 14, 56, 12, 6); g.fill();
-  g.fillStyle = "rgba(255,255,255,0.85)";
-  rr(26, 70, 120, 16, 8); g.fill();
-  g.fillStyle = "rgba(255,255,255,0.35)";
-  rr(26, 98, 190, 10, 5); g.fill();
-  rr(26, 116, 150, 10, 5); g.fill();
-  g.fillStyle = "rgba(255,255,255,0.16)";
-  rr(22, 160, W - 44, 170, 20); g.fill();
-  g.strokeStyle = "rgba(255,255,255,0.9)"; g.lineWidth = 8;
-  g.beginPath(); g.arc(W / 2, 245, 46, -Math.PI / 2, Math.PI * 1.15); g.stroke();
-  g.fillStyle = "rgba(255,255,255,0.25)";
-  rr(26, 372, W - 52, 12, 6); g.fill();
-  g.fillStyle = "rgba(255,255,255,0.95)";
-  rr(26, 372, (W - 52) * 0.68, 12, 6); g.fill();
-  g.fillStyle = "rgba(255,255,255,0.3)";
-  rr(26, 404, 110, 10, 5); g.fill();
-  rr(W / 2 - 40, H - 24, 80, 8, 4); g.fill();
+  const fill = (a: number) => { g.fillStyle = `rgba(255,255,255,${a})`; };
+  const bar = (x: number, y: number, w: number, h: number, a: number) => { fill(a); rr(x, y, w, h, Math.min(h / 2, 8)); g.fill(); };
+  const draws: (() => void)[] = [
+    // 0 · task card with a progress ring
+    () => {
+      bar(26, 70, 120, 16, 0.85); bar(26, 98, 190, 10, 0.35); bar(26, 116, 150, 10, 0.35);
+      fill(0.16); rr(22, 160, W - 44, 170, 20); g.fill();
+      g.strokeStyle = "rgba(255,255,255,0.9)"; g.lineWidth = 8; g.lineCap = "round";
+      g.beginPath(); g.arc(W / 2, 245, 46, -Math.PI / 2, Math.PI * 1.15); g.stroke();
+      bar(26, 372, W - 52, 12, 0.25); bar(26, 372, (W - 52) * 0.68, 12, 0.95); bar(26, 404, 110, 10, 0.3);
+    },
+    // 1 · vector bars
+    () => {
+      bar(26, 70, 150, 16, 0.85); bar(26, 98, 100, 10, 0.35);
+      const hs = [0.45, 0.8, 0.3, 0.65, 0.95, 0.5, 0.72, 0.38, 0.86, 0.58];
+      hs.forEach((h, i) => bar(26 + i * 21, 330 - h * 170, 14, h * 170, 0.35 + h * 0.6));
+      bar(26, 350, W - 52, 4, 0.3);
+      for (let i = 0; i < 3; i++) { bar(26, 380 + i * 26, 70, 10, 0.3); bar(W - 26 - 60, 380 + i * 26, 60, 10, 0.6); }
+    },
+    // 2 · verified list with a big check
+    () => {
+      fill(0.9); g.beginPath(); g.arc(W / 2, 150, 54, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = "rgba(40,44,52,1)"; g.lineWidth = 12; g.lineCap = "round"; g.lineJoin = "round";
+      g.beginPath(); g.moveTo(W / 2 - 24, 152); g.lineTo(W / 2 - 6, 170); g.lineTo(W / 2 + 26, 134); g.stroke();
+      for (let i = 0; i < 5; i++) {
+        const y = 248 + i * 40;
+        fill(0.85); g.beginPath(); g.arc(40, y + 6, 8, 0, Math.PI * 2); g.fill();
+        bar(60, y, 110 + ((i * 37) % 50), 12, 0.45);
+      }
+    },
+    // 3 · charging
+    () => {
+      fill(0.2); rr(W / 2 - 50, 120, 100, 200, 18); g.fill();
+      fill(0.85); rr(W / 2 - 40, 190, 80, 120, 10); g.fill();
+      fill(0.35); rr(W / 2 - 18, 104, 36, 14, 5); g.fill();
+      g.fillStyle = "rgba(40,44,52,1)";
+      g.beginPath(); g.moveTo(W / 2 + 6, 200); g.lineTo(W / 2 - 18, 252); g.lineTo(W / 2 - 2, 252); g.lineTo(W / 2 - 8, 296); g.lineTo(W / 2 + 18, 240); g.lineTo(W / 2 + 2, 240); g.closePath(); g.fill();
+      bar(W / 2 - 50, 350, 100, 22, 0.9); bar(W / 2 - 70, 388, 140, 10, 0.35);
+    },
+    // 4 · the 64-record grid
+    () => {
+      bar(26, 70, 130, 16, 0.85);
+      for (let i = 0; i < 64; i++) { const x = 30 + (i % 8) * 25, y = 120 + Math.floor(i / 8) * 25; fill(i < 46 ? 0.85 : 0.18); rr(x, y, 18, 18, 4); g.fill(); }
+      bar(26, 336, W - 52, 12, 0.25); bar(26, 336, (W - 52) * 0.72, 12, 0.9);
+      bar(26, 368, 90, 10, 0.35);
+    },
+    // 5 · reward with a rising line
+    () => {
+      bar(26, 70, 90, 12, 0.4); bar(26, 94, 170, 34, 0.95);
+      g.strokeStyle = "rgba(255,255,255,0.9)"; g.lineWidth = 6; g.lineJoin = "round"; g.lineCap = "round";
+      const pts = [[26, 300], [62, 280], [98, 288], [134, 240], [170, 252], [206, 200], [230, 186]];
+      g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x!, y!) : g.moveTo(x!, y!))); g.stroke();
+      fill(0.12); g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x!, y!) : g.moveTo(x!, y!))); g.lineTo(230, 320); g.lineTo(26, 320); g.closePath(); g.fill();
+      bar(26, 350, W - 52, 18, 0.25); bar(26, 350, (W - 52) * 0.75, 18, 0.85);
+      bar(26, 386, 80, 10, 0.4); bar(W - 26 - 60, 386, 60, 10, 0.4);
+    },
+    // 6 · log lines
+    () => {
+      fill(0.08); rr(18, 56, W - 36, 400, 16); g.fill();
+      const ws = [150, 190, 120, 170, 90, 200, 140, 110, 180, 130, 160, 100, 190];
+      ws.forEach((w, i) => { bar(32, 76 + i * 28, 10, 10, 0.7); bar(50, 76 + i * 28, w * 0.85, 10, i === ws.length - 1 ? 0.95 : 0.4); });
+    },
+    // 7 · lock screen
+    () => {
+      bar(W / 2 - 60, 76, 120, 12, 0.4); bar(W / 2 - 80, 104, 160, 58, 0.95);
+      for (let i = 0; i < 2; i++) { fill(0.18); rr(22, 220 + i * 92, W - 44, 76, 18); g.fill(); bar(40, 238 + i * 92, 36, 36, 0.7); bar(88, 242 + i * 92, 110, 10, 0.6); bar(88, 262 + i * 92, 80, 8, 0.35); }
+      fill(0.5); g.beginPath(); g.arc(56, 440, 20, 0, Math.PI * 2); g.fill(); g.beginPath(); g.arc(W - 56, 440, 20, 0, Math.PI * 2); g.fill();
+    },
+  ];
+  draws.forEach((draw, v) => {
+    g.save();
+    g.translate((v % 4) * W, Math.floor(v / 4) * H);
+    const tone = 0.85 + ((v * 3) % 5) * 0.04;
+    const bg = g.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, `rgb(${Math.round(106 * tone)},${Math.round(111 * tone)},${Math.round(124 * tone)})`);
+    bg.addColorStop(1, "#2c3039");
+    rr(1, 1, W - 2, H - 2, r); g.fillStyle = bg; g.fill();
+    g.save(); rr(1, 1, W - 2, H - 2, r); g.clip();
+    fill(0.55); rr(W / 2 - 28, 14, 56, 12, 6); g.fill(); // camera notch
+    draw();
+    fill(0.3); rr(W / 2 - 40, H - 24, 80, 8, 4); g.fill(); // home bar
+    g.restore();
+    g.restore();
+  });
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
+  t.anisotropy = 8;
+  t.generateMipmaps = true;
   return t;
 }
 
@@ -229,28 +294,54 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
   const N = opts.compact ? 30 : 44;
   const positions = fibonacciSphere(N, R);
   const bodyGeo = new RoundedBoxGeometry(0.4, 0.8, 0.05, 6, 0.06);
-  const bodyMat = new THREE.MeshPhysicalMaterial({ color: FRAME, metalness: 0.95, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 });
+  // Instance colours carry each frame's finish, so the base colour is white.
+  const bodyMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.95, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 });
   const bodies = new THREE.InstancedMesh(bodyGeo, bodyMat, N);
-  const screenTex = screenTexture();
+  const screenTex = screenAtlas();
   const screenGeo = new THREE.PlaneGeometry(0.36, 0.72);
+  // Each instance picks one of the atlas screens through a per-instance attribute.
+  const variant = new Float32Array(N);
+  for (let i = 0; i < N; i++) variant[i] = (i * 5 + Math.floor(i / SCREEN_VARIANTS)) % SCREEN_VARIANTS;
+  screenGeo.setAttribute("aVariant", new THREE.InstancedBufferAttribute(variant, 1));
   const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, transparent: true, alphaTest: 0.5, toneMapped: false });
+  screenMat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nattribute float aVariant;")
+      .replace("#include <uv_vertex>", "#include <uv_vertex>\n  vMapUv = vec2((vMapUv.x + mod(aVariant, 4.0)) * 0.25, (vMapUv.y + 1.0 - floor(aVariant / 4.0)) * 0.5);");
+  };
   const screens = new THREE.InstancedMesh(screenGeo, screenMat, N);
+  // Device forms and frame finishes, so the globe reads as a mix of real hardware.
+  const FORMS = [
+    { name: "phone", sx: 1, sy: 1 },
+    { name: "slim phone", sx: 0.9, sy: 1.04 },
+    { name: "compact phone", sx: 0.92, sy: 0.86 },
+    { name: "tablet", sx: 1.45, sy: 1.08 },
+    { name: "phone", sx: 1.04, sy: 0.96 },
+  ];
+  const FINISHES = [FRAME, new THREE.Color("#b9bec8"), new THREE.Color("#c8a98a"), new THREE.Color("#2b3a5c"), new THREE.Color("#1d2029"), new THREE.Color("#ff7a45")];
+  const IDLE_TONES = [IDLE, new THREE.Color("#a9bfdc"), new THREE.Color("#c9b6a8"), new THREE.Color("#b4abd6"), new THREE.Color("#a3cbc1")];
   const m = new THREE.Matrix4();
-  const one = new THREE.Vector3(1, 1, 1);
   const sc3 = new THREE.Vector3();
   const tmp = new THREE.Object3D();
   const SCREEN_OFFSET = new THREE.Matrix4().makeTranslation(0, 0, 0.027);
-  const base: { pos: THREE.Vector3; quat: THREE.Quaternion; phase: number }[] = [];
+  const base: { pos: THREE.Vector3; quat: THREE.Quaternion; phase: number; form: (typeof FORMS)[number]; idle: THREE.Color }[] = [];
   positions.forEach((p, i) => {
     tmp.position.copy(p);
     tmp.up.set(0, 1, 0);
     tmp.lookAt(p.x * 2, p.y * 2, p.z * 2); // screen faces outward, kept upright
     tmp.updateMatrix();
-    base.push({ pos: p.clone(), quat: tmp.quaternion.clone(), phase: Math.random() * Math.PI * 2 });
-    bodies.setMatrixAt(i, tmp.matrix);
-    m.compose(p, tmp.quaternion, one).multiply(SCREEN_OFFSET);
+    const form = FORMS[(i * 3 + 1) % FORMS.length]!;
+    // Mostly graphite, silver and champagne; a few navy, black and one or two orange accents.
+    const fin = i % 11 === 4 ? 5 : [0, 1, 0, 2, 3, 0, 1, 4, 2, 0][i % 10]!;
+    const idle = IDLE_TONES[(i * 7) % IDLE_TONES.length]!;
+    base.push({ pos: p.clone(), quat: tmp.quaternion.clone(), phase: Math.random() * Math.PI * 2, form, idle });
+    sc3.set(form.sx, form.sy, 1);
+    m.compose(p, tmp.quaternion, sc3);
+    bodies.setMatrixAt(i, m);
+    bodies.setColorAt(i, FINISHES[fin]!);
+    m.multiply(SCREEN_OFFSET);
     screens.setMatrixAt(i, m);
-    screens.setColorAt(i, IDLE);
+    screens.setColorAt(i, idle);
   });
   world.add(bodies, screens);
 
@@ -518,14 +609,15 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       const hs = hoverScale[i]!;
       const bob = Math.sin(t * 1.3 + bb.phase) * 0.012;
       a.copy(bb.pos).multiplyScalar(1 + bob + hs * 0.08);
-      sc3.setScalar(1 + hs * 0.45);
+      const grow = 1 + hs * 0.45;
+      sc3.set(bb.form.sx * grow, bb.form.sy * grow, grow);
       m.compose(a, bb.quat, sc3);
       bodies.setMatrixAt(i, m);
       m.multiply(SCREEN_OFFSET);
       screens.setMatrixAt(i, m);
       if (i === hovered) flash[i] = Math.max(flash[i]!, 1);
       flash[i] = Math.max(0, flash[i]! - dt * 1.4);
-      col.copy(IDLE).lerp(ORANGE, Math.min(1, flash[i]!)).lerp(PEACH, Math.max(0, flash[i]! - 0.7));
+      col.copy(bb.idle).lerp(ORANGE, Math.min(1, flash[i]!)).lerp(PEACH, Math.max(0, flash[i]! - 0.7));
       screens.setColorAt(i, col);
     }
     bodies.instanceMatrix.needsUpdate = true;
@@ -542,7 +634,7 @@ export function createConstellation(canvas: HTMLCanvasElement, opts: { motion: b
       wp.copy(pos).applyMatrix4(world.matrixWorld).project(camera);
       const x = (wp.x * 0.5 + 0.5) * canvas.clientWidth;
       const y = (-wp.y * 0.5 + 0.5) * canvas.clientHeight;
-      label.textContent = `Device ${String(hovered + 1).padStart(2, "0")} · ${flash[hovered]! > 0.2 ? "computing 64 records" : "idle"} · click to dispatch`;
+      label.textContent = `Device ${String(hovered + 1).padStart(2, "0")} · ${base[hovered]!.form.name} · ${flash[hovered]! > 0.2 ? "computing 64 records" : "idle"} · click to dispatch`;
       // Keep the label inside the hero: flip to the left of the device near the right edge.
       const lw = label.offsetWidth, lh = label.offsetHeight;
       const vw = Math.min(canvas.clientWidth, window.innerWidth - canvas.getBoundingClientRect().left);
