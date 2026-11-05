@@ -2,12 +2,14 @@
 import Layout from "../layouts/Layout.astro";
 import PageHero from "../components/PageHero.astro";
 import DeviceLab from "../islands/DeviceLab";
+import AndroidComingSoon from "../components/AndroidComingSoon.astro";
 ---
 <Layout title="Device & Session Lab" description="Pick a hypothetical Android device, set owner limits and run a simulated visible session. Nothing runs on your real device.">
   <PageHero eyebrow="Device & Session Lab · Simulation" title="Your device. Your limits." lead="See whether a hypothetical device may meet the proposed baseline, then start a visible session and watch how power, network, heat and data limits stop new work. Idle time alone never earns anything." />
   <section class="mx-auto max-w-7xl px-4 sm:px-6">
     <DeviceLab client:load />
   </section>
+  <AndroidComingSoon compact />
   <section class="mx-auto mt-12 max-w-7xl px-4 sm:px-6">
     <div class="rounded-[var(--radius-card)] border border-line p-6 text-sm leading-relaxed text-charcoal-80">
       <h2 class="text-base font-bold text-charcoal">About overnight charging</h2>

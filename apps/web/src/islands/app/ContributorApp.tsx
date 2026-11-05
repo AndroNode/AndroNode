@@ -97,11 +97,11 @@ function BrowserNode({ cfg, account, onChange }: { cfg: ApiConfig; account: Acco
   };
 
   if (cfg.verifierMode !== "fixture") {
-    return <Panel title="Browser test node"><p className="text-sm">This deployment verifies real model output, so the in-browser node is off. Use the command-line test node or an Android build of the client.</p></Panel>;
+    return <Panel title="Browser test node"><p className="text-sm">This deployment verifies real model output, so the in-browser node is off. Use the command-line test node. The Android app is coming soon.</p></Panel>;
   }
   return (
     <Panel title="Browser test node" chip={<SimChip kind="Testnet" />}>
-      <p className="text-sm text-charcoal-80">Runs the pipeline test profile in this tab: it leases real tasks, computes the deterministic test vectors and submits signed results. It does not use your device's sensors or permissions.</p>
+      <p className="text-sm text-charcoal-80">Runs the pipeline test profile in this tab: it leases real tasks, computes the deterministic test vectors and submits signed results. It does not use your device's sensors or permissions. The Android app is coming soon; until then, this tab stands in for a phone.</p>
       {node === undefined ? null : node === null ? (
         <div className="mt-4"><Button variant="accent" onClick={register}>Register this browser as a test node</Button></div>
       ) : (

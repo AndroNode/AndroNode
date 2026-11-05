@@ -1,0 +1,69 @@
+---
+/**
+ * "Coming soon" announcement for the AndroNode Android app. It states plainly that no download
+ * exists yet (so nobody is fooled by fake APKs) and points to what can be used today.
+ */
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+---
+<section id="android" class:list={["mx-auto max-w-7xl px-4 sm:px-6", compact ? "mt-12" : "py-16"]} aria-labelledby="android-h">
+  <div class="acs zone-dark relative isolate overflow-hidden rounded-[var(--radius-card)] border border-paper/10 bg-charcoal text-paper" data-reveal>
+    <div aria-hidden="true" class="acs-glow absolute -z-10"></div>
+    <div class="grid items-center gap-10 p-6 sm:p-10 lg:grid-cols-[1.25fr_1fr] lg:p-14">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full border border-orange/40 bg-orange/10 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-orange-deep">
+          <span class="relative flex size-2"><span class="ping absolute inline-flex size-full rounded-full bg-orange"></span><span class="relative inline-flex size-2 rounded-full bg-orange"></span></span>
+          Coming soon
+        </p>
+        <h2 id="android-h" class="mt-5 text-4xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-5xl">AndroNode for Android</h2>
+        <p class="mt-4 max-w-xl text-base leading-relaxed text-paper/70">
+          The app that lets your phone take short AI tasks, in visible sessions you start and stop, under the battery, heat and data limits you set. It is in development now.
+        </p>
+        <ul class="mt-6 grid gap-2 text-sm text-paper/80 sm:grid-cols-2">
+          <li class="flex gap-2"><span aria-hidden="true" class="text-orange">✓</span>Start and stop sessions yourself</li>
+          <li class="flex gap-2"><span aria-hidden="true" class="text-orange">✓</span>Runs only on power and unmetered Wi-Fi</li>
+          <li class="flex gap-2"><span aria-hidden="true" class="text-orange">✓</span>Pauses when the phone gets warm</li>
+          <li class="flex gap-2"><span aria-hidden="true" class="text-orange">✓</span>Earns only for verified results</li>
+        </ul>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/app/contributor" class="inline-flex min-h-12 items-center gap-2 rounded-full bg-orange px-6 font-bold text-[#0b0d12] hover:bg-orange-deep">Try the browser test node <span aria-hidden="true">→</span></a>
+          <a href="/docs#app" class="inline-flex min-h-12 items-center rounded-full border border-paper/25 px-6 font-bold hover:bg-paper/10">How the app will work</a>
+        </div>
+        <p class="mt-6 max-w-xl rounded-xl border border-paper/10 bg-paper/[0.04] px-4 py-3 text-sm text-paper/70">
+          <strong class="text-paper">No download exists yet.</strong> Anyone offering an AndroNode APK or app today is not us. The release will be announced on this site first.
+        </p>
+      </div>
+
+      <div aria-hidden="true" class="relative mx-auto w-[min(46vw,15rem)] lg:w-[min(70vw,15rem)]">
+        <div class="acs-phone relative aspect-[9/19] rounded-[2.4rem] border border-paper/20 bg-gradient-to-b from-[#1c2130] to-[#0d1017] p-3 shadow-2xl">
+          <div class="mx-auto mb-3 h-1.5 w-14 rounded-full bg-paper/20"></div>
+          <div class="flex h-[calc(100%-1.25rem)] flex-col rounded-[1.8rem] bg-[#0b0d12] p-4">
+            <div class="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.14em] text-paper/45"><span>AndroNode</span><span>v0.1</span></div>
+            <div class="mt-6 grid place-items-center">
+              <div class="acs-ring grid size-24 place-items-center rounded-full">
+                <span class="font-display text-2xl font-bold">Soon</span>
+              </div>
+            </div>
+            <div class="mt-6 grid gap-2">
+              <span class="h-2 w-4/5 rounded-full bg-paper/15"></span>
+              <span class="h-2 w-3/5 rounded-full bg-paper/10"></span>
+            </div>
+            <div class="mt-auto grid gap-2">
+              <div class="flex items-center justify-between rounded-lg bg-paper/[0.05] px-3 py-2 text-[10px] text-paper/60"><span>Battery</span><span class="font-mono">≥ 80%</span></div>
+              <div class="flex items-center justify-between rounded-lg bg-paper/[0.05] px-3 py-2 text-[10px] text-paper/60"><span>Network</span><span class="font-mono">Wi-Fi</span></div>
+              <div class="rounded-full bg-orange/90 py-2 text-center text-[11px] font-bold text-[#0b0d12]">Start session</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .acs-glow { inset: -30% -10% auto auto; width: 60%; aspect-ratio: 1; border-radius: 9999px; background: radial-gradient(circle, rgb(255 122 69 / 0.22), transparent 65%); }
+  .acs-phone { animation: acs-float 6s ease-in-out infinite; }
+  .acs-ring { position: relative; }
+  .acs-ring::before { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: conic-gradient(#ff7a45 0 70%, rgb(236 238 243 / 0.08) 70% 100%); -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%); mask: radial-gradient(circle, transparent 60%, #000 61%); }
+  @keyframes acs-float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(-1deg); } }
+</style>
