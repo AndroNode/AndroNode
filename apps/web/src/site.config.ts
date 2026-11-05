@@ -25,7 +25,7 @@ const raw: SiteConfig = {
     escrowAddress: null,
     adminSafe: null,
   },
-  social: { x: null, support: null },
+  social: { x: null, github: "https://github.com/AndroNode/AndroNode", support: null },
   release: { status: "simulation", evidenceDate: null },
 };
 

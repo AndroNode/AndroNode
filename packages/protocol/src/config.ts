@@ -26,7 +26,7 @@ export const siteConfigSchema = z.object({
     escrowAddress: evmAddress.nullable(),
     adminSafe: evmAddress.nullable(),
   }),
-  social: z.object({ x: z.string().url().nullable(), support: z.string().nullable() }),
+  social: z.object({ x: z.string().url().nullable(), github: z.string().url().nullable().default(null), support: z.string().nullable() }),
   release: z.object({
     status: z.enum(["simulation", "testnet", "mainnet"]),
     evidenceDate: z.string().nullable(),

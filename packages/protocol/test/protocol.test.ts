@@ -131,7 +131,7 @@ describe("config and CA chip (FR-16/17)", () => {
     displayName: "AndroNode", tagline: "", ticker: null, nativeTokenCa: null, nativeTokenCaOwnerConfirmed: false,
     chain: { id: 84532, name: "Base Sepolia", rpcUrl: "https://sepolia.base.org", explorerUrl: "https://sepolia.basescan.org", verified: true },
     settlement: { assetSymbol: "USDC", assetAddress: null, assetDecimals: 6, escrowAddress: null, adminSafe: null },
-    social: { x: null, support: null },
+    social: { x: null, github: null, support: null },
     release: { status: "simulation" as const, evidenceDate: null },
   };
   it("unset CA uses the exact tooltip", () => {
