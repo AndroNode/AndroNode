@@ -26,7 +26,7 @@ const raw: SiteConfig = {
     adminSafe: null,
   },
   social: { x: null, github: "https://github.com/AndroNode/AndroNode", support: null },
-  release: { status: "simulation", evidenceDate: null },
+  release: { status: "testnet", evidenceDate: null },
 };
 
 export const site = siteConfigSchema.parse(raw);

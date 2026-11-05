@@ -44,6 +44,7 @@ export default function VerifyLab() {
     decision: report.decision,
     reason: report.reason,
     worst: report.worst,
+    simulation: true,
     notice: "Simulation receipt. Not issued by a live network.",
   };
 
@@ -108,6 +109,11 @@ export default function VerifyLab() {
           </div>
         )}
         <p className="mt-4 text-xs text-charcoal-60">The first profile uses full-reference checking: a trusted verifier recomputes every record. Reference vectors here are authored fixtures, not real model output. A rejected attempt earns nothing and the customer is not charged; the task is retried elsewhere.</p>
+        <p className="mt-2 text-xs text-charcoal-60">What a receipt cannot prove: hashes, device attestation and on-chain settlement do not by themselves prove that the AI computation was correct. Acceptance rests on the trusted verifier's recomputation.</p>
+        <details className="mt-3 rounded-lg border border-line p-3 text-sm">
+          <summary className="cursor-pointer font-bold">Review options</summary>
+          <p className="mt-2 text-charcoal-80">Proposed: a contributor can ask for review of a rejection within 7 days, and a customer can dispute delivered results within 48 hours. The operator decides in the first release. This demo does not open a real support ticket.</p>
+        </details>
         <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
           <Button variant="ghost" onClick={() => download(`${receipt.receiptId}.json`, JSON.stringify(receipt, null, 2))}>Download receipt</Button>
           <Button variant="ghost" onClick={async () => { setCopied(await copyText(receipt.receiptId)); setTimeout(() => setCopied(false), 1500); }}>{copied ? "Copied" : "Copy receipt ID"}</Button>

@@ -28,7 +28,11 @@ export const SECTIONS: DocSection[] = [
 ];
 
 export const FAQ: { q: string; a: string }[] = [
-  { q: "Can I download the app or earn money today?", a: "No. AndroNode is a proposed protocol. This website is a simulation and offers no app, compute or payments." },
+  { q: "Is it live?", a: "Only as a public testnet. The labs on this site are simulations. The testnet app runs real tasks and settlement on Robinhood Chain Testnet with tUSDC test tokens that have no value. There is no paid service, mainnet or real-money payout yet." },
+  { q: "Can I download the app or earn money today?", a: "No. The Android app is coming soon and no download exists yet. You can try the browser test node in the testnet app, which earns test tokens only." },
+  { q: "What work is supported?", a: "One workload: batch embeddings of short, approved, non-sensitive English text, up to 64 records of at most 256 tokens per task. Classification, OCR and audio come later, each with its own rules." },
+  { q: "How are payments earned?", a: "Only for accepted results from customer-funded work. Each accepted record pays a fixed amount set when the task is leased: 75% to the contributor, 25% to the service pool. Uptime, installs and tokens earn nothing." },
+  { q: "Can I stop at any time?", a: "Yes. Stop ends new tasks at once and cancels the running one; the target is under five seconds in the app. You are never penalised for stopping or for a heat pause, but unfinished work earns nothing." },
   { q: "Does my phone earn for being plugged in overnight?", a: "No. Only accepted outputs from paid work earn. The first release uses explicit, visible sessions; automatic overnight sessions are a later feature that needs separate approval." },
   { q: "Is there an AndroNode token or contract address?", a: "There is no required token. If a contract address is ever published it will appear in the header. Until then it reads \"CA: Not announced\"; be careful with anyone claiming otherwise." },
   { q: "Can the device owner see my data?", a: "Yes. A device must read its assigned inputs. That is why only public, synthetic, licensed or cleared non-sensitive data is accepted." },

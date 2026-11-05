@@ -149,7 +149,18 @@ export default function WorkloadLab() {
   const start = () => { setCursor(0); setStage("run"); };
   const restart = () => { setCursor(0); setStage("build"); };
   const exportResults = () => {
-    const out = { notice: "Authored demo vectors. Not model output. Do not use for any purpose.", profileId: DEMO_PROFILE.id, orderId: demo.order?.orderId, results: acceptedRecordIds.slice(0, 64).map((id) => ({ id, vector: authoredVector(id) })), truncated: acceptedRecordIds.length > 64 };
+    const receiptOf = new Map(accepted.flatMap((t) => t.recordIds.map((id) => [id, `demo-rcpt-t${String(t.index + 1).padStart(3, "0")}`] as const)));
+    const out = {
+      simulation: true,
+      notice: "Authored demo vectors. Not model output. Do not use for any purpose.",
+      profileId: DEMO_PROFILE.id,
+      orderId: demo.order?.orderId,
+      scenario,
+      results: records.map((r) => {
+        const receiptId = receiptOf.get(r.id) ?? null;
+        return { id: r.id, state: receiptId ? "ACCEPTED" : "NOT_COMPLETED", receiptId, vector: receiptId ? authoredVector(r.id) : null };
+      }),
+    };
     download("andronode-demo-results.json", JSON.stringify(out, null, 1));
   };
 
@@ -200,14 +211,16 @@ export default function WorkloadLab() {
                 <dt className="text-charcoal-60">Maximum charge</dt><dd className="text-right font-mono font-bold">{formatUnits(maxCharge)} USDC</dd>
                 <dt className="text-charcoal-60">Contributors (75%)</dt><dd className="text-right font-mono">{formatUnits(allocate(maxCharge).contributor)}</dd>
                 <dt className="text-charcoal-60">Service (25%)</dt><dd className="text-right font-mono">{formatUnits(allocate(maxCharge).service)}</dd>
+                <dt className="text-charcoal-60">Quote valid for</dt><dd className="text-right font-mono">15 minutes (proposed)</dd>
               </dl>
+              <p className="mt-3 rounded-lg border border-line p-3 text-xs">Data boundary: only public, synthetic, licensed or cleared non-sensitive English text. The device that runs a task can read its records.</p>
               <p className="mt-3 text-xs text-charcoal-60">You fund the maximum into escrow and pay only for accepted records. The rest is refunded. Illustrative pilot rate, not a price offer.</p>
               <Field label="What happens during the run" htmlFor="wl-scn">
                 <Select id="wl-scn" value={scenario} onChange={(v) => { setScenario(v as WorkloadScenario); if (stage !== "run") setStage("build"); }} options={WORKLOAD_SCENARIOS.map((s) => ({ value: s.id, label: s.title }))} />
               </Field>
               <p className="mt-2 text-sm">{WORKLOAD_SCENARIOS.find((s) => s.id === scenario)!.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button variant="accent" disabled={stage === "run"} onClick={start}>{stage === "done" ? "Run again" : "Fund demo escrow and run"}</Button>
+                <Button variant="accent" disabled={stage === "run"} onClick={start}>{stage === "done" ? "Run again" : "Run simulation"}</Button>
               </div>
             </>
           )}

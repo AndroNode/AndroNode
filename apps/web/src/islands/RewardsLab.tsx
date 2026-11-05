@@ -7,7 +7,7 @@ import { Button, Field, Panel, Range, StatusBadge, type StatusTone } from "../co
 
 const RATE = PRICING.illustrativeRatePer1kUnits;
 const STAGES: { id: DemoState["rewardStage"]; label: string; tone: StatusTone; body: string }[] = [
-  { id: "provisional", label: "Provisional reward", tone: "busy", body: "Recorded after acceptance. Not yet money you can move. Held for a 7-day review window, and capped at $1 per device while on probation." },
+  { id: "provisional", label: "Provisional reward", tone: "busy", body: "Recorded after acceptance. Not yet money you can move. Held for the proposed 48-hour customer review, then included in the next daily settlement. Capped at $1 per device while on probation." },
   { id: "claimable", label: "Claimable", tone: "ok", body: "Included in a settlement batch on the escrow contract (target: within 11 days of order start). You may withdraw it at any time." },
   { id: "withdrawn", label: "Withdrawn", tone: "idle", body: "You pulled the balance to your own wallet. The contract never pushes payments to you." },
 ];
@@ -64,7 +64,7 @@ export default function RewardsLab() {
             )}
           </ol>
           <div className="mt-4 flex flex-wrap gap-2" aria-live="polite">
-            {demo.rewardStage === "provisional" && !held && <Button variant="accent" onClick={() => setDemo({ rewardStage: "claimable" })}>Skip 7-day review (demo)</Button>}
+            {demo.rewardStage === "provisional" && !held && <Button variant="accent" onClick={() => setDemo({ rewardStage: "claimable" })}>Skip 48-hour review (demo)</Button>}
             {demo.rewardStage === "claimable" && !held && <Button variant="accent" onClick={() => setDemo({ rewardStage: "withdrawn" })}>Withdraw (demo)</Button>}
             {demo.rewardStage !== "withdrawn" && <Button variant="ghost" onClick={() => setHeld(!held)}>{held ? "Resolve dispute" : "Open a dispute"}</Button>}
             <Button variant="ghost" onClick={() => { resetDemo(); setHeld(false); }}>Reset demo</Button>

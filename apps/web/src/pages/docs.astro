@@ -4,11 +4,14 @@ import PageHero from "../components/PageHero.astro";
 import { SECTIONS, FAQ } from "../content/docs";
 import site from "../site.config";
 const status = [
-  ["Website", "Simulation", "Live as a demo. Every panel uses bundled examples."],
-  ["Escrow contract", "Built and tested", `Ready for ${site.chain.name} testnet. Not audited. Mainnet needs an independent audit.`],
-  ["Coordinator API", "In development", "Cloudflare Workers and D1 for the testnet app."],
+  ["Website labs", "Simulation", "Every lab panel uses bundled examples, never real tasks or money."],
+  ["Testnet app", "Live on testnet", `Real tasks, verification and settlement on ${site.chain.name} with tUSDC test tokens that have no value.`],
+  ["Escrow contract", "Deployed on testnet", "Not audited. Mainnet needs an independent audit first."],
+  ["Settlement admin", "Single testnet key", "The protocol design calls for 2-of-3 administrator keys before any paid release."],
+  ["Review window", "10 minutes on testnet", "Shortened for testing. The proposed paid-release window is 48 hours."],
+  ["Result verifier", "Fixture checks", "Testnet checks results against fixtures. The full ONNX recomputation verifier is not running yet."],
   ["Android app", "Coming soon", "In development. No download exists yet; ignore anyone offering one."],
-  ["Paid service", "Not live", "No customer deposits or contributor payouts are accepted."],
+  ["Paid service", "Not live", "No real-money deposits or payouts are accepted."],
 ];
 ---
 <Layout title="Docs and FAQ" description="A plain-language summary of the AndroNode protocol design: scope, devices, sessions, verification, privacy, pricing, settlement, risks and FAQ.">
@@ -63,7 +66,7 @@ const status = [
           ))}
         </div>
       </section>
-      <p id="doc-empty" hidden class="mt-6 rounded-lg bg-peach-soft p-4 text-sm">No section matches. Try another word.</p>
+      <p id="doc-empty" hidden class="mt-6 rounded-lg bg-peach-soft p-4 text-sm">No section matches. Try another word, or <button id="doc-clear" type="button" class="font-bold underline">clear the search</button>.</p>
     </div>
   </div>
 </Layout>
@@ -76,6 +79,7 @@ const status = [
     const items = Array.from(document.querySelectorAll<HTMLElement>(".doc-item"));
     const count = document.getElementById("doc-count")!;
     const empty = document.getElementById("doc-empty")!;
+    document.getElementById("doc-clear")?.addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); input.focus(); });
     input.addEventListener("input", () => {
       const q = input.value.trim().toLowerCase();
       let shown = 0;
