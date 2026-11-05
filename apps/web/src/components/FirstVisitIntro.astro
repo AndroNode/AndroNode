@@ -254,7 +254,7 @@
 
   var tasks = [
     { label: "Fonts", p: (document.fonts && document.fonts.ready) || Promise.resolve() },
-    { label: "Logo", p: new Promise(function (r) { var i = new Image(); i.onload = i.onerror = r; i.src = "/brand/AndroNode_Horizontal_paper.svg"; }) },
+    { label: "Logo", p: new Promise(function (r) { var i = new Image(); i.onload = i.onerror = r; i.src = "/brand/AndroNode_Horizontal_orange.svg"; }) },
     { label: "Page", p: document.readyState === "complete" ? Promise.resolve() : new Promise(function (r) { window.addEventListener("load", r, { once: true }); }) },
   ];
   var finished = 0;
